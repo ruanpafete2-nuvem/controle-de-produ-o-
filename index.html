@@ -284,7 +284,6 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.06);
             margin-top: 20px;
             margin-bottom: 20px;
-            text-align: center;
             border: 1px solid #edf0f2;
         }
 
@@ -294,20 +293,39 @@
             color: #666;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            text-align: center;
         }
 
         .total-amount {
             font-size: 28px;
             font-weight: 800;
             color: var(--primary-color);
+            text-align: center;
         }
 
         .lucro-detalhe {
             font-size: 13px;
-            color: #555;
+            color: #444;
+            margin-top: 10px;
+            border-top: 1px dashed #e0e0e0;
+            padding-top: 10px;
+            text-align: left;
+        }
+
+        .lucro-linha {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .lucro-linha.destaque-sobra {
+            background: #f0fdf4;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #c6f6d5;
+            font-size: 13px;
             margin-top: 6px;
-            border-top: 1px dashed #eee;
-            padding-top: 6px;
         }
 
         .actions {
@@ -556,7 +574,7 @@
             <div class="total-section">
                 <h2>Total Bruto do Dia</h2>
                 <div class="total-amount" id="total-dia">R$ 0,00</div>
-                <div class="lucro-detalhe" id="lucro-liquido-dia">Lucro Líquido Estimado: R$ 0,00</div>
+                <div class="lucro-detalhe" id="lucro-liquido-dia"></div>
             </div>
 
             <div class="actions">
@@ -1087,11 +1105,11 @@
 
         function calcularTotalDia() {
             let totalBruto = 0;
-            let custoEquipe = 0;
+            let minhaProducao = 0;
+            
+            const prodFuncs = {};
             const funcsMap = {};
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
-
-            const funcionariosPresentesHoje = new Set();
 
             document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
                 const qtd = parseFloat(card.querySelector('.qtd').value) || 0;
@@ -1100,27 +1118,58 @@
                 totalBruto += subTotal;
 
                 const exec = card.querySelector('.select-executor').value;
-                if (exec !== 'mim' && funcsMap[exec]) {
-                    funcionariosPresentesHoje.add(exec);
-                    const f = funcsMap[exec];
-                    if (f.tipo === 'producao') {
-                        custoEquipe += (f.valor * qtd);
+                if (exec === 'mim') {
+                    minhaProducao += subTotal;
+                } else {
+                    if (!prodFuncs[exec]) prodFuncs[exec] = { gerado: 0, custo: 0 };
+                    prodFuncs[exec].gerado += subTotal;
+                    
+                    if (funcsMap[exec] && funcsMap[exec].tipo === 'producao') {
+                        prodFuncs[exec].custo += (funcsMap[exec].valor * qtd);
                     }
                 }
             });
 
-            funcionariosPresentesHoje.forEach(nomeFunc => {
+            // Adiciona custo fixo diário do funcionário apenas se ele tiver operado hoje
+            Object.keys(prodFuncs).forEach(nomeFunc => {
                 const f = funcsMap[nomeFunc];
-                if (f) {
-                    if (f.tipo === 'mensal') custoEquipe += (f.valor / 22);
-                    if (f.tipo === 'semanal') custoEquipe += (f.valor / 5);
-                    if (f.tipo === 'quinzenal') custoEquipe += (f.valor / 11);
+                if (f && f.tipo !== 'producao') {
+                    if (f.tipo === 'mensal') prodFuncs[nomeFunc].custo = (f.valor / 22);
+                    if (f.tipo === 'semanal') prodFuncs[nomeFunc].custo = (f.valor / 5);
+                    if (f.tipo === 'quinzenal') prodFuncs[nomeFunc].custo = (f.valor / 11);
                 }
             });
 
-            const lucroLiquido = totalBruto - custoEquipe;
             document.getElementById('total-dia').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('lucro-liquido-dia').innerText = `Lucro Líquido Estimado: ${lucroLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
+
+            // CONSTRUÇÃO DO QUADRO DETALHADO
+            let htmlDetalhes = '';
+            
+            htmlDetalhes += `<div class="lucro-linha"><span>🟢 Minha Produção:</span> <b>R$ ${minhaProducao.toFixed(2)}</b></div>`;
+
+            let lucroTotalDoDia = minhaProducao;
+
+            Object.keys(prodFuncs).forEach(nomeFunc => {
+                const gerado = prodFuncs[nomeFunc].gerado;
+                const custo = prodFuncs[nomeFunc].custo;
+                const sobra = gerado - custo;
+                lucroTotalDoDia += sobra;
+
+                htmlDetalhes += `
+                    <div style="background: #fafafa; border: 1px solid #eee; padding: 6px 8px; border-radius: 6px; margin: 6px 0;">
+                        <div class="lucro-linha" style="margin-bottom:2px;"><span>👤 Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
+                        <div class="lucro-linha" style="margin-bottom:2px; color: #d9534f;"><span>➖ Pagamento/Diária:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
+                        <div class="lucro-linha" style="margin-bottom:0; color: var(--primary-color);"><span>👉 Sobra do ${nomeFunc}:</span> <b>R$ ${sobra.toFixed(2)}</b></div>
+                    </div>`;
+            });
+
+            htmlDetalhes += `
+                <div class="lucro-linha destaque-sobra">
+                    <span><b>💰 SEU LUCRO FINAL HOJE:</b></span> 
+                    <b style="color: var(--primary-color); font-size: 15px;">R$ ${lucroTotalDoDia.toFixed(2)}</b>
+                </div>`;
+
+            document.getElementById('lucro-liquido-dia').innerHTML = htmlDetalhes;
         }
 
         function finalizarDia() {
@@ -1338,7 +1387,7 @@
 
             resumoBox.style.display = 'block';
             let detalheLucro = (filtroExecutor && filtroExecutor !== 'mim') 
-                ? `<div style="font-size:12px; margin-top:4px; color:#d9534f;">Desconto proporcional de pagamento: R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Lucro Líquido com este Funcionário: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
+                ? `<div style="font-size:12px; margin-top:4px; color:#d9534f;">Desconto proporcional de pagamento: R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Sobra do Funcionário para Você: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
                 : '';
 
             resumoBox.innerHTML = `Total do Período (${lista.length} dias): <br><b style="font-size:18px;">R$ ${somaTotalBruto.toFixed(2)}</b><br><span style="font-size:12px;">Total de Peças: ${somaPecas}</span>${detalheLucro}`;
