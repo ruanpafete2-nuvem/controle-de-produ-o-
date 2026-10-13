@@ -314,14 +314,6 @@
             color: var(--primary-color);
         }
 
-        .lucro-detalhe {
-            font-size: 13px;
-            color: #555;
-            margin-top: 6px;
-            border-top: 1px dashed #eee;
-            padding-top: 6px;
-        }
-
         .actions {
             display: flex;
             flex-wrap: wrap;
@@ -532,53 +524,30 @@
                 <button class="btn" title="Limpar Tela" onclick="novoDia()">🧹</button>
             </div>
 
-            <!-- SEÇÃO DE FUNCIONÁRIOS NO DIA -->
-            <div class="op-card" style="margin-top: 15px;">
-                <div class="op-header">
-                    <span>👥 Produção e Custos de Funcionários</span>
-                    <button class="btn" style="padding: 2px 6px; font-size: 12px;" onclick="adicionarFuncionarioDia()">➕ Lançar</button>
-                </div>
-                <div class="op-body">
-                    <div id="funcionarios-dia-container"></div>
-                    <div style="text-align: right; font-size: 13px; color: #d9534f; font-weight: bold; margin-top: 8px;">
-                        Total Custos Funcionários: <span id="total-custos-dia">R$ 0,00</span>
-                    </div>
-                </div>
-            </div>
-
             <div class="total-section">
-                <h2>Total Bruto do Dia</h2>
+                <h2>Total do Dia</h2>
                 <div class="total-amount" id="total-dia">R$ 0,00</div>
-                <div class="lucro-detalhe" id="lucro-liquido-dia">Lucro Líquido (já descontando funcionários): R$ 0,00</div>
             </div>
 
             <div class="actions">
-                <button class="btn btn-green" onclick="finalizarDia()">💾 Finalizar</button>
+                <button class="btn btn-green" onclick="finalizarDia()">💾 Finalizar Dia</button>
                 <button class="btn" onclick="togglePainel('funcionarios-painel')">👥 Equipe</button>
                 <button class="btn" onclick="togglePainel('historico-painel')">📁 Histórico</button>
                 <button class="btn" onclick="togglePainel('servicos-painel')">⚙️ Serviços</button>
             </div>
 
-            <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS -->
+            <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS (SEPARADO) -->
             <div id="funcionarios-painel" class="box-section">
-                <h2>👥 Cadastro de Funcionários & Custos</h2>
-                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Cadastre os funcionários e defina o valor pago ou custos associados:</p>
+                <h2>👥 Cadastro de Funcionários</h2>
+                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Cadastre seus funcionários para selecionar quem fez cada serviço:</p>
                 
                 <div class="filter-field">
                     <label for="func-nome">Nome do Funcionário:</label>
                     <input type="text" id="func-nome" placeholder="Ex: João Silva">
                 </div>
                 <div class="filter-field">
-                    <label for="func-valor">Valor Padrão (Diária ou por Peça / R$):</label>
+                    <label for="func-valor">Custo/Valor Fixo do Funcionário (R$ - opcional):</label>
                     <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 50.00" onclick="this.select()">
-                </div>
-                <div class="filter-field">
-                    <label for="func-tipo-custo">Tipo de Custo:</label>
-                    <select id="func-tipo-custo">
-                        <option value="diaria">Diária (Valor fixo por dia trabalhado)</option>
-                        <option value="producao">Por Produção (Valor por peça feita)</option>
-                        <option value="mensal">Custo Fixo Mensal/Semanal</option>
-                    </select>
                 </div>
                 <button class="btn btn-green btn-full" style="margin-top: 5px;" onclick="salvarNovoFuncionarioCadastrado()">➕ Cadastrar Funcionário</button>
                 
@@ -670,12 +639,11 @@
         const db = firebase.firestore();
 
         let contadorOperacoes = 0;
-        let contadorFuncionariosDia = 0;
         let registroEmEdicaoId = null;
 
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
-        // AO CARREGAR A PÁGINA: VERIFICA CREDENCIAIS SALVAS E SESSÃO ATIVA
+        // AO CARREGAR A PÁGINA
         window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('saved_user');
             const savedPass = localStorage.getItem('saved_pass');
@@ -692,7 +660,7 @@
             }
         });
 
-        /* --- AUTENTICAÇÃO COM FIREBASE E LEMBRAR SENHA --- */
+        /* --- AUTENTICAÇÃO COM FIREBASE --- */
         async function fazerLogin(autoLogin = false) {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
@@ -779,7 +747,7 @@
             }
         }
 
-        /* --- AUTO-SALVAMENTO (RASCUNHO AUTOMÁTICO) --- */
+        /* --- AUTO-SALVAMENTO --- */
         function salvarRascunho() {
             const dia = document.getElementById('dia').value;
             const mes = document.getElementById('mes').value;
@@ -791,22 +759,13 @@
                 operacoes.push({
                     servico: card.querySelector('.servico').value,
                     qtd: card.querySelector('.qtd').value,
-                    valor: card.querySelector('.valor').value
-                });
-            });
-
-            const funcionariosDia = [];
-            const cardsFunc = document.querySelectorAll('#funcionarios-dia-container .func-dia-item');
-            cardsFunc.forEach((card) => {
-                funcionariosDia.push({
-                    nome: card.querySelector('.func-dia-nome').value,
-                    producaoOuQtd: card.querySelector('.func-dia-qtd').value,
-                    valor: card.querySelector('.func-dia-valor').value
+                    valor: card.querySelector('.valor').value,
+                    executor: card.querySelector('.select-executor') ? card.querySelector('.select-executor').value : 'mim'
                 });
             });
 
             const rascunho = {
-                dia, mes, ano, operacoes, funcionariosDia, registroEmEdicaoId
+                dia, mes, ano, operacoes, registroEmEdicaoId
             };
 
             localStorage.setItem('rascunho_producao', JSON.stringify(rascunho));
@@ -814,7 +773,7 @@
 
         function carregarRascunho() {
             const rascunho = JSON.parse(localStorage.getItem('rascunho_producao'));
-            if (!rascunho || ((!rascunho.operacoes || rascunho.operacoes.length === 0) && (!rascunho.funcionariosDia || rascunho.funcionariosDia.length === 0))) return false;
+            if (!rascunho || (!rascunho.operacoes || rascunho.operacoes.length === 0)) return false;
 
             document.getElementById('dia').value = rascunho.dia || '';
             document.getElementById('mes').value = rascunho.mes || '';
@@ -823,23 +782,11 @@
 
             document.getElementById('operacoes-container').innerHTML = '';
             contadorOperacoes = 0;
-            if (rascunho.operacoes && rascunho.operacoes.length > 0) {
-                rascunho.operacoes.forEach(op => {
-                    adicionarOperacao(op.servico, op.qtd, op.valor);
-                });
-            } else {
-                adicionarOperacao();
-            }
 
-            document.getElementById('funcionarios-dia-container').innerHTML = '';
-            contadorFuncionariosDia = 0;
-            if (rascunho.funcionariosDia && rascunho.funcionariosDia.length > 0) {
-                rascunho.funcionariosDia.forEach(f => {
-                    adicionarFuncionarioDia(f.nome, f.producaoOuQtd, f.valor);
-                });
-            }
+            rascunho.operacoes.forEach(op => {
+                adicionarOperacao(op.servico, op.qtd, op.valor, op.executor);
+            });
 
-            calcularTotalDia();
             return true;
         }
 
@@ -855,16 +802,13 @@
         }
 
         function novoDia() {
-            if (confirm("Deseja limpar as operações e funcionários da tela para iniciar um novo dia?")) {
+            if (confirm("Deseja limpar as operações da tela para iniciar um novo dia?")) {
                 document.getElementById('operacoes-container').innerHTML = '';
-                document.getElementById('funcionarios-dia-container').innerHTML = '';
                 contadorOperacoes = 0;
-                contadorFuncionariosDia = 0;
                 registroEmEdicaoId = null;
                 limparRascunho();
                 resetarDataHoje();
                 adicionarOperacao();
-                calcularTotalDia();
             }
         }
 
@@ -884,7 +828,7 @@
             }
         }
 
-        /* --- GERENCIAMENTO DE SERVIÇOS PREDEFINIDOS --- */
+        /* --- GERENCIAMENTO DE SERVIÇOS --- */
         function salvarNovoServicoCadastrado() {
             const nome = document.getElementById('novo-servico-nome').value.trim();
             const valor = parseFloat(document.getElementById('novo-servico-valor').value) || 0;
@@ -950,13 +894,29 @@
             return options;
         }
 
+        function gerarOptionsExecutores(executorAtual = 'mim') {
+            const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            let options = `<option value="mim" ${executorAtual === 'mim' ? 'selected' : ''}>Minha Produção</option>`;
+            
+            funcionarios.forEach(f => {
+                const selected = (f.nome === executorAtual) ? 'selected' : '';
+                options += `<option value="${f.nome}" ${selected}>👤 Funcionário: ${f.nome}</option>`;
+            });
+            return options;
+        }
+
         function atualizarTodosOsSelects() {
-            const selects = document.querySelectorAll('.select-servico');
-            selects.forEach(select => {
+            const selectsServico = document.querySelectorAll('.select-servico');
+            selectsServico.forEach(select => {
                 const valorAtual = select.value;
                 select.innerHTML = gerarOptionsServicos(valorAtual);
             });
-            atualizarSelectsFuncionariosDia();
+
+            const selectsExecutor = document.querySelectorAll('.select-executor');
+            selectsExecutor.forEach(select => {
+                const valorAtual = select.value;
+                select.innerHTML = gerarOptionsExecutores(valorAtual);
+            });
         }
 
         function selecionarServicoPredefinido(id, selectElement) {
@@ -971,6 +931,7 @@
                 const valorPadrao = parseFloat(option.getAttribute('data-valor')) || 0;
                 inputValor.value = valorPadrao;
                 calcularTotalOperacao(id);
+                
                 inputQtd.focus();
                 inputQtd.select();
             }
@@ -980,7 +941,6 @@
         function salvarNovoFuncionarioCadastrado() {
             const nome = document.getElementById('func-nome').value.trim();
             const valor = parseFloat(document.getElementById('func-valor').value) || 0;
-            const tipo = document.getElementById('func-tipo-custo').value;
 
             if (!nome) {
                 alert('Digite o nome do funcionário!');
@@ -988,15 +948,15 @@
             }
 
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            funcionarios.push({ nome: nome, valor: valor, tipo: tipo });
+            funcionarios.push({ nome: nome, valor: valor });
             localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
 
             document.getElementById('func-nome').value = '';
             document.getElementById('func-valor').value = '';
 
             renderizarListaFuncionariosCadastrados();
-            atualizarSelectsFuncionariosDia();
-            alert('Funcionário cadastrado com sucesso!');
+            atualizarTodosOsSelects();
+            alert('Funcionário cadastrado!');
         }
 
         function removerFuncionarioCadastrado(index) {
@@ -1005,7 +965,7 @@
             funcionarios.splice(index, 1);
             localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
             renderizarListaFuncionariosCadastrados();
-            atualizarSelectsFuncionariosDia();
+            atualizarTodosOsSelects();
         }
 
         function renderizarListaFuncionariosCadastrados() {
@@ -1019,9 +979,10 @@
 
             let html = '<ul style="padding-left: 18px; font-size: 13px; margin: 0;">';
             funcionarios.forEach((f, idx) => {
+                const valorTxt = f.valor ? ` - Custo/Diária: R$ ${f.valor.toFixed(2)}` : '';
                 html += `
                     <li style="margin-bottom: 8px;">
-                        <b>${f.nome}</b> - R$ ${f.valor.toFixed(2)} (${f.tipo})
+                        <b>${f.nome}</b>${valorTxt}
                         <button style="background:none; border:none; cursor:pointer; font-size: 14px; margin-left: 6px;" title="Excluir" onclick="removerFuncionarioCadastrado(${idx})">🗑️</button>
                     </li>
                 `;
@@ -1030,89 +991,13 @@
             container.innerHTML = html;
         }
 
-        function gerarOptionsFuncionarios(funcAtual = '') {
-            const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            let options = `<option value="">-- Selecionar funcionário --</option>`;
-            
-            funcionarios.forEach(f => {
-                const selected = (f.nome === funcAtual) ? 'selected' : '';
-                options += `<option value="${f.nome}" data-valor="${f.valor || 0}" data-tipo="${f.tipo}" ${selected}>${f.nome} (R$ ${f.valor.toFixed(2)})</option>`;
-            });
-            return options;
-        }
-
-        function atualizarSelectsFuncionariosDia() {
-            const selects = document.querySelectorAll('.select-func-dia');
-            selects.forEach(select => {
-                const valorAtual = select.value;
-                select.innerHTML = gerarOptionsFuncionarios(valorAtual);
-            });
-        }
-
-        function selecionarFuncionarioPredefinido(id, selectElement) {
-            const option = selectElement.options[selectElement.selectedIndex];
-            const card = document.getElementById(`func-card-${id}`);
-            const inputNome = card.querySelector('.func-dia-nome');
-            const inputValor = card.querySelector('.func-dia-valor');
-            const inputQtd = card.querySelector('.func-dia-qtd');
-
-            if (selectElement.value !== "") {
-                inputNome.value = selectElement.value;
-                const valorPadrao = parseFloat(option.getAttribute('data-valor')) || 0;
-                inputValor.value = valorPadrao;
-                calcularTotalDia();
-                inputQtd.focus();
-                inputQtd.select();
-            }
-        }
-
-        function adicionarFuncionarioDia(nome = '', qtd = 1, valor = 0) {
-            contadorFuncionariosDia++;
-            const idAtual = contadorFuncionariosDia;
-            const container = document.getElementById('funcionarios-dia-container');
-            const optionsHTML = gerarOptionsFuncionarios(nome);
-
-            const html = `
-                <div class="func-dia-item" id="func-card-${idAtual}" style="background: #fafafa; border: 1px solid var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 8px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                        <select class="select-func-dia" style="font-size: 12px; padding: 6px;" onchange="selecionarFuncionarioPredefinido(${idAtual}, this)">
-                            ${optionsHTML}
-                        </select>
-                        <button class="btn-delete" style="font-size: 14px;" onclick="removerFuncionarioDia(${idAtual})">🗑️</button>
-                    </div>
-                    <div style="display: flex; gap: 6px;">
-                        <input type="hidden" class="func-dia-nome" value="${nome}">
-                        <div style="flex: 1;">
-                            <label style="font-size: 10px; color: #666;">Qtd / Dias / Peças:</label>
-                            <input type="number" step="1" inputmode="numeric" class="func-dia-qtd" value="${qtd}" min="0" oninput="calcularTotalDia()" onclick="this.select()">
-                        </div>
-                        <div style="flex: 1;">
-                            <label style="font-size: 10px; color: #666;">Valor unitário (R$):</label>
-                            <input type="number" step="0.01" inputmode="decimal" class="func-dia-valor" value="${valor}" min="0" oninput="calcularTotalDia()" onclick="this.select()">
-                        </div>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
-            calcularTotalDia();
-            salvarRascunho();
-        }
-
-        function removerFuncionarioDia(id) {
-            const card = document.getElementById(`func-card-${id}`);
-            if (card) {
-                card.remove();
-                calcularTotalDia();
-                salvarRascunho();
-            }
-        }
-
         /* --- OPERAÇÕES E CARTÕES --- */
-        function adicionarOperacao(servico = '', qtd = 0, valor = 0) {
+        function adicionarOperacao(servico = '', qtd = 0, valor = 0, executor = 'mim') {
             contadorOperacoes++;
             const idAtual = contadorOperacoes;
             const container = document.getElementById('operacoes-container');
-            const optionsHTML = gerarOptionsServicos(servico);
+            const optionsServico = gerarOptionsServicos(servico);
+            const optionsExecutor = gerarOptionsExecutores(executor);
             
             const cardHTML = `
                 <div class="op-card" id="op-card-${idAtual}">
@@ -1122,10 +1007,18 @@
                     </div>
                     <div class="op-body">
                         <div class="op-row">
+                            <div class="op-label">Quem fez?</div>
+                            <div class="op-input">
+                                <select class="select-executor" onchange="salvarRascunho()">
+                                    ${optionsExecutor}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="op-row">
                             <div class="op-label">Atalho Serviço</div>
                             <div class="op-input">
                                 <select class="select-servico" onchange="selecionarServicoPredefinido(${idAtual}, this)">
-                                    ${optionsHTML}
+                                    ${optionsServico}
                                 </select>
                             </div>
                         </div>
@@ -1189,29 +1082,16 @@
         }
 
         function calcularTotalDia() {
-            let totalBruto = 0;
+            let totalGeral = 0;
             const cards = document.querySelectorAll('#operacoes-container .op-card');
+            
             cards.forEach(card => {
                 const qtd = parseFloat(card.querySelector('.qtd').value) || 0;
                 const valor = parseFloat(card.querySelector('.valor').value) || 0;
-                totalBruto += (qtd * valor);
+                totalGeral += (qtd * valor);
             });
 
-            let totalCustosFunc = 0;
-            const cardsFunc = document.querySelectorAll('#funcionarios-dia-container .func-dia-item');
-            cardsFunc.forEach(card => {
-                const qtd = parseFloat(card.querySelector('.func-dia-qtd').value) || 0;
-                const valor = parseFloat(card.querySelector('.func-dia-valor').value) || 0;
-                totalCustosFunc += (qtd * valor);
-            });
-
-            const lucroLiquido = totalBruto - totalCustosFunc;
-
-            document.getElementById('total-dia').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('total-custos-dia').innerText = totalCustosFunc.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('lucro-liquido-dia').innerText = `Lucro Líquido (após pagar funcionários): ${lucroLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
-            
-            salvarRascunho();
+            document.getElementById('total-dia').innerText = totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
         function converterParaDataPadrao(dia, mesTexto, ano) {
@@ -1227,8 +1107,7 @@
             const dia = document.getElementById('dia').value.toString().trim();
             const mes = document.getElementById('mes').value.toString().toLowerCase().trim();
             const ano = document.getElementById('ano').value.toString().trim();
-            const totalBrutoStr = document.getElementById('total-dia').innerText;
-            const totalCustosStr = document.getElementById('total-custos-dia').innerText;
+            const total = document.getElementById('total-dia').innerText;
 
             if (!dia || !mes || !ano) {
                 alert('Preencha a data antes de finalizar!');
@@ -1236,9 +1115,6 @@
             }
 
             const dataIso = converterParaDataPadrao(dia, mes, ano);
-            const brutoNum = parseFloat(totalBrutoStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
-            const custosNum = parseFloat(totalCustosStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
-            const liquidoNum = brutoNum - custosNum;
 
             const registro = {
                 id: registroEmEdicaoId ? registroEmEdicaoId : Date.now(),
@@ -1247,30 +1123,22 @@
                 ano: ano,
                 dataIso: dataIso,
                 dataTexto: `${dia}/${mes}/${ano}`,
-                total: totalBrutoStr,
-                totalNumerico: brutoNum,
-                custosFuncionarios: custosNum,
-                lucroLiquido: liquidoNum,
-                operacoes: [],
-                funcionariosDia: []
+                total: total,
+                totalNumerico: parseFloat(total.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0,
+                operacoes: []
             };
 
             const cards = document.querySelectorAll('#operacoes-container .op-card');
             cards.forEach((card) => {
+                const executorSelect = card.querySelector('.select-executor');
+                const executorVal = executorSelect ? executorSelect.value : 'mim';
+                
                 registro.operacoes.push({
                     servico: card.querySelector('.servico').value || 'Não informado',
                     qtd: parseFloat(card.querySelector('.qtd').value) || 0,
                     valor: parseFloat(card.querySelector('.valor').value) || 0,
-                    total: card.querySelector('.total-op').innerText
-                });
-            });
-
-            const cardsFunc = document.querySelectorAll('#funcionarios-dia-container .func-dia-item');
-            cardsFunc.forEach((card) => {
-                registro.funcionariosDia.push({
-                    nome: card.querySelector('.func-dia-nome').value || 'Funcionário',
-                    qtd: parseFloat(card.querySelector('.func-dia-qtd').value) || 0,
-                    valor: parseFloat(card.querySelector('.func-dia-valor').value) || 0
+                    total: card.querySelector('.total-op').innerText,
+                    executor: executorVal
                 });
             });
 
@@ -1371,9 +1239,7 @@
                 return;
             }
 
-            let somaBruto = 0;
-            let somaCustosFunc = 0;
-            let somaLucroLiquido = 0;
+            let somaTotal = 0;
             let somaPecas = 0;
 
             lista.forEach((item, index) => {
@@ -1384,34 +1250,19 @@
                 if (valorNum === undefined) {
                     valorNum = parseFloat(item.total.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
                 }
-                somaBruto += valorNum;
-
-                const custoFunc = item.custosFuncionarios || 0;
-                somaCustosFunc += custoFunc;
-
-                const liquido = item.lucroLiquido !== undefined ? item.lucroLiquido : (valorNum - custoFunc);
-                somaLucroLiquido += liquido;
+                somaTotal += valorNum;
 
                 let opsHTML = '';
                 if (item.operacoes && Array.isArray(item.operacoes)) {
                     item.operacoes.forEach((op) => {
                         somaPecas += (op.qtd || 0);
+                        const quemFezTxt = (op.executor && op.executor !== 'mim') ? ` 👤 (${op.executor})` : '';
                         opsHTML += `
                             <div class="card-item">
-                                • <b>${op.servico}</b>: ${op.qtd}x R$ ${op.valor} = ${op.total}
+                                • <b>${op.servico}</b>${quemFezTxt}: ${op.qtd}x R$ ${op.valor} = ${op.total}
                             </div>
                         `;
                     });
-                }
-
-                let funcHTML = '';
-                if (item.funcionariosDia && item.funcionariosDia.length > 0) {
-                    funcHTML += `<div style="font-size: 12px; color: #d9534f; margin-top: 4px; border-top: 1px dashed #eee; padding-top: 4px;"><b>Custos Equipe:</b>`;
-                    item.funcionariosDia.forEach(f => {
-                        const totalF = f.qtd * f.valor;
-                        funcHTML += `<div> - ${f.nome}: ${f.qtd}x R$ ${f.valor} = R$ ${totalF.toFixed(2)}</div>`;
-                    });
-                    funcHTML += `</div>`;
                 }
 
                 const card = `
@@ -1419,16 +1270,12 @@
                         <div class="card-header">
                             <span>📅 ${dataFormatada}</span>
                             <div>
-                                <span style="color: var(--primary-color); margin-right: 8px;">Bruto: ${item.total}</span>
+                                <span style="color: var(--primary-color); margin-right: 8px;">${item.total}</span>
                                 <button style="background:none; border:none; cursor:pointer;" title="Editar" onclick="editarRegistro(${itemId})">✏️</button>
                                 <button style="background:none; border:none; cursor:pointer;" title="Excluir" onclick="excluirRegistro(${itemId})">🗑️</button>
                             </div>
                         </div>
                         ${opsHTML}
-                        ${funcHTML}
-                        <div style="font-size: 12px; font-weight: bold; color: #333; margin-top: 4px;">
-                            Lucro Líquido: R$ ${liquido.toFixed(2)}
-                        </div>
                     </div>
                 `;
                 container.innerHTML += card;
@@ -1436,12 +1283,10 @@
 
             resumoBox.style.display = 'block';
             resumoBox.innerHTML = `
-                Balanço do Período (${lista.length} dias): <br>
-                <b>Bruto:</b> ${somaBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} | 
-                <b>Custos:</b> ${somaCustosFunc.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} <br>
-                <b style="font-size: 18px; color: var(--primary-color);">Lucro Líquido: ${somaLucroLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</b>
-                <div style="font-size: 12px; margin-top: 4px; color: #555;">
-                    📦 Peças produzidas: <b>${somaPecas}</b>
+                Total do Período (${lista.length} dias): <br>
+                <b style="font-size: 20px;">${somaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</b>
+                <div style="font-size: 12px; margin-top: 5px; color: #555;">
+                    📦 Total de peças: <b>${somaPecas}</b>
                 </div>
             `;
             btnExportar.style.display = 'block';
@@ -1509,10 +1354,8 @@
         function exportarRelatorioWhatsApp() {
             if (registrosFiltradosAtuais.length === 0) return;
 
-            let texto = `📋 *RELATÓRIO DE PRODUÇÃO E LUCRO*\n`;
-            let somaBruto = 0;
-            let somaCustos = 0;
-            let somaLiquido = 0;
+            let texto = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
+            let somaTotal = 0;
             let somaPecas = 0;
 
             registrosFiltradosAtuais.forEach(item => {
@@ -1521,30 +1364,20 @@
                 if (valorNum === undefined) {
                     valorNum = parseFloat(item.total.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
                 }
-                const custo = item.custosFuncionarios || 0;
-                const liquido = item.lucroLiquido !== undefined ? item.lucroLiquido : (valorNum - custo);
+                somaTotal += valorNum;
 
-                somaBruto += valorNum;
-                somaCustos += custo;
-                somaLiquido += liquido;
-
-                texto += `\n📅 *Data: ${dataFormatada}*\n`;
+                texto += `\n📅 *Data: ${dataFormatada}* (Total: ${item.total})\n`;
                 if (item.operacoes) {
                     item.operacoes.forEach(op => {
                         somaPecas += (op.qtd || 0);
-                        texto += ` • ${op.servico}: ${op.qtd}x = ${op.total}\n`;
+                        const executorTxt = (op.executor && op.executor !== 'mim') ? ` [${op.executor}]` : '';
+                        texto += ` • ${op.servico}${executorTxt}: ${op.qtd}x (R$ ${op.valor}) = ${op.total}\n`;
                     });
                 }
-                if (item.funcionariosDia && item.funcionariosDia.length > 0) {
-                    texto += ` *Custos Equipe:* R$ ${custo.toFixed(2)}\n`;
-                }
-                texto += ` *Lucro Líquido:* R$ ${liquido.toFixed(2)}\n`;
             });
 
-            texto += `\n📦 *TOTAL PEÇAS: ${somaPecas}*`;
-            texto += `\n💰 *TOTAL BRUTO: ${somaBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*`;
-            texto += `\n📉 *TOTAL CUSTOS: ${somaCustos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*`;
-            texto += `\n💎 *LUCRO LÍQUIDO TOTAL: ${somaLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*`;
+            texto += `\n📦 *TOTAL DE PEÇAS: ${somaPecas}*`;
+            texto += `\n💰 *TOTAL DO PERÍODO: ${somaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*`;
 
             navigator.clipboard.writeText(texto).then(() => {
                 alert('Relatório copiado para a área de transferência!\n\nAgora basta abrir o WhatsApp ou Bloco de Notas e colá-lo.');
@@ -1574,26 +1407,18 @@
 
             document.getElementById('operacoes-container').innerHTML = '';
             contadorOperacoes = 0;
+
             if (registro.operacoes && registro.operacoes.length > 0) {
                 registro.operacoes.forEach(op => {
-                    adicionarOperacao(op.servico, op.qtd, op.valor);
+                    adicionarOperacao(op.servico, op.qtd, op.valor, op.executor);
                 });
             } else {
                 adicionarOperacao();
             }
 
-            document.getElementById('funcionarios-dia-container').innerHTML = '';
-            contadorFuncionariosDia = 0;
-            if (registro.funcionariosDia && registro.funcionariosDia.length > 0) {
-                registro.funcionariosDia.forEach(f => {
-                    adicionarFuncionarioDia(f.nome, f.qtd, f.valor);
-                });
-            }
-
-            calcularTotalDia();
             salvarRascunho();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            alert('Ajuste o que precisar e clique em "Finalizar" para atualizar!');
+            alert('Ajuste o que precisar no topo e clique em "Finalizar Dia" para atualizar!');
         }
 
         /* --- BACKUP E RESTAURAÇÃO --- */
