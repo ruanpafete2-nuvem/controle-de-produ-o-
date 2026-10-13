@@ -715,6 +715,7 @@
 
         let contadorOperacoes = 0;
         let registroEmEdicaoId = null;
+        let funcionarioEmEdicaoIndex = null;
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -930,6 +931,48 @@
             alert('Funcionário cadastrado!');
         }
 
+        function prepararEdicaoFuncionario(index) {
+            const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            const f = funcionarios[index];
+            if (!f) return;
+
+            document.getElementById('func-nome').value = f.nome;
+            document.getElementById('func-tipo-pagamento').value = f.tipo;
+            document.getElementById('func-valor').value = f.valor;
+            funcionarioEmEdicaoIndex = index;
+
+            const btnCadastrar = document.querySelector('#funcionarios-painel button.btn-green');
+            btnCadastrar.innerText = '💾 Salvar Alterações';
+            btnCadastrar.setAttribute('onclick', 'salvarEdicaoFuncionario()');
+        }
+
+        function salvarEdicaoFuncionario() {
+            const nome = document.getElementById('func-nome').value.trim();
+            const tipo = document.getElementById('func-tipo-pagamento').value;
+            const valor = parseFloat(document.getElementById('func-valor').value) || 0;
+
+            if (!nome) { alert('Digite o nome do funcionário!'); return; }
+
+            let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            if (funcionarioEmEdicaoIndex !== null && funcionarios[funcionarioEmEdicaoIndex]) {
+                funcionarios[funcionarioEmEdicaoIndex] = { nome, tipo, valor };
+                localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
+            }
+
+            document.getElementById('func-nome').value = '';
+            document.getElementById('func-valor').value = '';
+            funcionarioEmEdicaoIndex = null;
+
+            const btnCadastrar = document.querySelector('#funcionarios-painel button.btn-green');
+            btnCadastrar.innerText = '➕ Cadastrar Funcionário';
+            btnCadastrar.setAttribute('onclick', 'salvarNovoFuncionarioCadastrado()');
+
+            renderizarListaFuncionariosCadastrados();
+            atualizarTodosOsSelects();
+            gerarRankingEquipe('hoje');
+            alert('Funcionário atualizado com sucesso!');
+        }
+
         function removerFuncionarioCadastrado(index) {
             if (!confirm('Deseja excluir este funcionário?')) return;
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
@@ -948,7 +991,14 @@
             let html = '<ul style="padding-left: 18px; font-size: 13px; margin: 0;">';
             funcionarios.forEach((f, idx) => {
                 const descTipo = f.tipo === 'producao' ? `Por Produção (R$ ${f.valor.toFixed(2)}/peça)` : `${f.tipo.toUpperCase()} (R$ ${f.valor.toFixed(2)})`;
-                html += `<li style="margin-bottom: 6px;"><b>${f.nome}</b> - ${descTipo} <button style="background:none; border:none; cursor:pointer;" onclick="removerFuncionarioCadastrado(${idx})">🗑️</button></li>`;
+                html += `
+                    <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><b>${f.nome}</b> - ${descTipo}</span>
+                        <div>
+                            <button style="background:none; border:none; cursor:pointer;" onclick="prepararEdicaoFuncionario(${idx})" title="Editar">✏️</button>
+                            <button style="background:none; border:none; cursor:pointer;" onclick="removerFuncionarioCadastrado(${idx})" title="Excluir">🗑️</button>
+                        </div>
+                    </li>`;
             });
             container.innerHTML = html + '</ul>';
         }
@@ -1130,7 +1180,6 @@
                 }
             });
 
-            // Adiciona custo fixo diário do funcionário apenas se ele tiver operado hoje
             Object.keys(prodFuncs).forEach(nomeFunc => {
                 const f = funcsMap[nomeFunc];
                 if (f && f.tipo !== 'producao') {
@@ -1142,9 +1191,7 @@
 
             document.getElementById('total-dia').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            // CONSTRUÇÃO DO QUADRO DETALHADO
             let htmlDetalhes = '';
-            
             htmlDetalhes += `<div class="lucro-linha"><span>🟢 Minha Produção:</span> <b>R$ ${minhaProducao.toFixed(2)}</b></div>`;
 
             let lucroTotalDoDia = minhaProducao;
