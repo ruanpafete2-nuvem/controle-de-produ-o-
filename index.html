@@ -977,7 +977,6 @@
             const funcsMap = {};
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
 
-            // Verifica quais funcionários tiveram operações lançadas HOJE na tela
             const funcionariosPresentesHoje = new Set();
 
             document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
@@ -996,7 +995,6 @@
                 }
             });
 
-            // Adiciona o custo fixo proporcional APENAS se o funcionário estiver presente hoje
             funcionariosPresentesHoje.forEach(nomeFunc => {
                 const f = funcsMap[nomeFunc];
                 if (f) {
@@ -1075,14 +1073,12 @@
             if (hist.length === 0) { alert('Nenhum histórico encontrado.'); return; }
 
             if (criterio === 'dia') {
-                // Encontra o dia com maior total numérico
                 let maisLucrativo = hist.reduce((max, curr) => curr.totalNumerico > max.totalNumerico ? curr : max, hist[0]);
                 document.getElementById('data-inicio').value = maisLucrativo.dataIso;
                 document.getElementById('data-fim').value = maisLucrativo.dataIso;
                 buscarHistorico();
                 alert(`Dia mais lucrativo encontrado: ${maisLucrativo.dataTexto} (${maisLucrativo.total})`);
             } else if (criterio === 'semana' || criterio === 'mes') {
-                // Agrupa por semana ou mês e acha o maior
                 const grupos = {};
                 hist.forEach(item => {
                     let chave = '';
@@ -1090,7 +1086,6 @@
                     if (criterio === 'mes') {
                         chave = `${item.ano}-${item.mes}`;
                     } else {
-                        // Ano e número aproximado da semana
                         const primeiroJan = new Date(d.getFullYear(), 0, 1);
                         const semanaNum = Math.ceil((((d - primeiroJan) / 86400000) + primeiroJan.getDay() + 1) / 7);
                         chave = `${d.getFullYear()}-S${semanaNum}`;
@@ -1115,6 +1110,14 @@
             }
         }
 
+        function normalizarNomeServico(nome) {
+            if (!nome) return "Geral";
+            let str = nome.trim().toLowerCase();
+            // Correção automática de pequenas variações de grafia comuns
+            if (str === "manda aberta") str = "manga aberta";
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
         function buscarHistorico() {
             const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
             const ini = document.getElementById('data-inicio').value;
@@ -1131,7 +1134,7 @@
                 return true;
             });
 
-            // ORDENAÇÃO CORRETA: Do dia mais recente para o mais antigo
+            // Ordena do dia mais recente para o mais antigo
             filtrados.sort((a, b) => b.dataIso.localeCompare(a.dataIso));
 
             renderizarHistorico(filtrados, execFiltro);
@@ -1184,8 +1187,9 @@
                     subTotalCard += sub;
                     somaPecas += qtd;
 
+                    const nomeFormatado = normalizarNomeServico(op.servico);
                     const quem = op.executor && op.executor !== 'mim' ? ` 👤 (${op.executor})` : ' 🟢 (Você)';
-                    opsHTML += `<div class="card-item">• <b>${op.servico}</b>${quem}: ${qtd}x = R$ ${sub.toFixed(2)}</div>`;
+                    opsHTML += `<div class="card-item">• <b>${nomeFormatado}</b>${quem}: ${qtd}x = R$ ${sub.toFixed(2)}</div>`;
 
                     const exec = op.executor || 'mim';
                     if (exec !== 'mim' && funcsMap[exec] && funcsMap[exec].tipo === 'producao') {
@@ -1234,17 +1238,20 @@
             barras.innerHTML = '';
             if (lista.length === 0) { box.style.display = 'none'; return; }
 
-            const counts = {}; let max = 0;
+            const counts = {}; 
+            let max = 0;
+
             lista.forEach(i => i.operacoes.forEach(op => {
                 const exec = op.executor || 'mim';
                 if (!filtroExecutor || exec === filtroExecutor) {
-                    counts[op.servico] = (counts[op.servico] || 0) + op.qtd;
-                    if(counts[op.servico] > max) max = counts[op.servico];
+                    const nomeNormalizado = normalizarNomeServico(op.servico);
+                    counts[nomeNormalizado] = (counts[nomeNormalizado] || 0) + op.qtd;
+                    if (counts[nomeNormalizado] > max) max = counts[nomeNormalizado];
                 }
             }));
 
             const keys = Object.keys(counts);
-            if(keys.length === 0) { box.style.display = 'none'; return; }
+            if (keys.length === 0) { box.style.display = 'none'; return; }
 
             keys.forEach(k => {
                 const pct = max > 0 ? (counts[k] / max) * 100 : 0;
@@ -1260,7 +1267,10 @@
             hist.forEach(i => {
                 total += i.totalNumerico;
                 txt += `\n📅 *${i.dataTexto}* (${i.total})\n`;
-                i.operacoes.forEach(op => txt += ` • ${op.servico} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`);
+                i.operacoes.forEach(op => {
+                    const nomeNorm = normalizarNomeServico(op.servico);
+                    txt += ` • ${nomeNorm} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
+                });
             });
             txt += `\n💰 *TOTAL GERAL: R$ ${total.toFixed(2)}*`;
             navigator.clipboard.writeText(txt).then(() => alert('Relatório copiado para colar no WhatsApp!'));
