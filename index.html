@@ -597,24 +597,15 @@
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 18px 0;">
 
                 <h2>👥 Cadastro de Funcionários</h2>
-                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Cadastre o funcionário e escolha a forma/valor que ele recebe:</p>
+                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Cadastre o funcionário e o valor pago por dia:</p>
                 
                 <div class="filter-field">
                     <label for="func-nome">Nome do Funcionário:</label>
                     <input type="text" id="func-nome" placeholder="Ex: João Silva">
                 </div>
                 <div class="filter-field">
-                    <label for="func-tipo-pagamento">Tipo de Pagamento:</label>
-                    <select id="func-tipo-pagamento">
-                        <option value="mensal">Mensal (Valor fixo por mês)</option>
-                        <option value="semanal">Semanal (Valor fixo por semana)</option>
-                        <option value="quinzenal">Quinzena (Valor fixo por quinzena)</option>
-                        <option value="producao">Por Produção (Valor pago por peça)</option>
-                    </select>
-                </div>
-                <div class="filter-field">
-                    <label for="func-valor">Valor (R$):</label>
-                    <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 1500.00 ou 0.35" onclick="this.select()">
+                    <label for="func-valor">Valor do Salário / Diária (R$):</label>
+                    <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 100.00" onclick="this.select()">
                 </div>
                 <button class="btn btn-green btn-full" style="margin-top: 5px;" onclick="salvarNovoFuncionarioCadastrado()">➕ Cadastrar Funcionário</button>
                 
@@ -913,13 +904,12 @@
 
         function salvarNovoFuncionarioCadastrado() {
             const nome = document.getElementById('func-nome').value.trim();
-            const tipo = document.getElementById('func-tipo-pagamento').value;
             const valor = parseFloat(document.getElementById('func-valor').value) || 0;
 
             if (!nome) { alert('Digite o nome do funcionário!'); return; }
 
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            funcionarios.push({ nome, tipo, valor });
+            funcionarios.push({ nome, valor });
             localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
 
             document.getElementById('func-nome').value = '';
@@ -937,7 +927,6 @@
             if (!f) return;
 
             document.getElementById('func-nome').value = f.nome;
-            document.getElementById('func-tipo-pagamento').value = f.tipo;
             document.getElementById('func-valor').value = f.valor;
             funcionarioEmEdicaoIndex = index;
 
@@ -948,14 +937,13 @@
 
         function salvarEdicaoFuncionario() {
             const nome = document.getElementById('func-nome').value.trim();
-            const tipo = document.getElementById('func-tipo-pagamento').value;
             const valor = parseFloat(document.getElementById('func-valor').value) || 0;
 
             if (!nome) { alert('Digite o nome do funcionário!'); return; }
 
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
             if (funcionarioEmEdicaoIndex !== null && funcionarios[funcionarioEmEdicaoIndex]) {
-                funcionarios[funcionarioEmEdicaoIndex] = { nome, tipo, valor };
+                funcionarios[funcionarioEmEdicaoIndex] = { nome, valor };
                 localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
             }
 
@@ -990,10 +978,9 @@
 
             let html = '<ul style="padding-left: 18px; font-size: 13px; margin: 0;">';
             funcionarios.forEach((f, idx) => {
-                const descTipo = f.tipo === 'producao' ? `Por Produção (R$ ${f.valor.toFixed(2)}/peça)` : `${f.tipo.toUpperCase()} (R$ ${f.valor.toFixed(2)})`;
                 html += `
                     <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <span><b>${f.nome}</b> - ${descTipo}</span>
+                        <span><b>${f.nome}</b> - R$ ${f.valor.toFixed(2)}/dia</span>
                         <div>
                             <button style="background:none; border:none; cursor:pointer;" onclick="prepararEdicaoFuncionario(${idx})" title="Editar">✏️</button>
                             <button style="background:none; border:none; cursor:pointer;" onclick="removerFuncionarioCadastrado(${idx})" title="Excluir">🗑️</button>
@@ -1174,18 +1161,9 @@
                     if (!prodFuncs[exec]) prodFuncs[exec] = { gerado: 0, custo: 0 };
                     prodFuncs[exec].gerado += subTotal;
                     
-                    if (funcsMap[exec] && funcsMap[exec].tipo === 'producao') {
-                        prodFuncs[exec].custo += (funcsMap[exec].valor * qtd);
+                    if (funcsMap[exec]) {
+                        prodFuncs[exec].custo = funcsMap[exec].valor;
                     }
-                }
-            });
-
-            Object.keys(prodFuncs).forEach(nomeFunc => {
-                const f = funcsMap[nomeFunc];
-                if (f && f.tipo !== 'producao') {
-                    if (f.tipo === 'mensal') prodFuncs[nomeFunc].custo = (f.valor / 22);
-                    if (f.tipo === 'semanal') prodFuncs[nomeFunc].custo = (f.valor / 5);
-                    if (f.tipo === 'quinzenal') prodFuncs[nomeFunc].custo = (f.valor / 11);
                 }
             });
 
@@ -1205,7 +1183,7 @@
                 htmlDetalhes += `
                     <div style="background: #fafafa; border: 1px solid #eee; padding: 6px 8px; border-radius: 6px; margin: 6px 0;">
                         <div class="lucro-linha" style="margin-bottom:2px;"><span>👤 Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
-                        <div class="lucro-linha" style="margin-bottom:2px; color: #d9534f;"><span>➖ Pagamento/Diária:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
+                        <div class="lucro-linha" style="margin-bottom:2px; color: #d9534f;"><span>➖ Diária/Pagamento:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
                         <div class="lucro-linha" style="margin-bottom:0; color: var(--primary-color);"><span>👉 Sobra do ${nomeFunc}:</span> <b>R$ ${sobra.toFixed(2)}</b></div>
                     </div>`;
             });
@@ -1401,8 +1379,8 @@
                     opsHTML += `<div class="card-item">• <b>${nomeFormatado}</b>${quem}: ${qtd}x = R$ ${sub.toFixed(2)}</div>`;
 
                     const exec = op.executor || 'mim';
-                    if (exec !== 'mim' && funcsMap[exec] && funcsMap[exec].tipo === 'producao') {
-                        somaCustoFuncionario += (funcsMap[exec].valor * qtd);
+                    if (exec !== 'mim' && funcsMap[exec]) {
+                        somaCustoFuncionario += funcsMap[exec].valor;
                     }
                 });
 
@@ -1422,19 +1400,11 @@
                     </div>`;
             });
 
-            if (filtroExecutor && filtroExecutor !== 'mim' && funcsMap[filtroExecutor]) {
-                const f = funcsMap[filtroExecutor];
-                const totalDiasTrabalhados = lista.filter(item => item.operacoes.some(op => op.executor === filtroExecutor)).length;
-                if (f.tipo === 'mensal') somaCustoFuncionario = (f.valor / 22) * totalDiasTrabalhados;
-                if (f.tipo === 'semanal') somaCustoFuncionario = (f.valor / 5) * totalDiasTrabalhados;
-                if (f.tipo === 'quinzenal') somaCustoFuncionario = (f.valor / 11) * totalDiasTrabalhados;
-            }
-
             const lucroLiquidoReal = somaTotalBruto - somaCustoFuncionario;
 
             resumoBox.style.display = 'block';
             let detalheLucro = (filtroExecutor && filtroExecutor !== 'mim') 
-                ? `<div style="font-size:12px; margin-top:4px; color:#d9534f;">Desconto proporcional de pagamento: R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Sobra do Funcionário para Você: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
+                ? `<div style="font-size:12px; margin-top:4px; color:#d9534f;">Desconto de pagamento: R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Sobra do Funcionário para Você: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
                 : '';
 
             resumoBox.innerHTML = `Total do Período (${lista.length} dias): <br><b style="font-size:18px;">R$ ${somaTotalBruto.toFixed(2)}</b><br><span style="font-size:12px;">Total de Peças: ${somaPecas}</span>${detalheLucro}`;
