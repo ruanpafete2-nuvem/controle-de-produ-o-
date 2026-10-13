@@ -14,463 +14,69 @@
             --border-color: #e0e0e0;
             --danger-color: #d9534f;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 15px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 450px;
-            margin: 0 auto;
-        }
-
-        /* --- CABEÇALHO COM DESTAQUE --- */
-        .app-header {
-            background: linear-gradient(135deg, #2e7d32, #1b5e20);
-            color: #ffffff;
-            padding: 18px 15px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
-        }
-
-        .app-header h1 {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            color: #ffffff;
-        }
-
-        .app-header p {
-            font-size: 12px;
-            color: #e8f5e9;
-            margin: 4px 0 0 0;
-            opacity: 0.9;
-        }
-
-        h2 {
-            font-size: 16px;
-            margin-top: 0;
-            color: #444;
-        }
-
-        /* --- TELA DE LOGIN ESTILIZADA --- */
-        .login-card {
-            background: var(--card-bg);
-            padding: 30px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid #edf0f2;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .login-header .icon-logo {
-            font-size: 38px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .login-header h2 {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text-color);
-            margin: 0;
-        }
-
-        .login-header p {
-            font-size: 13px;
-            color: #777;
-            margin-top: 4px;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: #555;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #555;
-            margin-bottom: 15px;
-            cursor: pointer;
-        }
-
-        .remember-me input {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--primary-color);
-            cursor: pointer;
-        }
-
-        .error {
-            color: var(--danger-color);
-            font-size: 13px;
-            text-align: center;
-            margin-top: 12px;
-            font-weight: 500;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* --- DATA --- */
-        .date-card {
-            background: var(--card-bg);
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .date-field {
-            flex: 1;
-        }
-
-        .date-field label {
-            display: block;
-            margin-bottom: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #666;
-        }
-
-        input[type="text"], input[type="number"], input[type="password"], input[type="date"], select {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background-color: #fafafa;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--primary-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
-        }
-
-        /* --- CARTÕES DE OPERAÇÃO --- */
-        .op-card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-            margin-bottom: 15px;
-            overflow: hidden;
-            border: 1px solid #edf0f2;
-        }
-
-        .op-header {
-            background-color: #f8f9fa;
-            padding: 10px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .btn-delete {
-            background: transparent;
-            border: none;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .op-body {
-            padding: 12px;
-        }
-
-        .op-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .op-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .op-label {
-            width: 35%;
-            font-size: 13px;
-            color: #555;
-            font-weight: 500;
-        }
-
-        .op-input {
-            width: 65%;
-        }
-
-        .total-op-val {
-            font-weight: bold;
-            color: var(--primary-color);
-            font-size: 15px;
-        }
-
-        /* --- BOTÕES --- */
-        .btn {
-            background-color: #ffffff;
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-green {
-            background-color: var(--primary-color);
-            color: #fff;
-            border: none;
-        }
-
-        .btn-green:active {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-danger {
-            background-color: var(--danger-color);
-            color: #fff;
-            border: none;
-        }
-
-        .btn-full {
-            width: 100%;
-        }
-
-        /* --- SEÇÃO TOTAL --- */
-        .total-section {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-            margin-top: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-            border: 1px solid #edf0f2;
-        }
-
-        .total-section h2 {
-            font-size: 13px;
-            margin-bottom: 4px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .total-amount {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--primary-color);
-        }
-
-        .actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .actions .btn {
-            flex: 1;
-            min-width: 100px;
-        }
-
-        /* --- SEÇÕES RECOLHÍVEIS --- */
-        .box-section {
-            display: none;
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #edf0f2;
-        }
-
-        .filter-field {
-            margin-bottom: 10px;
-        }
-
-        .filter-field label {
-            display: block;
-            font-size: 12px;
-            margin-bottom: 4px;
-            font-weight: 600;
-            color: #555;
-        }
-
-        .quick-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-bottom: 12px;
-        }
-
-        .btn-chip {
-            background: #f0f4f8;
-            border: 1px solid #d0d7de;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-            color: #444;
-            cursor: pointer;
-        }
-
-        .btn-chip:active {
-            background: #e2e8f0;
-        }
-
-        .resumo-periodo {
-            background-color: #e8f5e9;
-            border: 1px solid #a5d6a7;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            text-align: center;
-        }
-
-        .card-historico {
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            background-color: #fff;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            font-size: 14px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 6px;
-            margin-bottom: 6px;
-        }
-
-        .card-item {
-            font-size: 13px;
-            margin-bottom: 4px;
-            color: #444;
-        }
-
-        /* --- GRÁFICO --- */
-        .chart-box {
-            background: #fff;
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
-
-        .bar-item {
-            margin-bottom: 10px;
-        }
-
-        .bar-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            margin-bottom: 3px;
-        }
-
-        .bar-bg {
-            background: #eef2f5;
-            height: 12px;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .bar-fill {
-            background: var(--primary-color);
-            height: 100%;
-            width: 0%;
-            border-radius: 6px;
-            transition: width 0.3s ease;
-        }
-
-        /* --- BACKUP DISCRETO --- */
-        .backup-discreto {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px dashed var(--border-color);
-            text-align: center;
-            font-size: 11px;
-            color: #888;
-        }
-
-        .btn-subtle {
-            background: none;
-            border: none;
-            color: #666;
-            font-size: 11px;
-            text-decoration: underline;
-            cursor: pointer;
-            margin: 0 5px;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 15px; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .app-container { width: 100%; max-width: 450px; margin: 0 auto; }
+        .app-header { background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #ffffff; padding: 18px 15px; border-radius: 12px; text-align: center; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2); }
+        .app-header h1 { font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px; color: #ffffff; }
+        .app-header p { font-size: 12px; color: #e8f5e9; margin: 4px 0 0 0; opacity: 0.9; }
+        h2 { font-size: 16px; margin-top: 0; color: #444; }
+        .login-card { background: var(--card-bg); padding: 30px 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #edf0f2; width: 100%; box-sizing: border-box; }
+        .login-header { text-align: center; margin-bottom: 25px; }
+        .login-header .icon-logo { font-size: 38px; margin-bottom: 8px; display: block; }
+        .login-header h2 { font-size: 20px; font-weight: 700; color: var(--text-color); margin: 0; }
+        .login-header p { font-size: 13px; color: #777; margin-top: 4px; }
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; margin-bottom: 6px; color: #555; font-size: 13px; font-weight: 600; }
+        .remember-me { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #555; margin-bottom: 15px; cursor: pointer; }
+        .remember-me input { width: 16px; height: 16px; accent-color: var(--primary-color); cursor: pointer; }
+        .error { color: var(--danger-color); font-size: 13px; text-align: center; margin-top: 12px; font-weight: 500; }
+        .hidden { display: none !important; }
+        .date-card { background: var(--card-bg); padding: 12px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; gap: 10px; margin-bottom: 15px; }
+        .date-field { flex: 1; }
+        .date-field label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: #666; }
+        input[type="text"], input[type="number"], input[type="password"], input[type="date"], select { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; box-sizing: border-box; font-size: 14px; outline: none; background-color: #fafafa; }
+        input:focus, select:focus { border-color: var(--primary-color); background-color: #fff; box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1); }
+        .op-card { background: var(--card-bg); border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-bottom: 15px; overflow: hidden; border: 1px solid #edf0f2; }
+        .op-header { background-color: #f8f9fa; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); font-weight: bold; font-size: 14px; }
+        .btn-delete { background: transparent; border: none; font-size: 16px; cursor: pointer; padding: 2px 6px; }
+        .op-body { padding: 12px; }
+        .op-row { display: flex; align-items: center; margin-bottom: 10px; }
+        .op-row:last-child { margin-bottom: 0; }
+        .op-label { width: 35%; font-size: 13px; color: #555; font-weight: 500; }
+        .op-input { width: 65%; }
+        .total-op-val { font-weight: bold; color: var(--primary-color); font-size: 15px; }
+        .btn { background-color: #ffffff; border: 1px solid var(--border-color); padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+        .btn-green { background-color: var(--primary-color); color: #fff; border: none; }
+        .btn-full { width: 100%; }
+        .total-section { background: var(--card-bg); padding: 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); margin-top: 20px; margin-bottom: 20px; text-align: center; border: 1px solid #edf0f2; }
+        .total-section h2 { font-size: 13px; margin-bottom: 4px; color: #666; text-transform: uppercase; }
+        .total-amount { font-size: 28px; font-weight: 800; color: var(--primary-color); }
+        .lucro-detalhe { font-size: 12px; color: #555; margin-top: 6px; border-top: 1px dashed #eee; padding-top: 6px; }
+        .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .actions .btn { flex: 1; min-width: 90px; }
+        .box-section { display: none; background-color: var(--card-bg); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 15px; margin-bottom: 20px; border: 1px solid #edf0f2; }
+        .filter-field { margin-bottom: 10px; }
+        .filter-field label { display: block; font-size: 12px; margin-bottom: 4px; font-weight: 600; color: #555; }
+        .quick-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .btn-chip { background: #f0f4f8; border: 1px solid #d0d7de; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; color: #444; cursor: pointer; }
+        .resumo-periodo { background-color: #e8f5e9; border: 1px solid #a5d6a7; padding: 12px; border-radius: 6px; margin-bottom: 15px; color: var(--primary-color); text-align: center; }
+        .card-historico { border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; background-color: #fff; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 14px; border-bottom: 1px solid #f0f0f0; padding-bottom: 6px; margin-bottom: 6px; }
+        .card-item { font-size: 13px; margin-bottom: 4px; color: #444; }
+        .chart-box { background: #fff; border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 15px; }
+        .bar-item { margin-bottom: 10px; }
+        .bar-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
+        .bar-bg { background: #eef2f5; height: 12px; border-radius: 6px; overflow: hidden; }
+        .bar-fill { background: var(--primary-color); height: 100%; width: 0%; border-radius: 6px; }
+        .backup-discreto { margin-top: 30px; padding-top: 15px; border-top: 1px dashed var(--border-color); text-align: center; font-size: 11px; color: #888; }
+        .btn-subtle { background: none; border: none; color: #666; font-size: 11px; text-decoration: underline; cursor: pointer; margin: 0 5px; }
     </style>
-
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
     <div class="app-container">
-        
-        <!-- TELA DE LOGIN ESTILIZADA -->
+        <!-- TELA DE LOGIN -->
         <div id="login-screen" class="login-card">
             <div class="login-header">
                 <span class="icon-logo">📋</span>
@@ -485,17 +91,15 @@
                 <label for="password">Senha</label>
                 <input type="password" id="password" placeholder="Digite sua senha">
             </div>
-            
             <label class="remember-me">
                 <input type="checkbox" id="remember-me" checked>
                 <span>Lembrar minhas credenciais</span>
             </label>
-
-            <button class="btn btn-green btn-full" style="padding: 12px; font-size: 15px; margin-top: 5px;" onclick="fazerLogin()">Entrar</button>
+            <button class="btn btn-green btn-full" style="padding: 12px; font-size: 15px;" onclick="fazerLogin()">Entrar</button>
             <div id="login-error" class="error"></div>
         </div>
 
-        <!-- TELA DO APLICATIVO -->
+        <!-- TELA DO APP -->
         <div id="app-screen" class="hidden">
             <div class="app-header">
                 <h1>📋 Controle de Produção</h1>
@@ -525,29 +129,39 @@
             </div>
 
             <div class="total-section">
-                <h2>Total do Dia</h2>
+                <h2>Total Bruto do Dia</h2>
                 <div class="total-amount" id="total-dia">R$ 0,00</div>
+                <div class="lucro-detalhe" id="lucro-liquido-dia">Lucro Líquido: R$ 0,00</div>
             </div>
 
             <div class="actions">
-                <button class="btn btn-green" onclick="finalizarDia()">💾 Finalizar Dia</button>
+                <button class="btn btn-green" onclick="finalizarDia()">💾 Finalizar</button>
                 <button class="btn" onclick="togglePainel('funcionarios-painel')">👥 Equipe</button>
                 <button class="btn" onclick="togglePainel('historico-painel')">📁 Histórico</button>
                 <button class="btn" onclick="togglePainel('servicos-painel')">⚙️ Serviços</button>
             </div>
 
-            <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS (SEPARADO) -->
+            <!-- PAINEL DE EQUIPE (CADASTRO DE FUNCIONÁRIOS) -->
             <div id="funcionarios-painel" class="box-section">
                 <h2>👥 Cadastro de Funcionários</h2>
-                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Cadastre seus funcionários para selecionar quem fez cada serviço:</p>
+                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Defina o nome, o tipo de pagamento e o valor correspondente:</p>
                 
                 <div class="filter-field">
                     <label for="func-nome">Nome do Funcionário:</label>
                     <input type="text" id="func-nome" placeholder="Ex: João Silva">
                 </div>
                 <div class="filter-field">
-                    <label for="func-valor">Custo/Valor Fixo do Funcionário (R$ - opcional):</label>
-                    <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 50.00" onclick="this.select()">
+                    <label for="func-tipo-pagamento">Tipo de Pagamento:</label>
+                    <select id="func-tipo-pagamento">
+                        <option value="mensal">Mensal (Fixo por mês)</option>
+                        <option value="semanal">Semanal (Fixo por semana)</option>
+                        <option value="quinzenal">Quinzena (Fixo por quinzena)</option>
+                        <option value="producao">Por Produção (Paga por peça)</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="func-valor">Valor (R$):</label>
+                    <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 1500.00 ou 0.35" onclick="this.select()">
                 </div>
                 <button class="btn btn-green btn-full" style="margin-top: 5px;" onclick="salvarNovoFuncionarioCadastrado()">➕ Cadastrar Funcionário</button>
                 
@@ -555,10 +169,9 @@
                 <div id="lista-funcionarios-cadastrados"></div>
             </div>
 
-            <!-- PAINEL DE CADASTRO DE SERVIÇOS -->
+            <!-- PAINEL DE SERVIÇOS -->
             <div id="servicos-painel" class="box-section">
                 <h2>⚙️ Serviços Predefinidos</h2>
-                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Cadastre seus serviços e valores para agilizar o preenchimento:</p>
                 <div class="filter-field">
                     <label for="novo-servico-nome">Nome do Serviço:</label>
                     <input type="text" id="novo-servico-nome" placeholder="Ex: Calça">
@@ -568,7 +181,6 @@
                     <input type="number" step="0.01" inputmode="decimal" id="novo-servico-valor" placeholder="Ex: 5.00" onclick="this.select()">
                 </div>
                 <button class="btn btn-green btn-full" style="margin-top: 5px;" onclick="salvarNovoServicoCadastrado()">➕ Cadastrar Serviço</button>
-                
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
                 <div id="lista-servicos-cadastrados"></div>
             </div>
@@ -586,11 +198,18 @@
                     </div>
                     
                     <div class="filter-field">
-                        <label for="data-inicio">De (Data Inicial):</label>
+                        <label for="filtro-executor">Filtrar por Executor:</label>
+                        <select id="filtro-executor" onchange="buscarHistorico()">
+                            <option value="">Todos (Geral)</option>
+                            <option value="mim">Minha Produção</option>
+                        </select>
+                    </div>
+                    <div class="filter-field">
+                        <label for="data-inicio">De:</label>
                         <input type="date" id="data-inicio">
                     </div>
                     <div class="filter-field">
-                        <label for="data-fim">Até (Data Final):</label>
+                        <label for="data-fim">Até:</label>
                         <input type="date" id="data-fim">
                     </div>
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
@@ -600,23 +219,20 @@
                 </div>
 
                 <div id="resumo-total-periodo" class="resumo-periodo" style="display:none;"></div>
-                
-                <button class="btn btn-green btn-full" id="btn-exportar" style="margin-bottom: 15px; display: none;" onclick="exportarRelatorioWhatsApp()">📲 Exportar Resumo (WhatsApp)</button>
+                <button class="btn btn-green btn-full" id="btn-exportar" style="margin-bottom: 15px; display: none;" onclick="exportarRelatorioWhatsApp()">📲 Exportar (WhatsApp)</button>
 
-                <!-- ÁREA DO GRÁFICO POR SERVIÇO -->
                 <div id="grafico-container" class="chart-box" style="display:none;">
-                    <h3 style="font-size: 13px; margin-top: 0; margin-bottom: 10px; color: #555;">📊 Total de Peças por Serviço</h3>
+                    <h3 style="font-size: 13px; margin-top: 0; margin-bottom: 10px; color: #555;">📊 Peças por Serviço</h3>
                     <div id="barras-grafico"></div>
                 </div>
 
                 <div id="lista-historico"></div>
             </div>
 
-            <!-- SEÇÃO DISCRETA DE BACKUP -->
             <div class="backup-discreto">
                 <span>Segurança dos Dados:</span>
-                <button class="btn-subtle" onclick="fazerBackup()">⬇️ Baixar Backup</button> | 
-                <button class="btn-subtle" onclick="document.getElementById('input-restaurar').click()">⬆️ Restaurar Backup</button> | 
+                <button class="btn-subtle" onclick="fazerBackup()">⬇️ Backup</button> | 
+                <button class="btn-subtle" onclick="document.getElementById('input-restaurar').click()">⬆️ Restaurar</button> | 
                 <button class="btn-subtle" style="color: var(--danger-color);" onclick="fazerLogout()">🚪 Sair</button>
                 <input type="file" id="input-restaurar" style="display: none;" accept=".json" onchange="restaurarBackup(event)">
             </div>
@@ -624,7 +240,6 @@
     </div>
 
     <script>
-        // CONFIGURAÇÃO DO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBzV-QawZdO6LjHf5ZBw8EfPJfa5Bnbf3w",
             authDomain: "controle-producao-c08c7.firebaseapp.com",
@@ -634,90 +249,49 @@
             appId: "1:293400609855:web:d04338f74be3b34b1ae48a",
             measurementId: "G-ZY7Z9BJ07J"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         let contadorOperacoes = 0;
         let registroEmEdicaoId = null;
-
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
-        // AO CARREGAR A PÁGINA
         window.addEventListener('DOMContentLoaded', () => {
             const savedUser = localStorage.getItem('saved_user');
             const savedPass = localStorage.getItem('saved_pass');
             const isLoggedIn = localStorage.getItem('is_logged_in');
-
             if (savedUser && savedPass) {
                 document.getElementById('username').value = savedUser;
                 document.getElementById('password').value = savedPass;
                 document.getElementById('remember-me').checked = true;
             }
-
-            if (isLoggedIn === 'true' && savedUser && savedPass) {
-                fazerLogin(true);
-            }
+            if (isLoggedIn === 'true' && savedUser && savedPass) fazerLogin(true);
         });
 
-        /* --- AUTENTICAÇÃO COM FIREBASE --- */
         async function fazerLogin(autoLogin = false) {
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
             const remember = document.getElementById('remember-me').checked;
             const errorDiv = document.getElementById('login-error');
-
             errorDiv.innerText = '';
-
-            if (!user || !pass) {
-                errorDiv.innerText = 'Preencha usuário e senha!';
-                return;
-            }
-
+            if (!user || !pass) { errorDiv.innerText = 'Preencha usuário e senha!'; return; }
             try {
-                const snapshot = await db.collection('usuarios')
-                    .where('usuario', '==', user)
-                    .where('senha', '==', pass)
-                    .get();
-
-                if (snapshot.empty) {
-                    errorDiv.innerText = 'Usuário ou senha incorretos!';
-                    localStorage.removeItem('is_logged_in');
-                    localStorage.removeItem('saved_user');
-                    localStorage.removeItem('saved_pass');
-                    return;
-                }
-
+                const snapshot = await db.collection('usuarios').where('usuario', '==', user).where('senha', '==', pass).get();
+                if (snapshot.empty) { errorDiv.innerText = 'Usuário ou senha incorretos!'; return; }
                 let userData = null;
                 snapshot.forEach(doc => userData = doc.data());
-
-                if (userData.ativo === false) {
-                    errorDiv.innerText = 'Sua conta está inativa!';
-                    localStorage.removeItem('is_logged_in');
-                    localStorage.removeItem('saved_user');
-                    localStorage.removeItem('saved_pass');
-                    return;
-                }
-
+                if (userData.ativo === false) { errorDiv.innerText = 'Conta inativa!'; return; }
                 if (remember) {
                     localStorage.setItem('saved_user', user);
                     localStorage.setItem('saved_pass', pass);
                     localStorage.setItem('is_logged_in', 'true');
                 } else {
-                    localStorage.removeItem('saved_user');
-                    localStorage.removeItem('saved_pass');
-                    localStorage.removeItem('is_logged_in');
+                    localStorage.removeItem('saved_user'); localStorage.removeItem('saved_pass'); localStorage.removeItem('is_logged_in');
                 }
-
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('app-screen').classList.remove('hidden');
-
                 inicializarApp();
-
-            } catch (err) {
-                console.error(err);
-                errorDiv.innerText = 'Erro ao conectar ao banco de dados.';
-            }
+            } catch (err) { errorDiv.innerText = 'Erro ao conectar ao banco.'; }
         }
 
         function fazerLogout() {
@@ -727,73 +301,44 @@
         }
 
         function inicializarApp() {
-            let servicos = JSON.parse(localStorage.getItem('servicosCadastrados'));
-            if (!servicos) {
-                localStorage.setItem('servicosCadastrados', JSON.stringify([]));
-            }
-            let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados'));
-            if (!funcionarios) {
-                localStorage.setItem('funcionariosCadastrados', JSON.stringify([]));
-            }
-            
+            if (!localStorage.getItem('servicosCadastrados')) localStorage.setItem('servicosCadastrados', JSON.stringify([]));
+            if (!localStorage.getItem('funcionariosCadastrados')) localStorage.setItem('funcionariosCadastrados', JSON.stringify([]));
             renderizarListaServicosCadastrados();
             renderizarListaFuncionariosCadastrados();
-
-            if (!carregarRascunho()) {
-                resetarDataHoje();
-                if (contadorOperacoes === 0) {
-                    adicionarOperacao();
-                }
-            }
+            atualizarSelectFiltroExecutor();
+            if (!carregarRascunho()) { resetarDataHoje(); if (contadorOperacoes === 0) adicionarOperacao(); }
         }
 
-        /* --- AUTO-SALVAMENTO --- */
         function salvarRascunho() {
             const dia = document.getElementById('dia').value;
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
-
             const operacoes = [];
-            const cards = document.querySelectorAll('#operacoes-container .op-card');
-            cards.forEach((card) => {
+            document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
                 operacoes.push({
                     servico: card.querySelector('.servico').value,
                     qtd: card.querySelector('.qtd').value,
                     valor: card.querySelector('.valor').value,
-                    executor: card.querySelector('.select-executor') ? card.querySelector('.select-executor').value : 'mim'
+                    executor: card.querySelector('.select-executor').value
                 });
             });
-
-            const rascunho = {
-                dia, mes, ano, operacoes, registroEmEdicaoId
-            };
-
-            localStorage.setItem('rascunho_producao', JSON.stringify(rascunho));
+            localStorage.setItem('rascunho_producao', JSON.stringify({ dia, mes, ano, operacoes, registroEmEdicaoId }));
         }
 
         function carregarRascunho() {
             const rascunho = JSON.parse(localStorage.getItem('rascunho_producao'));
-            if (!rascunho || (!rascunho.operacoes || rascunho.operacoes.length === 0)) return false;
-
+            if (!rascunho || !rascunho.operacoes || rascunho.operacoes.length === 0) return false;
             document.getElementById('dia').value = rascunho.dia || '';
             document.getElementById('mes').value = rascunho.mes || '';
             document.getElementById('ano').value = rascunho.ano || '';
             registroEmEdicaoId = rascunho.registroEmEdicaoId || null;
-
             document.getElementById('operacoes-container').innerHTML = '';
             contadorOperacoes = 0;
-
-            rascunho.operacoes.forEach(op => {
-                adicionarOperacao(op.servico, op.qtd, op.valor, op.executor);
-            });
-
+            rascunho.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
             return true;
         }
 
-        function limparRascunho() {
-            localStorage.removeItem('rascunho_producao');
-        }
-
+        function limparRascunho() { localStorage.removeItem('rascunho_producao'); }
         function resetarDataHoje() {
             const hoje = new Date();
             document.getElementById('dia').value = hoje.getDate();
@@ -802,427 +347,255 @@
         }
 
         function novoDia() {
-            if (confirm("Deseja limpar as operações da tela para iniciar um novo dia?")) {
+            if (confirm("Deseja limpar as operações da tela?")) {
                 document.getElementById('operacoes-container').innerHTML = '';
-                contadorOperacoes = 0;
-                registroEmEdicaoId = null;
-                limparRascunho();
-                resetarDataHoje();
-                adicionarOperacao();
+                contadorOperacoes = 0; registroEmEdicaoId = null; limparRascunho(); resetarDataHoje(); adicionarOperacao();
             }
         }
 
-        /* --- CONTROLE EXCLUSIVO DE PAINÉIS --- */
         function togglePainel(id) {
-            const paineis = ['historico-painel', 'servicos-painel', 'funcionarios-painel'];
-            const painelClicado = document.getElementById(id);
-            const jaEstavaAberto = painelClicado.style.display === 'block';
-
-            paineis.forEach(pId => {
-                document.getElementById(pId).style.display = 'none';
-            });
-
-            if (!jaEstavaAberto) {
-                painelClicado.style.display = 'block';
-                if(id === 'historico-painel') buscarHistorico();
-            }
+            ['historico-painel', 'servicos-painel', 'funcionarios-painel'].forEach(p => document.getElementById(p).style.display = 'none');
+            const painel = document.getElementById(id);
+            if (painel.style.display !== 'block') { painel.style.display = 'block'; if(id === 'historico-painel') buscarHistorico(); }
         }
 
-        /* --- GERENCIAMENTO DE SERVIÇOS --- */
         function salvarNovoServicoCadastrado() {
             const nome = document.getElementById('novo-servico-nome').value.trim();
             const valor = parseFloat(document.getElementById('novo-servico-valor').value) || 0;
-
-            if (!nome) {
-                alert('Digite o nome do serviço!');
-                return;
-            }
-
+            if (!nome) { alert('Digite o nome do serviço!'); return; }
             let servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            servicos.push({ nome: nome, valor: valor });
+            servicos.push({ nome, valor });
             localStorage.setItem('servicosCadastrados', JSON.stringify(servicos));
-
-            document.getElementById('novo-servico-nome').value = '';
-            document.getElementById('novo-servico-valor').value = '';
-
-            renderizarListaServicosCadastrados();
-            atualizarTodosOsSelects();
-            alert('Serviço cadastrado!');
+            document.getElementById('novo-servico-nome').value = ''; document.getElementById('novo-servico-valor').value = '';
+            renderizarListaServicosCadastrados(); atualizarTodosOsSelects(); alert('Serviço cadastrado!');
         }
 
         function removerServicoCadastrado(index) {
-            if (!confirm('Deseja excluir este serviço cadastrado?')) return;
-            let servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            servicos.splice(index, 1);
-            localStorage.setItem('servicosCadastrados', JSON.stringify(servicos));
-            renderizarListaServicosCadastrados();
-            atualizarTodosOsSelects();
+            if (!confirm('Excluir serviço?')) return;
+            let s = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
+            s.splice(index, 1); localStorage.setItem('servicosCadastrados', JSON.stringify(s));
+            renderizarListaServicosCadastrados(); atualizarTodosOsSelects();
         }
 
         function renderizarListaServicosCadastrados() {
             const container = document.getElementById('lista-servicos-cadastrados');
             const servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            
-            if (servicos.length === 0) {
-                container.innerHTML = '<p style="font-size:12px; color:#666;">Nenhum serviço cadastrado ainda.</p>';
-                return;
-            }
-
+            if (servicos.length === 0) { container.innerHTML = '<p style="font-size:12px; color:#666;">Nenhum serviço cadastrado.</p>'; return; }
             let html = '<ul style="padding-left: 18px; font-size: 13px; margin: 0;">';
             servicos.forEach((s, idx) => {
-                const valorTxt = s.valor ? ` - R$ ${s.valor.toFixed(2)}` : '';
-                html += `
-                    <li style="margin-bottom: 8px;">
-                        <b>${s.nome}</b>${valorTxt}
-                        <button style="background:none; border:none; cursor:pointer; font-size: 14px; margin-left: 6px;" title="Excluir" onclick="removerServicoCadastrado(${idx})">🗑️</button>
-                    </li>
-                `;
+                html += `<li style="margin-bottom: 6px;"><b>${s.nome}</b> (R$ ${s.valor.toFixed(2)}) <button style="background:none; border:none; cursor:pointer;" onclick="removerServicoCadastrado(${idx})">🗑️</button></li>`;
             });
-            html += '</ul>';
-            container.innerHTML = html;
+            container.innerHTML = html + '</ul>';
         }
 
-        function gerarOptionsServicos(servicoAtual = '') {
-            const servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            let options = `<option value="">-- Selecionar cadastrado --</option>`;
-            
-            servicos.forEach(s => {
-                const selected = (s.nome === servicoAtual) ? 'selected' : '';
-                const valorTxt = s.valor ? ` (R$ ${s.valor.toFixed(2)})` : '';
-                options += `<option value="${s.nome}" data-valor="${s.valor || 0}" ${selected}>${s.nome}${valorTxt}</option>`;
-            });
-            return options;
-        }
-
-        function gerarOptionsExecutores(executorAtual = 'mim') {
-            const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            let options = `<option value="mim" ${executorAtual === 'mim' ? 'selected' : ''}>Minha Produção</option>`;
-            
-            funcionarios.forEach(f => {
-                const selected = (f.nome === executorAtual) ? 'selected' : '';
-                options += `<option value="${f.nome}" ${selected}>👤 Funcionário: ${f.nome}</option>`;
-            });
-            return options;
-        }
-
-        function atualizarTodosOsSelects() {
-            const selectsServico = document.querySelectorAll('.select-servico');
-            selectsServico.forEach(select => {
-                const valorAtual = select.value;
-                select.innerHTML = gerarOptionsServicos(valorAtual);
-            });
-
-            const selectsExecutor = document.querySelectorAll('.select-executor');
-            selectsExecutor.forEach(select => {
-                const valorAtual = select.value;
-                select.innerHTML = gerarOptionsExecutores(valorAtual);
-            });
-        }
-
-        function selecionarServicoPredefinido(id, selectElement) {
-            const option = selectElement.options[selectElement.selectedIndex];
-            const card = document.getElementById(`op-card-${id}`);
-            const inputServico = card.querySelector('.servico');
-            const inputValor = card.querySelector('.valor');
-            const inputQtd = card.querySelector('.qtd');
-
-            if (selectElement.value !== "") {
-                inputServico.value = selectElement.value;
-                const valorPadrao = parseFloat(option.getAttribute('data-valor')) || 0;
-                inputValor.value = valorPadrao;
-                calcularTotalOperacao(id);
-                
-                inputQtd.focus();
-                inputQtd.select();
-            }
-        }
-
-        /* --- GERENCIAMENTO DE FUNCIONÁRIOS --- */
         function salvarNovoFuncionarioCadastrado() {
             const nome = document.getElementById('func-nome').value.trim();
+            const tipo = document.getElementById('func-tipo-pagamento').value;
             const valor = parseFloat(document.getElementById('func-valor').value) || 0;
-
-            if (!nome) {
-                alert('Digite o nome do funcionário!');
-                return;
-            }
-
-            let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            funcionarios.push({ nome: nome, valor: valor });
-            localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
-
-            document.getElementById('func-nome').value = '';
-            document.getElementById('func-valor').value = '';
-
-            renderizarListaFuncionariosCadastrados();
-            atualizarTodosOsSelects();
-            alert('Funcionário cadastrado!');
+            if (!nome) { alert('Digite o nome do funcionário!'); return; }
+            let funcs = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            funcs.push({ nome, tipo, valor });
+            localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcs));
+            document.getElementById('func-nome').value = ''; document.getElementById('func-valor').value = '';
+            renderizarListaFuncionariosCadastrados(); atualizarTodosOsSelects(); alert('Funcionário cadastrado!');
         }
 
         function removerFuncionarioCadastrado(index) {
-            if (!confirm('Deseja excluir este funcionário?')) return;
-            let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            funcionarios.splice(index, 1);
-            localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
-            renderizarListaFuncionariosCadastrados();
-            atualizarTodosOsSelects();
+            if (!confirm('Excluir funcionário?')) return;
+            let f = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            f.splice(index, 1); localStorage.setItem('funcionariosCadastrados', JSON.stringify(f));
+            renderizarListaFuncionariosCadastrados(); atualizarTodosOsSelects();
         }
 
         function renderizarListaFuncionariosCadastrados() {
             const container = document.getElementById('lista-funcionarios-cadastrados');
-            const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            
-            if (funcionarios.length === 0) {
-                container.innerHTML = '<p style="font-size:12px; color:#666;">Nenhum funcionário cadastrado ainda.</p>';
-                return;
-            }
-
+            const funcs = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            if (funcs.length === 0) { container.innerHTML = '<p style="font-size:12px; color:#666;">Nenhum funcionário cadastrado.</p>'; return; }
             let html = '<ul style="padding-left: 18px; font-size: 13px; margin: 0;">';
-            funcionarios.forEach((f, idx) => {
-                const valorTxt = f.valor ? ` - Custo/Diária: R$ ${f.valor.toFixed(2)}` : '';
-                html += `
-                    <li style="margin-bottom: 8px;">
-                        <b>${f.nome}</b>${valorTxt}
-                        <button style="background:none; border:none; cursor:pointer; font-size: 14px; margin-left: 6px;" title="Excluir" onclick="removerFuncionarioCadastrado(${idx})">🗑️</button>
-                    </li>
-                `;
+            funcs.forEach((f, idx) => {
+                html += `<li style="margin-bottom: 6px;"><b>${f.nome}</b> - ${f.tipo}: R$ ${f.valor.toFixed(2)} <button style="background:none; border:none; cursor:pointer;" onclick="removerFuncionarioCadastrado(${idx})">🗑️</button></li>`;
             });
-            html += '</ul>';
-            container.innerHTML = html;
+            container.innerHTML = html + '</ul>';
         }
 
-        /* --- OPERAÇÕES E CARTÕES --- */
+        function gerarOptionsServicos(atual = '') {
+            const servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
+            let opt = `<option value="">-- Selecionar serviço --</option>`;
+            servicos.forEach(s => {
+                opt += `<option value="${s.nome}" data-valor="${s.valor}" ${s.nome === atual ? 'selected' : ''}>${s.nome} (R$ ${s.valor.toFixed(2)})</option>`;
+            });
+            return opt;
+        }
+
+        function gerarOptionsExecutores(atual = 'mim') {
+            const funcs = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            let opt = `<option value="mim" ${atual === 'mim' ? 'selected' : ''}>Minha Produção</option>`;
+            funcs.forEach(f => {
+                opt += `<option value="${f.nome}" ${f.nome === atual ? 'selected' : ''}>👤 Funcionário: ${f.nome}</option>`;
+            });
+            return opt;
+        }
+
+        function atualizarTodosOsSelects() {
+            document.querySelectorAll('.select-servico').forEach(s => s.innerHTML = gerarOptionsServicos(s.value));
+            document.querySelectorAll('.select-executor').forEach(s => s.innerHTML = gerarOptionsExecutores(s.value));
+            atualizarSelectFiltroExecutor();
+        }
+
+        function atualizarSelectFiltroExecutor() {
+            const sel = document.getElementById('filtro-executor');
+            const atual = sel.value;
+            let opt = `<option value="">Todos (Geral)</option><option value="mim">Minha Produção</option>`;
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
+                opt += `<option value="${f.nome}">${f.nome}</option>`;
+            });
+            sel.innerHTML = opt;
+            sel.value = atual;
+        }
+
+        function selecionarServicoPredefinido(id, el) {
+            const opt = el.options[el.selectedIndex];
+            const card = document.getElementById(`op-card-${id}`);
+            if (el.value !== "") {
+                card.querySelector('.servico').value = el.value;
+                card.querySelector('.valor').value = opt.getAttribute('data-valor') || 0;
+                calcularTotalOperacao(id);
+            }
+        }
+
         function adicionarOperacao(servico = '', qtd = 0, valor = 0, executor = 'mim') {
             contadorOperacoes++;
-            const idAtual = contadorOperacoes;
-            const container = document.getElementById('operacoes-container');
-            const optionsServico = gerarOptionsServicos(servico);
-            const optionsExecutor = gerarOptionsExecutores(executor);
-            
-            const cardHTML = `
-                <div class="op-card" id="op-card-${idAtual}">
+            const id = contadorOperacoes;
+            const html = `
+                <div class="op-card" id="op-card-${id}">
                     <div class="op-header">
-                        <span>Operação ${idAtual}</span>
-                        <button class="btn-delete" title="Excluir Operação" onclick="removerOperacao(${idAtual})">🗑️</button>
+                        <span>Operação ${id}</span>
+                        <button class="btn-delete" onclick="removerOperacao(${id})">🗑️</button>
                     </div>
                     <div class="op-body">
-                        <div class="op-row">
-                            <div class="op-label">Quem fez?</div>
-                            <div class="op-input">
-                                <select class="select-executor" onchange="salvarRascunho()">
-                                    ${optionsExecutor}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="op-row">
-                            <div class="op-label">Atalho Serviço</div>
-                            <div class="op-input">
-                                <select class="select-servico" onchange="selecionarServicoPredefinido(${idAtual}, this)">
-                                    ${optionsServico}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="op-row">
-                            <div class="op-label">Serviço</div>
-                            <div class="op-input">
-                                <input type="text" class="servico" value="${servico}" oninput="salvarRascunho()">
-                            </div>
-                        </div>
-                        <div class="op-row">
-                            <div class="op-label">Quantidade</div>
-                            <div class="op-input">
-                                <input type="number" inputmode="numeric" class="qtd" value="${qtd}" min="0" onclick="this.select()" oninput="calcularTotalOperacao(${idAtual})">
-                            </div>
-                        </div>
-                        <div class="op-row">
-                            <div class="op-label">Valor da peça</div>
-                            <div class="op-input">
-                                <input type="number" step="0.01" inputmode="decimal" class="valor" value="${valor}" min="0" onclick="this.select()" oninput="calcularTotalOperacao(${idAtual})">
-                            </div>
-                        </div>
-                        <div class="op-row">
-                            <div class="op-label">Total</div>
-                            <div class="op-input total-op-val total-op">R$ 0,00</div>
-                        </div>
+                        <div class="op-row"><div class="op-label">Quem fez?</div><div class="op-input"><select class="select-executor" onchange="salvarRascunho()">${gerarOptionsExecutores(executor)}</select></div></div>
+                        <div class="op-row"><div class="op-label">Atalho</div><div class="op-input"><select class="select-servico" onchange="selecionarServicoPredefinido(${id}, this)">${gerarOptionsServicos(servico)}</select></div></div>
+                        <div class="op-row"><div class="op-label">Serviço</div><div class="op-input"><input type="text" class="servico" value="${servico}" oninput="salvarRascunho()"></div></div>
+                        <div class="op-row"><div class="op-label">Qtd</div><div class="op-input"><input type="number" inputmode="numeric" class="qtd" value="${qtd}" min="0" oninput="calcularTotalOperacao(${id})" onclick="this.select()"></div></div>
+                        <div class="op-row"><div class="op-label">Valor</div><div class="op-input"><input type="number" step="0.01" inputmode="decimal" class="valor" value="${valor}" min="0" oninput="calcularTotalOperacao(${id})" onclick="this.select()"></div></div>
+                        <div class="op-row"><div class="op-label">Total</div><div class="op-input total-op-val total-op">R$ 0,00</div></div>
                     </div>
-                </div>
-            `;
-            
-            container.insertAdjacentHTML('beforeend', cardHTML);
-            calcularTotalOperacao(idAtual);
+                </div>`;
+            document.getElementById('operacoes-container').insertAdjacentHTML('beforeend', html);
+            calcularTotalOperacao(id);
             salvarRascunho();
         }
 
         function removerOperacao(id) {
-            const cards = document.querySelectorAll('#operacoes-container .op-card');
-            if (cards.length <= 1) {
-                alert('Você precisa ter pelo menos uma operação.');
-                return;
-            }
-            const cardParaRemover = document.getElementById(`op-card-${id}`);
-            if (cardParaRemover) {
-                cardParaRemover.remove();
-                calcularTotalDia();
-                salvarRascunho();
-            }
+            if (document.querySelectorAll('#operacoes-container .op-card').length <= 1) { alert('Mínimo 1 operação.'); return; }
+            document.getElementById(`op-card-${id}`).remove();
+            calcularTotalDia(); salvarRascunho();
         }
 
         function calcularTotalOperacao(id) {
             const card = document.getElementById(`op-card-${id}`);
             if (!card) return;
-            
             const qtd = parseFloat(card.querySelector('.qtd').value) || 0;
             const valor = parseFloat(card.querySelector('.valor').value) || 0;
-            
             const total = qtd * valor;
             card.querySelector('.total-op').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            
-            calcularTotalDia();
-            salvarRascunho();
+            calcularTotalDia(); salvarRascunho();
         }
 
         function calcularTotalDia() {
-            let totalGeral = 0;
-            const cards = document.querySelectorAll('#operacoes-container .op-card');
-            
-            cards.forEach(card => {
+            let totalBruto = 0, custoFuncs = 0;
+            const funcsMap = {};
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
+
+            document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
                 const qtd = parseFloat(card.querySelector('.qtd').value) || 0;
                 const valor = parseFloat(card.querySelector('.valor').value) || 0;
-                totalGeral += (qtd * valor);
+                const sub = qtd * valor;
+                totalBruto += sub;
+                
+                const exec = card.querySelector('.select-executor').value;
+                if (exec !== 'mim' && funcsMap[exec]) {
+                    const f = funcsMap[exec];
+                    if (f.tipo === 'producao') {
+                        custoFuncs += sub; // ou f.valor * qtd se o valor pago ao funcionário for diferente
+                    }
+                }
             });
 
-            document.getElementById('total-dia').innerText = totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        }
+            // Se houver funcionário mensal/semanal/quinzenal, calcula a proporção diária (considerando ~22 dias úteis p/ mês ou proporcional)
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
+                if (f.tipo === 'mensal') custoFuncs += (f.valor / 22);
+                if (f.tipo === 'semanal') custoFuncs += (f.valor / 5);
+                if (f.tipo === 'quinzenal') custoFuncs += (f.valor / 11);
+            });
 
-        function converterParaDataPadrao(dia, mesTexto, ano) {
-            let mesNum = mesesNomes.indexOf(mesTexto.toLowerCase().trim()) + 1;
-            if (mesNum === 0) mesNum = parseInt(mesTexto) || 1;
-            
-            const d = dia.toString().padStart(2, '0');
-            const m = mesNum.toString().padStart(2, '0');
-            return `${ano}-${m}-${d}`;
+            const liquido = totalBruto - custoFuncs;
+            document.getElementById('total-dia').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('lucro-liquido-dia').innerText = `Lucro Líquido Estimado (já descontando equipe): ${liquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
         }
 
         function finalizarDia() {
-            const dia = document.getElementById('dia').value.toString().trim();
-            const mes = document.getElementById('mes').value.toString().toLowerCase().trim();
-            const ano = document.getElementById('ano').value.toString().trim();
-            const total = document.getElementById('total-dia').innerText;
-
-            if (!dia || !mes || !ano) {
-                alert('Preencha a data antes de finalizar!');
-                return;
-            }
-
-            const dataIso = converterParaDataPadrao(dia, mes, ano);
-
-            const registro = {
-                id: registroEmEdicaoId ? registroEmEdicaoId : Date.now(),
-                dia: dia,
-                mes: mes,
-                ano: ano,
-                dataIso: dataIso,
-                dataTexto: `${dia}/${mes}/${ano}`,
-                total: total,
-                totalNumerico: parseFloat(total.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0,
-                operacoes: []
-            };
-
-            const cards = document.querySelectorAll('#operacoes-container .op-card');
-            cards.forEach((card) => {
-                const executorSelect = card.querySelector('.select-executor');
-                const executorVal = executorSelect ? executorSelect.value : 'mim';
-                
-                registro.operacoes.push({
-                    servico: card.querySelector('.servico').value || 'Não informado',
+            const dia = document.getElementById('dia').value.trim();
+            const mes = document.getElementById('mes').value.trim().toLowerCase();
+            const ano = document.getElementById('ano').value.trim();
+            if (!dia || !mes || !ano) { alert('Preencha a data!'); return; }
+            
+            const totalBrutoStr = document.getElementById('total-dia').innerText;
+            const brutoNum = parseFloat(totalBrutoStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
+            
+            const operacoes = [];
+            document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
+                operacoes.push({
+                    servico: card.querySelector('.servico').value || 'Geral',
                     qtd: parseFloat(card.querySelector('.qtd').value) || 0,
                     valor: parseFloat(card.querySelector('.valor').value) || 0,
                     total: card.querySelector('.total-op').innerText,
-                    executor: executorVal
+                    executor: card.querySelector('.select-executor').value
                 });
             });
 
-            let historico = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const indexExistente = historico.findIndex(item => item.id === registro.id);
-            
-            if (indexExistente !== -1) {
-                historico[indexExistente] = registro;
-                alert('Registro atualizado!');
-            } else {
-                historico.push(registro);
-                alert('Dia finalizado e salvo!');
-            }
+            const registro = {
+                id: registroEmEdicaoId ? registroEmEdicaoId : Date.now(),
+                dia, mes, ano,
+                dataTexto: `${dia}/${mes}/${ano}`,
+                dataIso: `${ano}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`,
+                total: totalBrutoStr,
+                totalNumerico: brutoNum,
+                operacoes
+            };
 
-            localStorage.setItem('historicoProducao', JSON.stringify(historico));
-            
-            limparRascunho();
-            registroEmEdicaoId = null;
-
-            if (document.getElementById('historico-painel').style.display === 'block') {
-                buscarHistorico();
-            }
-        }
-
-        /* --- HISTÓRICO, ATALHOS, RELATÓRIO E GRÁFICO --- */
-        let registrosFiltradosAtuais = [];
-
-        function formatDateToInput(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-
-        function filtrarRapido(tipo) {
-            const hoje = new Date();
-            let inicio, fim;
-
-            if (tipo === 'hoje') {
-                inicio = new Date(hoje);
-                fim = new Date(hoje);
-            } else if (tipo === 'semana') {
-                const day = hoje.getDay();
-                const diff = hoje.getDate() - day + (day === 0 ? -6 : 1);
-                inicio = new Date(hoje.setDate(diff));
-                fim = new Date();
-            } else if (tipo === 'mes') {
-                inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-                fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
-            } else if (tipo === 'mes_passado') {
-                inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
-                fim = new Date(hoje.getFullYear(), hoje.getMonth(), 0);
-            }
-
-            document.getElementById('data-inicio').value = formatDateToInput(inicio);
-            document.getElementById('data-fim').value = formatDateToInput(fim);
-            buscarHistorico();
+            let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            const idx = hist.findIndex(i => i.id === registro.id);
+            if (idx !== -1) hist[idx] = registro; else hist.push(registro);
+            localStorage.setItem('historicoProducao', JSON.stringify(hist));
+            limparRascunho(); registroEmEdicaoId = null; alert('Salvo com sucesso!');
+            if (document.getElementById('historico-painel').style.display === 'block') buscarHistorico();
         }
 
         function buscarHistorico() {
-            const historico = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const dataInicio = document.getElementById('data-inicio').value;
-            const dataFim = document.getElementById('data-fim').value;
+            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            const ini = document.getElementById('data-inicio').value;
+            const fim = document.getElementById('data-fim').value;
+            const execFiltro = document.getElementById('filtro-executor').value;
 
-            registrosFiltradosAtuais = historico.filter(item => {
-                const dataItem = item.dataIso || converterParaDataPadrao(item.dia, item.mes, item.ano);
-                if (dataInicio && dataItem < dataInicio) return false;
-                if (dataFim && dataItem > dataFim) return false;
+            let filtrados = hist.filter(item => {
+                if (ini && item.dataIso < ini) return false;
+                if (fim && item.dataIso > fim) return false;
+                if (execFiltro) {
+                    const temOpDoExecutor = item.operacoes.some(op => (op.executor || 'mim') === execFiltro);
+                    if (!temOpDoExecutor) return false;
+                }
                 return true;
             });
 
-            registrosFiltradosAtuais.sort((a, b) => {
-                const dA = a.dataIso || converterParaDataPadrao(a.dia, a.mes, a.ano);
-                const dB = b.dataIso || converterParaDataPadrao(b.dia, b.mes, b.ano);
-                return dB.localeCompare(dA);
-            });
-
-            renderizarHistorico(registrosFiltradosAtuais);
-            renderizarGrafico(registrosFiltradosAtuais);
+            renderizarHistorico(filtrados);
+            renderizarGrafico(filtrados);
         }
 
         function limparFiltro() {
             document.getElementById('data-inicio').value = '';
             document.getElementById('data-fim').value = '';
+            document.getElementById('filtro-executor').value = '';
             buscarHistorico();
         }
 
@@ -1231,249 +604,98 @@
             const resumoBox = document.getElementById('resumo-total-periodo');
             const btnExportar = document.getElementById('btn-exportar');
             container.innerHTML = '';
-
-            if (lista.length === 0) {
-                container.innerHTML = '<p style="color:#666; font-style:italic; font-size: 13px;">Nenhum registro no período.</p>';
-                resumoBox.style.display = 'none';
-                btnExportar.style.display = 'none';
-                return;
-            }
-
-            let somaTotal = 0;
-            let somaPecas = 0;
-
-            lista.forEach((item, index) => {
-                const dataFormatada = item.dataTexto || `${item.dia}/${item.mes}/${item.ano}`;
-                const itemId = item.id || index;
-
-                let valorNum = item.totalNumerico;
-                if (valorNum === undefined) {
-                    valorNum = parseFloat(item.total.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
-                }
-                somaTotal += valorNum;
-
+            if (lista.length === 0) { container.innerHTML = '<p style="color:#666; font-size:13px;">Nenhum registro encontrado.</p>'; resumoBox.style.display = 'none'; btnExportar.style.display = 'none'; return; }
+            
+            let somaTotal = 0, somaPecas = 0;
+            lista.forEach(item => {
+                somaTotal += item.totalNumerico;
                 let opsHTML = '';
-                if (item.operacoes && Array.isArray(item.operacoes)) {
-                    item.operacoes.forEach((op) => {
-                        somaPecas += (op.qtd || 0);
-                        const quemFezTxt = (op.executor && op.executor !== 'mim') ? ` 👤 (${op.executor})` : '';
-                        opsHTML += `
-                            <div class="card-item">
-                                • <b>${op.servico}</b>${quemFezTxt}: ${op.qtd}x R$ ${op.valor} = ${op.total}
-                            </div>
-                        `;
-                    });
-                }
-
-                const card = `
-                    <div class="card-historico">
-                        <div class="card-header">
-                            <span>📅 ${dataFormatada}</span>
-                            <div>
-                                <span style="color: var(--primary-color); margin-right: 8px;">${item.total}</span>
-                                <button style="background:none; border:none; cursor:pointer;" title="Editar" onclick="editarRegistro(${itemId})">✏️</button>
-                                <button style="background:none; border:none; cursor:pointer;" title="Excluir" onclick="excluirRegistro(${itemId})">🗑️</button>
-                            </div>
-                        </div>
-                        ${opsHTML}
-                    </div>
-                `;
-                container.innerHTML += card;
+                item.operacoes.forEach(op => {
+                    somaPecas += op.qtd;
+                    const quem = op.executor && op.executor !== 'mim' ? ` 👤 (${op.executor})` : ' 🟢 (Você)';
+                    opsHTML += `<div class="card-item">• <b>${op.servico}</b>${quem}: ${op.qtd}x = ${op.total}</div>`;
+                });
+                container.innerHTML += `<div class="card-historico"><div class="card-header"><span>📅 ${item.dataTexto}</span><div><span style="color:var(--primary-color);">${item.total}</span> <button style="background:none;border:none;" onclick="editarRegistro(${item.id})">✏️</button> <button style="background:none;border:none;" onclick="excluirRegistro(${item.id})">🗑️</button></div></div>${opsHTML}</div>`;
             });
-
             resumoBox.style.display = 'block';
-            resumoBox.innerHTML = `
-                Total do Período (${lista.length} dias): <br>
-                <b style="font-size: 20px;">${somaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</b>
-                <div style="font-size: 12px; margin-top: 5px; color: #555;">
-                    📦 Total de peças: <b>${somaPecas}</b>
-                </div>
-            `;
+            resumoBox.innerHTML = `Total do Período: <br><b style="font-size:18px;">${somaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</b><br><span style="font-size:12px;">Peças: ${somaPecas}</span>`;
             btnExportar.style.display = 'block';
         }
 
         function renderizarGrafico(lista) {
-            const graficoBox = document.getElementById('grafico-container');
-            const barrasBox = document.getElementById('barras-grafico');
-            barrasBox.innerHTML = '';
-
-            if (lista.length === 0) {
-                graficoBox.style.display = 'none';
-                return;
-            }
-
-            const contagemServicos = {};
-            let maiorQtd = 0;
-
-            lista.forEach(item => {
-                if (item.operacoes && Array.isArray(item.operacoes)) {
-                    item.operacoes.forEach(op => {
-                        const nome = op.servico.trim().toLowerCase();
-                        const nomeFormatado = nome.charAt(0).toUpperCase() + nome.slice(1);
-                        const qtd = parseFloat(op.qtd) || 0;
-
-                        if (!contagemServicos[nomeFormatado]) {
-                            contagemServicos[nomeFormatado] = 0;
-                        }
-                        contagemServicos[nomeFormatado] += qtd;
-                    });
-                }
+            const box = document.getElementById('grafico-container');
+            const barras = document.getElementById('barras-grafico');
+            barras.innerHTML = '';
+            if (lista.length === 0) { box.style.display = 'none'; return; }
+            const counts = {}; let max = 0;
+            lista.forEach(i => i.operacoes.forEach(op => {
+                const s = op.servico; counts[s] = (counts[s] || 0) + op.qtd; if(counts[s] > max) max = counts[s];
+            }));
+            const keys = Object.keys(counts);
+            if(keys.length === 0) { box.style.display = 'none'; return; }
+            keys.forEach(k => {
+                const pct = max > 0 ? (counts[k] / max) * 100 : 0;
+                barras.innerHTML += `<div class="bar-item"><div class="bar-label"><span><b>${k}</b></span><span>${counts[k]}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div></div>`;
             });
-
-            const chaves = Object.keys(contagemServicos);
-            if (chaves.length === 0) {
-                graficoBox.style.display = 'none';
-                return;
-            }
-
-            chaves.forEach(key => {
-                if (contagemServicos[key] > maiorQtd) maiorQtd = contagemServicos[key];
-            });
-
-            chaves.forEach(servico => {
-                const qtdTotal = contagemServicos[servico];
-                const porcentagem = maiorQtd > 0 ? (qtdTotal / maiorQtd) * 100 : 0;
-
-                const barHTML = `
-                    <div class="bar-item">
-                        <div class="bar-label">
-                            <span><b>${servico}</b></span>
-                            <span>${qtdTotal} peças</span>
-                        </div>
-                        <div class="bar-bg">
-                            <div class="bar-fill" style="width: ${porcentagem}%;"></div>
-                        </div>
-                    </div>
-                `;
-                barrasBox.innerHTML += barHTML;
-            });
-
-            graficoBox.style.display = 'block';
+            box.style.display = 'block';
         }
 
         function exportarRelatorioWhatsApp() {
-            if (registrosFiltradosAtuais.length === 0) return;
-
-            let texto = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
-            let somaTotal = 0;
-            let somaPecas = 0;
-
-            registrosFiltradosAtuais.forEach(item => {
-                const dataFormatada = item.dataTexto || `${item.dia}/${item.mes}/${item.ano}`;
-                let valorNum = item.totalNumerico;
-                if (valorNum === undefined) {
-                    valorNum = parseFloat(item.total.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
-                }
-                somaTotal += valorNum;
-
-                texto += `\n📅 *Data: ${dataFormatada}* (Total: ${item.total})\n`;
-                if (item.operacoes) {
-                    item.operacoes.forEach(op => {
-                        somaPecas += (op.qtd || 0);
-                        const executorTxt = (op.executor && op.executor !== 'mim') ? ` [${op.executor}]` : '';
-                        texto += ` • ${op.servico}${executorTxt}: ${op.qtd}x (R$ ${op.valor}) = ${op.total}\n`;
-                    });
-                }
+            let txt = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
+            let total = 0;
+            // Pega os dados filtrados atualmente na tela se houver
+            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            hist.forEach(i => {
+                total += i.totalNumerico;
+                txt += `\n📅 *${i.dataTexto}* (${i.total})\n`;
+                i.operacoes.forEach(op => txt += ` • ${op.servico} [${op.executor}]: ${op.qtd}x = ${op.total}\n`);
             });
-
-            texto += `\n📦 *TOTAL DE PEÇAS: ${somaPecas}*`;
-            texto += `\n💰 *TOTAL DO PERÍODO: ${somaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*`;
-
-            navigator.clipboard.writeText(texto).then(() => {
-                alert('Relatório copiado para a área de transferência!\n\nAgora basta abrir o WhatsApp ou Bloco de Notas e colá-lo.');
-            }).catch(() => {
-                alert('Erro ao copiar automaticamente.');
-            });
+            txt += `\n💰 *TOTAL GERAL: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}*`;
+            navigator.clipboard.writeText(txt).then(() => alert('Relatório copiado para colar no WhatsApp!'));
         }
 
         function excluirRegistro(id) {
-            if (!confirm('Apagar este registro?')) return;
-            let historico = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            historico = historico.filter((item, index) => (item.id !== undefined ? item.id !== id : index !== id));
-            localStorage.setItem('historicoProducao', JSON.stringify(historico));
+            if (!confirm('Excluir?')) return;
+            let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            localStorage.setItem('historicoProducao', JSON.stringify(hist.filter(i => i.id !== id)));
             buscarHistorico();
         }
 
         function editarRegistro(id) {
-            let historico = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const registro = historico.find((item, index) => (item.id !== undefined ? item.id === id : index === id));
-            if (!registro) return;
-
-            registroEmEdicaoId = registro.id || id;
-
-            if (registro.dia) document.getElementById('dia').value = registro.dia;
-            if (registro.mes) document.getElementById('mes').value = registro.mes;
-            if (registro.ano) document.getElementById('ano').value = registro.ano;
-
+            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            const reg = hist.find(i => i.id === id);
+            if (!reg) return;
+            registroEmEdicaoId = reg.id;
+            document.getElementById('dia').value = reg.dia;
+            document.getElementById('mes').value = reg.mes;
+            document.getElementById('ano').value = reg.ano;
             document.getElementById('operacoes-container').innerHTML = '';
             contadorOperacoes = 0;
-
-            if (registro.operacoes && registro.operacoes.length > 0) {
-                registro.operacoes.forEach(op => {
-                    adicionarOperacao(op.servico, op.qtd, op.valor, op.executor);
-                });
-            } else {
-                adicionarOperacao();
-            }
-
-            salvarRascunho();
+            reg.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            alert('Ajuste o que precisar no topo e clique em "Finalizar Dia" para atualizar!');
+            alert('Ajuste os dados e clique em "Finalizar".');
         }
 
-        /* --- BACKUP E RESTAURAÇÃO --- */
         function fazerBackup() {
-            const dados = {
-                historico: JSON.parse(localStorage.getItem('historicoProducao')) || [],
-                servicos: JSON.parse(localStorage.getItem('servicosCadastrados')) || [],
-                funcionarios: JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []
-            };
-
-            const jsonStr = JSON.stringify(dados, null, 2);
-            const hoje = new Date().toISOString().slice(0, 10);
-            const nomeArquivo = `backup_producao_${hoje}.json`;
-
-            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(jsonStr);
-            
-            const linkElement = document.createElement('a');
-            linkElement.setAttribute('href', dataUri);
-            linkElement.setAttribute('download', nomeArquivo);
-            document.body.appendChild(linkElement);
-            
-            linkElement.click();
-            document.body.removeChild(linkElement);
+            const dados = { historico: JSON.parse(localStorage.getItem('historicoProducao')), servicos: JSON.parse(localStorage.getItem('servicosCadastrados')), funcionarios: JSON.parse(localStorage.getItem('funcionariosCadastrados')) };
+            const link = document.createElement('a');
+            link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dados, null, 2));
+            link.download = `backup_${new Date().toISOString().slice(0,10)}.json`;
+            link.click();
         }
 
-        function restaurarBackup(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
+        function restaurarBackup(e) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function(evt) {
                 try {
-                    const dados = JSON.parse(e.target.result);
-                    if (dados.historico || dados.servicos || dados.funcionarios) {
-                        if (confirm("Isso substituirá seus dados atuais pelos dados do arquivo. Deseja continuar?")) {
-                            if (dados.historico) localStorage.setItem('historicoProducao', JSON.stringify(dados.historico));
-                            if (dados.servicos) localStorage.setItem('servicosCadastrados', JSON.stringify(dados.servicos));
-                            if (dados.funcionarios) localStorage.setItem('funcionariosCadastrados', JSON.stringify(dados.funcionarios));
-                            
-                            renderizarListaServicosCadastrados();
-                            renderizarListaFuncionariosCadastrados();
-                            atualizarTodosOsSelects();
-                            if (document.getElementById('historico-painel').style.display === 'block') {
-                                buscarHistorico();
-                            }
-                            alert('Backup restaurado com sucesso!');
-                        }
-                    } else {
-                        alert('Arquivo de backup inválido.');
-                    }
-                } catch (err) {
-                    alert('Erro ao ler arquivo de backup.');
-                }
+                    const d = JSON.parse(evt.target.result);
+                    if(d.historico) localStorage.setItem('historicoProducao', JSON.stringify(d.historico));
+                    if(d.servicos) localStorage.setItem('servicosCadastrados', JSON.stringify(d.servicos));
+                    if(d.funcionarios) localStorage.setItem('funcionariosCadastrados', JSON.stringify(d.funcionarios));
+                    inicializarApp(); alert('Restaurado com sucesso!');
+                } catch(err) { alert('Erro no arquivo.'); }
             };
-            reader.readAsText(file);
+            reader.readAsText(e.target.files[0]);
         }
     </script>
 </body>
