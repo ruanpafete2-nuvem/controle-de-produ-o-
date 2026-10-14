@@ -6,14 +6,14 @@
     <title>Controle de Produção</title>
     <style>
         :root {
-            --primary-color: #10b981;
-            --primary-dark: #059669;
+            --primary-color: #15803d;
+            --primary-dark: #166534;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
-            --danger-color: #ef4444;
+            --danger-color: #dc2626;
         }
 
         * {
@@ -40,29 +40,27 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            padding-bottom: 75px; /* Espaço para a barra fixa no rodapé */
-            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 75px;
+            box-shadow: 0 0 25px rgba(0,0,0,0.05);
         }
 
         .app-header {
-            background: linear-gradient(135deg, #059669, #10b981);
-            color: #ffffff;
-            padding: 14px 16px;
+            background: #ffffff;
+            color: var(--text-main);
+            padding: 16px;
             text-align: center;
-            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
+            border-bottom: 1px solid var(--border-color);
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
         .app-header h1 {
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 700;
             margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
+            color: var(--text-main);
+            letter-spacing: -0.3px;
         }
 
         .login-card {
@@ -99,130 +97,134 @@
         .error { color: var(--danger-color); font-size: 13px; text-align: center; margin-top: 10px; font-weight: 500; }
         .hidden { display: none !important; }
 
-        /* DATA BAR */
+        /* BARRA DE DATA */
         .date-bar {
-            background: #f1f5f9;
-            padding: 10px 14px;
+            background: #f8fafc;
+            padding: 12px 16px;
             display: flex;
-            gap: 8px;
+            gap: 10px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .date-field { flex: 1; }
-        .date-field label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
+        .date-field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 3px; }
 
         input[type="text"], input[type="number"], input[type="password"], input[type="date"], select {
             width: 100%;
-            padding: 8px 10px;
+            padding: 9px 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 13px;
             outline: none;
             background-color: #fff;
-            transition: border-color 0.2s;
+            color: var(--text-main);
+            transition: all 0.2s;
         }
 
-        input:focus, select:focus { border-color: var(--primary-color); }
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+        }
 
-        /* RESUMO COMPACTO DO DIA */
+        /* CARD DE RESUMO MINIMALISTA */
         .summary-card {
-            background: #ecfdf5;
-            border-bottom: 1px solid #a7f3d0;
-            padding: 12px 16px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px;
         }
 
         .summary-main {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
+            align-items: baseline;
+            margin-bottom: 12px;
         }
 
-        .summary-main .title { font-size: 12px; font-weight: 700; color: var(--primary-dark); text-transform: uppercase; }
-        .summary-main .value { font-size: 22px; font-weight: 800; color: var(--primary-dark); }
+        .summary-main .title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .summary-main .value { font-size: 24px; font-weight: 800; color: var(--primary-color); }
 
         .lucro-detalhe {
-            font-size: 12px;
-            border-top: 1px dashed #a7f3d0;
-            padding-top: 8px;
-            margin-top: 4px;
+            font-size: 13px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 10px;
         }
 
         .lucro-linha {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            color: #334155;
         }
 
         .lucro-linha.destaque-sobra {
-            background: #ffffff;
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid #a7f3d0;
-            font-weight: 700;
-            margin-top: 6px;
+            background: #f0fdf4;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #bbf7d0;
+            font-weight: 600;
+            margin-top: 10px;
+            color: var(--primary-dark);
         }
 
-        /* LINHAS COMPACTAS DE OPERAÇÃO */
-        .op-list { padding: 12px 14px; }
+        /* LISTA DE ITENS LIMPA */
+        .op-list { padding: 16px; }
 
         .op-row-item {
             background: #ffffff;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
         }
 
         .op-row-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             font-size: 12px;
             font-weight: 700;
             color: var(--text-muted);
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 4px;
         }
 
         .op-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 8px;
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
         .op-grid-3 {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
+            gap: 10px;
             align-items: end;
         }
 
         .op-grid-cell label {
             display: block;
-            font-size: 10px;
+            font-size: 11px;
             color: var(--text-muted);
-            margin-bottom: 2px;
-            font-weight: 600;
+            margin-bottom: 3px;
+            font-weight: 500;
         }
 
         .total-badge {
-            background: #f1f5f9;
+            background: #f8fafc;
+            border: 1px solid var(--border-color);
             padding: 8px;
             border-radius: 8px;
             text-align: center;
-            font-weight: 800;
-            color: var(--primary-dark);
+            font-weight: 700;
+            color: var(--primary-color);
             font-size: 13px;
         }
 
         .btn {
             background: #ffffff;
             border: 1px solid var(--border-color);
-            padding: 9px 12px;
+            padding: 10px 14px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
@@ -231,10 +233,11 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            transition: background-color 0.1s;
+            color: var(--text-main);
+            transition: all 0.15s ease;
         }
 
-        .btn:active { background-color: #f1f5f9; }
+        .btn:active { background-color: #f1f5f9; transform: scale(0.99); }
 
         .btn-green {
             background-color: var(--primary-color);
@@ -245,7 +248,7 @@
         .btn-green:active { background-color: var(--primary-dark); }
         .btn-full { width: 100%; }
 
-        /* BOTTOM NAVBAR (BARRA FIXA NO RODAPÉ) */
+        /* NAVEGAÇÃO RODAPÉ CLEAN */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -257,32 +260,28 @@
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
-            padding: 8px 0 10px 0;
+            padding: 8px 0 12px 0;
             z-index: 100;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 500;
             color: var(--text-muted);
             background: none;
             border: none;
             cursor: pointer;
-            gap: 3px;
+            gap: 4px;
         }
 
         .nav-item .icon { font-size: 18px; }
-        .nav-item.active { color: var(--primary-dark); }
+        .nav-item.active { color: var(--primary-color); font-weight: 700; }
 
-        /* PAINÉIS */
-        .box-panel {
-            padding: 16px;
-            display: none;
-        }
+        /* PAINÉIS SECUNDÁRIOS */
+        .box-panel { padding: 16px; display: none; }
 
         .quick-filters {
             display: flex;
@@ -294,7 +293,7 @@
         .btn-chip {
             background: #f1f5f9;
             border: 1px solid var(--border-color);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
@@ -311,7 +310,7 @@
         .card-historico {
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 10px 12px;
+            padding: 12px;
             margin-bottom: 10px;
             background: #fff;
         }
@@ -327,10 +326,10 @@
         }
 
         .ranking-card {
-            background: #fafafa;
+            background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 15px;
         }
 
@@ -338,16 +337,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 4px;
-            border-bottom: 1px dashed #e2e8f0;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
             font-size: 13px;
         }
 
         .ranking-badge {
             font-weight: 700;
-            color: var(--primary-dark);
-            background: #ecfdf5;
-            padding: 2px 8px;
+            color: var(--primary-color);
+            background: #f0fdf4;
+            padding: 3px 10px;
             border-radius: 12px;
             font-size: 11px;
         }
@@ -373,12 +372,12 @@
 
     <div class="app-container">
         
-        <!-- TELA DE LOGIN -->
+        <!-- LOGIN -->
         <div id="login-screen" class="login-card">
             <div class="login-header">
                 <span class="icon-logo">📋</span>
                 <h2>Controle de Produção</h2>
-                <p>Acesse para gerenciar a produção</p>
+                <p>Acesse para continuar</p>
             </div>
             <div class="input-group">
                 <label for="username">Usuário</label>
@@ -391,20 +390,20 @@
             
             <label class="remember-me">
                 <input type="checkbox" id="remember-me" checked>
-                <span>Lembrar minhas credenciais</span>
+                <span>Lembrar credenciais</span>
             </label>
 
-            <button class="btn btn-green btn-full" style="padding: 12px;" onclick="fazerLogin()">Entrar no Sistema</button>
+            <button class="btn btn-green btn-full" style="padding: 12px;" onclick="fazerLogin()">Entrar</button>
             <div id="login-error" class="error"></div>
         </div>
 
-        <!-- TELA DO APLICATIVO -->
+        <!-- APLICATIVO PRINCIPAL -->
         <div id="app-screen" class="hidden">
             <div class="app-header">
-                <h1>📋 Controle de Produção</h1>
+                <h1>Controle de Produção</h1>
             </div>
 
-            <!-- PAINEL 1: LANÇAMENTO DIÁRIO (INÍCIO) -->
+            <!-- PAINEL LANÇAMENTO -->
             <div id="main-panel">
                 <div class="date-bar">
                     <div class="date-field">
@@ -433,17 +432,17 @@
                     <div id="operacoes-container"></div>
 
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
-                        <button class="btn btn-full" onclick="adicionarOperacao()">➕ Adicionar Item</button>
-                        <button class="btn" title="Limpar Tudo" onclick="novoDia()">🧹</button>
+                        <button class="btn btn-full" onclick="adicionarOperacao()">+ Adicionar Item</button>
+                        <button class="btn" title="Limpar Tela" onclick="novoDia()">🧹</button>
                     </div>
 
-                    <button class="btn btn-green btn-full" style="margin-top: 12px; padding: 12px;" onclick="finalizarDia()">💾 Finalizar e Salvar o Dia</button>
+                    <button class="btn btn-green btn-full" style="margin-top: 14px; padding: 12px; font-size: 14px;" onclick="finalizarDia()">Salvar Dia</button>
                 </div>
             </div>
 
-            <!-- PAINEL 2: EQUIPE & RANKING -->
+            <!-- PAINEL EQUIPE -->
             <div id="funcionarios-painel" class="box-panel">
-                <h2 style="font-size: 15px; margin-top:0;">🏆 Desempenho da Equipe</h2>
+                <h2 style="font-size: 15px; margin-top:0;">Desempenho da Equipe</h2>
                 <div class="quick-filters">
                     <button class="btn-chip active" id="chip-rank-hoje" onclick="gerarRankingEquipe('hoje')">Hoje</button>
                     <button class="btn-chip" id="chip-rank-semana" onclick="gerarRankingEquipe('semana')">Esta Semana</button>
@@ -453,7 +452,7 @@
 
                 <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
 
-                <h2 style="font-size: 15px;">👥 Cadastrar Funcionário</h2>
+                <h2 style="font-size: 15px;">Cadastrar Funcionário</h2>
                 <div class="input-group">
                     <label>Nome do Funcionário</label>
                     <input type="text" id="func-nome" placeholder="Ex: João">
@@ -462,16 +461,16 @@
                     <label>Valor da Diária / Salário (R$)</label>
                     <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 100.00" onclick="this.select()">
                 </div>
-                <button class="btn btn-green btn-full" id="btn-salvar-func" onclick="salvarNovoFuncionarioCadastrado()">➕ Salvar Funcionário</button>
+                <button class="btn btn-green btn-full" id="btn-salvar-func" onclick="salvarNovoFuncionarioCadastrado()">Salvar Funcionário</button>
                 
                 <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
                 <div id="lista-funcionarios-cadastrados"></div>
             </div>
 
-            <!-- PAINEL 3: HISTÓRICO -->
+            <!-- PAINEL HISTÓRICO -->
             <div id="historico-painel" class="box-panel">
-                <h2 style="font-size: 15px; margin-top:0;">📁 Histórico de Produção</h2>
-                <div style="background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 12px;">
+                <h2 style="font-size: 15px; margin-top:0;">Histórico de Produção</h2>
+                <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 12px;">
                     <div class="quick-filters">
                         <button class="btn-chip" onclick="filtrarRapido('hoje')">Hoje</button>
                         <button class="btn-chip" onclick="filtrarRapido('semana')">Semana</button>
@@ -485,23 +484,23 @@
                         <input type="date" id="data-inicio" style="font-size:11px;">
                         <input type="date" id="data-fim" style="font-size:11px;">
                     </div>
-                    <button class="btn btn-full" style="margin-top:8px; padding:6px;" onclick="buscarHistorico()">🔍 Buscar</button>
+                    <button class="btn btn-full" style="margin-top:8px; padding:8px;" onclick="buscarHistorico()">Buscar</button>
                 </div>
 
-                <div id="resumo-total-periodo" style="display:none; background:#ecfdf5; border:1px solid #a7f3d0; padding:10px; border-radius:8px; text-align:center; margin-bottom:12px; font-size:13px; color:var(--primary-dark);"></div>
-                <button class="btn btn-green btn-full" id="btn-exportar" style="display:none; margin-bottom:12px;" onclick="exportarRelatorioWhatsApp()">📲 Relatório WhatsApp</button>
+                <div id="resumo-total-periodo" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:8px; text-align:center; margin-bottom:12px; font-size:13px; color:var(--primary-dark);"></div>
+                <button class="btn btn-green btn-full" id="btn-exportar" style="display:none; margin-bottom:12px;" onclick="exportarRelatorioWhatsApp()">Relatório WhatsApp</button>
 
-                <div id="grafico-container" style="display:none; background:#fff; border:1px solid var(--border-color); padding:10px; border-radius:8px; margin-bottom:12px;">
-                    <span style="font-size:12px; font-weight:700;">📊 Peças por Serviço</span>
+                <div id="grafico-container" style="display:none; background:#fff; border:1px solid var(--border-color); padding:12px; border-radius:8px; margin-bottom:12px;">
+                    <span style="font-size:12px; font-weight:700;">Peças por Serviço</span>
                     <div id="barras-grafico" style="margin-top:8px;"></div>
                 </div>
 
                 <div id="lista-historico"></div>
             </div>
 
-            <!-- PAINEL 4: SERVIÇOS -->
+            <!-- PAINEL SERVIÇOS -->
             <div id="servicos-painel" class="box-panel">
-                <h2 style="font-size: 15px; margin-top:0;">⚙️ Serviços Predefinidos</h2>
+                <h2 style="font-size: 15px; margin-top:0;">Serviços Predefinidos</h2>
                 <div class="input-group">
                     <label>Nome do Serviço</label>
                     <input type="text" id="novo-servico-nome" placeholder="Ex: Calça">
@@ -510,20 +509,20 @@
                     <label>Valor Unitário (R$)</label>
                     <input type="number" step="0.01" inputmode="decimal" id="novo-servico-valor" placeholder="Ex: 5.00" onclick="this.select()">
                 </div>
-                <button class="btn btn-green btn-full" onclick="salvarNovoServicoCadastrado()">➕ Cadastrar Serviço</button>
+                <button class="btn btn-green btn-full" onclick="salvarNovoServicoCadastrado()">Cadastrar Serviço</button>
                 
                 <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
                 <div id="lista-servicos-cadastrados"></div>
             </div>
 
-            <!-- BARRA DE NAVEGAÇÃO FIXA RODAPÉ -->
+            <!-- BOTTOM NAVIGATION -->
             <nav class="bottom-nav">
                 <button class="nav-item active" id="nav-inicio" onclick="navegarPara('main-panel', 'nav-inicio')">
                     <span class="icon">📱</span>
                     <span>Lançar</span>
                 </button>
                 <button class="nav-item" id="nav-equipe" onclick="navegarPara('funcionarios-painel', 'nav-equipe')">
-                    <span class="icon">🏆</span>
+                    <span class="icon">👥</span>
                     <span>Equipe</span>
                 </button>
                 <button class="nav-item" id="nav-historico" onclick="navegarPara('historico-painel', 'nav-historico')">
@@ -536,11 +535,10 @@
                 </button>
             </nav>
 
-            <!-- SEÇÃO DE BACKUP DISCRETA -->
             <div class="backup-discreto">
-                <button class="btn-subtle" onclick="fazerBackup()">⬇️ Backup</button> | 
-                <button class="btn-subtle" onclick="document.getElementById('input-restaurar').click()">⬆️ Restaurar</button> | 
-                <button class="btn-subtle" style="color:var(--danger-color);" onclick="fazerLogout()">🚪 Sair</button>
+                <button class="btn-subtle" onclick="fazerBackup()">Baixar Backup</button> | 
+                <button class="btn-subtle" onclick="document.getElementById('input-restaurar').click()">Restaurar Backup</button> | 
+                <button class="btn-subtle" style="color:var(--danger-color);" onclick="fazerLogout()">Sair</button>
                 <input type="file" id="input-restaurar" style="display: none;" accept=".json" onchange="restaurarBackup(event)">
             </div>
         </div>
@@ -774,7 +772,7 @@
             funcionarioEmEdicaoIndex = index;
 
             const btn = document.getElementById('btn-salvar-func');
-            btn.innerText = '💾 Salvar Alterações';
+            btn.innerText = 'Salvar Alterações';
             btn.setAttribute('onclick', 'salvarEdicaoFuncionario()');
         }
 
@@ -794,7 +792,7 @@
             funcionarioEmEdicaoIndex = null;
 
             const btn = document.getElementById('btn-salvar-func');
-            btn.innerText = '➕ Salvar Funcionário';
+            btn.innerText = 'Salvar Funcionário';
             btn.setAttribute('onclick', 'salvarNovoFuncionarioCadastrado()');
 
             renderizarListaFuncionariosCadastrados();
@@ -901,9 +899,9 @@
 
         function gerarOptionsExecutores(executorAtual = 'mim') {
             const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            let options = `<option value="mim" ${executorAtual === 'mim' ? 'selected' : ''}>Eu (Minha Produção)</option>`;
+            let options = `<option value="mim" ${executorAtual === 'mim' ? 'selected' : ''}>Minha Produção</option>`;
             funcionarios.forEach(f => {
-                options += `<option value="${f.nome}" ${f.nome === executorAtual ? 'selected' : ''}>👤 ${f.nome}</option>`;
+                options += `<option value="${f.nome}" ${f.nome === executorAtual ? 'selected' : ''}>${f.nome}</option>`;
             });
             return options;
         }
@@ -956,7 +954,7 @@
                     </div>
                     <div class="op-grid-3">
                         <div class="op-grid-cell">
-                            <label>Nome Serviço</label>
+                            <label>Serviço</label>
                             <input type="text" class="servico" value="${servico}" oninput="salvarRascunho()">
                         </div>
                         <div class="op-grid-cell">
@@ -1021,7 +1019,7 @@
 
             document.getElementById('total-dia').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            let htmlDetalhes = `<div class="lucro-linha"><span>🟢 Sua Produção:</span> <b>R$ ${minhaProducao.toFixed(2)}</b></div>`;
+            let htmlDetalhes = `<div class="lucro-linha"><span>Sua Produção:</span> <b>R$ ${minhaProducao.toFixed(2)}</b></div>`;
             let lucroTotalDoDia = minhaProducao;
 
             Object.keys(prodFuncs).forEach(nomeFunc => {
@@ -1031,17 +1029,17 @@
                 lucroTotalDoDia += sobra;
 
                 htmlDetalhes += `
-                    <div style="background:#fff; border:1px solid #a7f3d0; padding:4px 8px; border-radius:6px; margin:4px 0;">
-                        <div class="lucro-linha"><span>👤 Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
-                        <div class="lucro-linha" style="color:#ef4444;"><span>➖ Diária:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
-                        <div class="lucro-linha" style="color:var(--primary-dark);"><span>👉 Sobra dele(a):</span> <b>R$ ${sobra.toFixed(2)}</b></div>
+                    <div style="background:#ffffff; border:1px solid #e2e8f0; padding:6px 10px; border-radius:8px; margin:6px 0;">
+                        <div class="lucro-linha"><span>Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
+                        <div class="lucro-linha" style="color:var(--danger-color);"><span>Diária:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
+                        <div class="lucro-linha" style="color:var(--primary-color);"><span>Sobra de ${nomeFunc}:</span> <b>R$ ${sobra.toFixed(2)}</b></div>
                     </div>`;
             });
 
             htmlDetalhes += `
                 <div class="lucro-linha destaque-sobra">
-                    <span>💰 SEU LUCRO FINAL HOJE:</span> 
-                    <b style="color:var(--primary-dark); font-size:14px;">R$ ${lucroTotalDoDia.toFixed(2)}</b>
+                    <span>SEU LUCRO FINAL HOJE:</span> 
+                    <b style="font-size:15px;">R$ ${lucroTotalDoDia.toFixed(2)}</b>
                 </div>`;
 
             document.getElementById('lucro-liquido-dia').innerHTML = htmlDetalhes;
@@ -1171,7 +1169,7 @@
                     somaPecas += qtd;
 
                     const nomeFormatado = normalizarNomeServico(op.servico);
-                    const quem = op.executor && op.executor !== 'mim' ? ` 👤 (${op.executor})` : ' 🟢 (Você)';
+                    const quem = op.executor && op.executor !== 'mim' ? ` (${op.executor})` : ' (Você)';
                     opsHTML += `<div style="font-size:12px; margin-bottom:2px; color:#444;">• <b>${nomeFormatado}</b>${quem}: ${qtd}x = R$ ${sub.toFixed(2)}</div>`;
 
                     const exec = op.executor || 'mim';
@@ -1187,7 +1185,7 @@
                         <div class="card-header">
                             <span>📅 ${item.dataTexto}</span>
                             <div>
-                                <span style="color:var(--primary-dark);">R$ ${subTotalCard.toFixed(2)}</span> 
+                                <span style="color:var(--primary-color);">R$ ${subTotalCard.toFixed(2)}</span> 
                                 <button style="background:none;border:none;" onclick="editarRegistro(${item.id})">✏️</button> 
                                 <button style="background:none;border:none;" onclick="excluirRegistro(${item.id})">🗑️</button>
                             </div>
@@ -1199,7 +1197,7 @@
             const lucroLiquidoReal = somaTotalBruto - somaCustoFuncionario;
             resumoBox.style.display = 'block';
             let detalheLucro = (filtroExecutor && filtroExecutor !== 'mim') 
-                ? `<br><span style="font-size:11px; color:#ef4444;">Desconto diárias: R$ ${somaCustoFuncionario.toFixed(2)}</span><br><b style="color:var(--primary-dark);">Sobra pra Você: R$ ${lucroLiquidoReal.toFixed(2)}</b>`
+                ? `<br><span style="font-size:11px; color:var(--danger-color);">Desconto diárias: R$ ${somaCustoFuncionario.toFixed(2)}</span><br><b style="color:var(--primary-color);">Sobra pra Você: R$ ${lucroLiquidoReal.toFixed(2)}</b>`
                 : '';
 
             resumoBox.innerHTML = `Total Período (${lista.length} dias): <b>R$ ${somaTotalBruto.toFixed(2)}</b> | Peças: ${somaPecas}${detalheLucro}`;
