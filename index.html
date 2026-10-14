@@ -2,30 +2,46 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Controle de Produção</title>
+
+    <!-- Fonte Inter para visual moderno e legível -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary-color: #2e7d32;
-            --primary-hover: #1b5e20;
-            --bg-color: #f4f6f8;
+            --primary-color: #10b981;
+            --primary-hover: #059669;
+            --primary-dark: #047857;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
-            --text-color: #1a252f;
-            --border-color: #e0e0e0;
-            --danger-color: #d9534f;
+            --text-color: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger-color: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --radius-lg: 16px;
+            --radius-md: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             margin: 0;
-            padding: 15px;
+            padding: 0;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
             justify-content: center;
-            align-items: center;
             min-height: 100vh;
-            box-sizing: border-box;
+            letter-spacing: -0.2px;
         }
 
         .app-container {
@@ -33,21 +49,22 @@
             max-width: 450px;
             margin: 0 auto;
             position: relative;
-            padding-bottom: 70px;
+            padding: 16px;
+            padding-bottom: 85px;
         }
 
         .app-header {
-            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            background: linear-gradient(135deg, #059669, #047857);
             color: #ffffff;
-            padding: 18px 15px;
-            border-radius: 12px;
+            padding: 20px 16px;
+            border-radius: var(--radius-lg);
             text-align: center;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
+            margin-bottom: 16px;
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.25);
         }
 
         .app-header h1 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             margin: 0;
             display: flex;
@@ -59,48 +76,50 @@
 
         .app-header p {
             font-size: 12px;
-            color: #e8f5e9;
+            color: #a7f3d0;
             margin: 4px 0 0 0;
-            opacity: 0.9;
+            opacity: 0.95;
+            font-weight: 500;
         }
 
         h2 {
-            font-size: 16px;
+            font-size: 15px;
             margin-top: 0;
-            color: #444;
+            color: var(--text-color);
+            font-weight: 700;
         }
 
         .login-card {
             background: var(--card-bg);
-            padding: 30px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid #edf0f2;
+            padding: 32px 24px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
             width: 100%;
-            box-sizing: border-box;
+            margin-top: 40px;
         }
 
         .login-header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 24px;
         }
 
         .login-header .icon-logo {
-            font-size: 38px;
+            font-size: 44px;
             margin-bottom: 8px;
             display: block;
         }
 
         .login-header h2 {
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--text-color);
             margin: 0;
         }
 
         .login-header p {
             font-size: 13px;
-            color: #777;
+            color: var(--text-muted);
             margin-top: 4px;
         }
 
@@ -111,9 +130,11 @@
         .input-group label {
             display: block;
             margin-bottom: 6px;
-            color: #555;
-            font-size: 13px;
+            color: var(--text-muted);
+            font-size: 12px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
         }
 
         .remember-me {
@@ -121,14 +142,14 @@
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            color: #555;
-            margin-bottom: 15px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
             cursor: pointer;
         }
 
         .remember-me input {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             accent-color: var(--primary-color);
             cursor: pointer;
         }
@@ -138,7 +159,7 @@
             font-size: 13px;
             text-align: center;
             margin-top: 12px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
         .hidden {
@@ -147,12 +168,13 @@
 
         .date-card {
             background: var(--card-bg);
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 14px 16px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
             display: flex;
             gap: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
 
         .date-field {
@@ -162,47 +184,49 @@
         .date-field label {
             display: block;
             margin-bottom: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #666;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
-        input[type="text"], input[type="number"], input[type="password"], input[type="date"], textarea, select {
+        input[type="text"], input[type="number"], input[type="password"], input[type="date"], select {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            background-color: #fafafa;
+            transition: all 0.2s ease;
+            background-color: #fff;
+            color: var(--text-color);
         }
 
-        input:focus, textarea:focus, select:focus {
+        input:focus, select:focus {
             border-color: var(--primary-color);
-            background-color: #fff;
-            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
         }
 
         .op-card {
             background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-            margin-bottom: 15px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 14px;
             overflow: hidden;
-            border: 1px solid #edf0f2;
+            border: 1px solid var(--border-color);
         }
 
         .op-header {
-            background-color: #f8f9fa;
-            padding: 10px 12px;
+            background-color: #f1f5f9;
+            padding: 10px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border-color);
-            font-weight: bold;
-            font-size: 14px;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-muted);
         }
 
         .btn-delete {
@@ -212,10 +236,15 @@
             cursor: pointer;
             padding: 2px 6px;
             border-radius: 4px;
+            transition: transform 0.1s;
+        }
+
+        .btn-delete:active {
+            transform: scale(0.9);
         }
 
         .op-body {
-            padding: 12px;
+            padding: 14px;
         }
 
         .op-row {
@@ -229,19 +258,19 @@
         }
 
         .op-label {
-            width: 35%;
-            font-size: 13px;
-            color: #555;
-            font-weight: 500;
+            width: 38%;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
         }
 
         .op-input {
-            width: 65%;
+            width: 62%;
         }
 
         .total-op-val {
-            font-weight: bold;
-            color: var(--primary-color);
+            font-weight: 800;
+            color: var(--primary-dark);
             font-size: 15px;
         }
 
@@ -251,24 +280,28 @@
             padding: 10px 14px;
             font-size: 13px;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            transition: all 0.2s;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.15s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
+            color: var(--text-color);
         }
 
         .btn:active {
             transform: scale(0.98);
+            background-color: #f1f5f9;
         }
 
         .btn-green {
             background-color: var(--primary-color);
             color: #fff;
             border: none;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25);
         }
 
         .btn-green:active {
@@ -281,35 +314,35 @@
 
         .total-section {
             background: var(--card-bg);
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-            margin-top: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #edf0f2;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            margin-top: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
         }
 
         .total-section h2 {
-            font-size: 13px;
+            font-size: 11px;
             margin-bottom: 4px;
-            color: #666;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
             text-align: center;
         }
 
         .total-amount {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 800;
-            color: var(--primary-color);
+            color: var(--primary-dark);
             text-align: center;
         }
 
         .lucro-detalhe {
-            font-size: 13px;
-            color: #444;
+            font-size: 12px;
+            color: var(--text-color);
             margin-top: 10px;
-            border-top: 1px dashed #e0e0e0;
+            border-top: 1px dashed var(--border-color);
             padding-top: 10px;
             text-align: left;
         }
@@ -322,22 +355,22 @@
         }
 
         .lucro-linha.destaque-sobra {
-            background: #f0fdf4;
-            padding: 6px 8px;
-            border-radius: 6px;
-            border: 1px solid #c6f6d5;
+            background: #ecfdf5;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #a7f3d0;
             font-size: 13px;
-            margin-top: 6px;
+            margin-top: 8px;
         }
 
         .box-section {
             display: none;
             background-color: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #edf0f2;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
         }
 
         /* BARRA DE NAVEGAÇÃO FIXA NO RODAPÉ */
@@ -352,9 +385,9 @@
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
-            padding: 8px 0 10px 0;
+            padding: 10px 0 12px 0;
             z-index: 100;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
         }
 
         .nav-item {
@@ -363,11 +396,13 @@
             align-items: center;
             font-size: 11px;
             font-weight: 600;
-            color: #666;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-muted);
             background: none;
             border: none;
             cursor: pointer;
-            gap: 3px;
+            gap: 4px;
+            transition: color 0.15s ease;
         }
 
         .nav-item .icon {
@@ -375,19 +410,20 @@
         }
 
         .nav-item.active {
-            color: var(--primary-color);
+            color: var(--primary-hover);
         }
 
         .filter-field {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .filter-field label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             margin-bottom: 4px;
             font-weight: 600;
-            color: #555;
+            color: var(--text-muted);
+            text-transform: uppercase;
         }
 
         .quick-filters {
@@ -398,36 +434,41 @@
         }
 
         .btn-chip {
-            background: #f0f4f8;
-            border: 1px solid #d0d7de;
-            padding: 4px 10px;
-            border-radius: 12px;
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            padding: 5px 12px;
+            border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
-            color: #444;
+            color: var(--text-muted);
             cursor: pointer;
+            transition: all 0.15s ease;
         }
 
         .btn-chip.active {
             background: var(--primary-color);
             color: #ffffff;
-            border-color: var(--primary-hover);
+            border-color: var(--primary-color);
+        }
+
+        .btn-chip:active {
+            background: #e2e8f0;
         }
 
         .resumo-periodo {
-            background-color: #e8f5e9;
-            border: 1px solid #a5d6a7;
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 15px;
-            color: var(--primary-color);
+            color: var(--primary-dark);
             text-align: center;
         }
 
         .card-historico {
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px 12px;
+            border-radius: 8px;
+            padding: 12px;
             margin-bottom: 10px;
             background-color: #fff;
         }
@@ -436,24 +477,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-weight: bold;
-            font-size: 14px;
-            border-bottom: 1px solid #f0f0f0;
+            font-weight: 700;
+            font-size: 13px;
+            border-bottom: 1px solid #f1f5f9;
             padding-bottom: 6px;
             margin-bottom: 6px;
         }
 
         .card-item {
-            font-size: 13px;
+            font-size: 12px;
             margin-bottom: 4px;
-            color: #444;
+            color: var(--text-color);
         }
 
         .chart-box {
             background: #fff;
             border: 1px solid var(--border-color);
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 15px;
         }
 
@@ -464,14 +505,14 @@
         .bar-label {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
-            margin-bottom: 3px;
+            font-size: 11px;
+            margin-bottom: 4px;
         }
 
         .bar-bg {
-            background: #eef2f5;
-            height: 12px;
-            border-radius: 6px;
+            background: #f1f5f9;
+            height: 10px;
+            border-radius: 5px;
             overflow: hidden;
         }
 
@@ -479,15 +520,15 @@
             background: var(--primary-color);
             height: 100%;
             width: 0%;
-            border-radius: 6px;
+            border-radius: 5px;
             transition: width 0.3s ease;
         }
 
         .ranking-card {
-            background: #fdfdfd;
-            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 10px;
+            padding: 10px 12px;
             margin-bottom: 15px;
         }
 
@@ -495,37 +536,41 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 6px;
-            border-bottom: 1px dashed #edf2f7;
-            font-size: 13px;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--border-color);
+            font-size: 12px;
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
         }
 
         .ranking-badge {
-            font-weight: bold;
-            color: var(--primary-color);
-            background: #e8f5e9;
-            padding: 2px 8px;
-            border-radius: 10px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            background: #ecfdf5;
+            padding: 3px 10px;
+            border-radius: 12px;
             font-size: 11px;
         }
 
         .backup-discreto {
-            margin-top: 30px;
-            padding-top: 15px;
+            margin-top: 24px;
+            padding-top: 14px;
             border-top: 1px dashed var(--border-color);
             text-align: center;
             font-size: 11px;
-            color: #888;
+            color: var(--text-muted);
         }
 
         .btn-subtle {
             background: none;
             border: none;
-            color: #666;
+            color: var(--text-muted);
             font-size: 11px;
             text-decoration: underline;
             cursor: pointer;
-            margin: 0 5px;
+            margin: 0 4px;
         }
     </style>
 
@@ -558,7 +603,7 @@
                 <span>Lembrar minhas credenciais</span>
             </label>
 
-            <button class="btn btn-green btn-full" style="padding: 12px; font-size: 15px; margin-top: 5px;" onclick="fazerLogin()">Entrar</button>
+            <button class="btn btn-green btn-full" style="padding: 12px; font-size: 14px; margin-top: 5px;" onclick="fazerLogin()">Entrar</button>
             <div id="login-error" class="error"></div>
         </div>
 
@@ -599,7 +644,7 @@
                     <div class="lucro-detalhe" id="lucro-liquido-dia"></div>
                 </div>
 
-                <button class="btn btn-green btn-full" style="padding: 12px; font-size: 15px;" onclick="finalizarDia()">💾 Finalizar Dia</button>
+                <button class="btn btn-green btn-full" style="padding: 12px; font-size: 14px;" onclick="finalizarDia()">💾 Finalizar Dia</button>
             </div>
 
             <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS + COMPARATIVO -->
@@ -697,31 +742,6 @@
                 <div id="lista-historico"></div>
             </div>
 
-            <!-- NOVO PAINEL DE CONSULTA COM IA -->
-            <div id="ia-painel" class="box-section">
-                <h2>🤖 Perguntar à IA sobre o Período</h2>
-                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Selecione um período e faça qualquer pergunta sobre a produção:</p>
-                
-                <div class="filter-field">
-                    <label for="ia-data-inicio">De (Data Inicial):</label>
-                    <input type="date" id="ia-data-inicio">
-                </div>
-                <div class="filter-field">
-                    <label for="ia-data-fim">Até (Data Final):</label>
-                    <input type="date" id="ia-data-fim">
-                </div>
-                <div class="filter-field">
-                    <label for="ia-pergunta">O que você quer ver/saber?</label>
-                    <textarea id="ia-pergunta" rows="3" placeholder="Ex: Qual funcionário produziu mais peças e qual o faturamento total?"></textarea>
-                </div>
-                <button class="btn btn-green btn-full" onclick="consultarIA()">✨ Perguntar à IA</button>
-                
-                <div id="ia-resultado-box" style="margin-top: 15px; display: none; background: #f8f9fa; border: 1px solid #ddd; padding: 12px; border-radius: 6px; font-size: 13px; line-height: 1.4;">
-                    <b>Resposta da IA:</b>
-                    <p id="ia-resposta-texto" style="margin: 8px 0 0 0; color: #333;"></p>
-                </div>
-            </div>
-
             <!-- BARRA DE NAVEGAÇÃO FIXA NO RODAPÉ -->
             <nav class="bottom-nav">
                 <button class="nav-item active" id="nav-inicio" onclick="alternarPainel('main-panel', 'nav-inicio')">
@@ -739,10 +759,6 @@
                 <button class="nav-item" id="nav-servicos" onclick="alternarPainel('servicos-painel', 'nav-servicos')">
                     <span class="icon">⚙️</span>
                     <span>Serviços</span>
-                </button>
-                <button class="nav-item" id="nav-ia" onclick="alternarPainel('ia-painel', 'nav-ia')">
-                    <span class="icon">🤖</span>
-                    <span>IA</span>
                 </button>
             </nav>
 
@@ -919,7 +935,7 @@
         }
 
         function alternarPainel(idPainel, idNavBtn) {
-            ['main-panel', 'funcionarios-painel', 'servicos-painel', 'historico-painel', 'ia-painel'].forEach(pId => {
+            ['main-panel', 'funcionarios-painel', 'servicos-painel', 'historico-painel'].forEach(pId => {
                 document.getElementById(pId).style.display = 'none';
             });
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
@@ -998,7 +1014,7 @@
             document.getElementById('func-valor').value = f.valor;
             funcionarioEmEdicaoIndex = index;
 
-            const btnCadastrar = document.querySelector('#funcionarios-painel button.btn-green');
+            const btnCadastrar = document.getElementById('btn-salvar-func');
             btnCadastrar.innerText = '💾 Salvar Alterações';
             btnCadastrar.setAttribute('onclick', 'salvarEdicaoFuncionario()');
         }
@@ -1019,7 +1035,7 @@
             document.getElementById('func-valor').value = '';
             funcionarioEmEdicaoIndex = null;
 
-            const btnCadastrar = document.querySelector('#funcionarios-painel button.btn-green');
+            const btnCadastrar = document.getElementById('btn-salvar-func');
             btnCadastrar.innerText = '➕ Cadastrar Funcionário';
             btnCadastrar.setAttribute('onclick', 'salvarNovoFuncionarioCadastrado()');
 
@@ -1547,61 +1563,6 @@
             alternarPainel('main-panel', 'nav-inicio');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             alert('Ajuste os dados no topo e clique em "Finalizar Dia".');
-        }
-
-        async function consultarIA() {
-            const ini = document.getElementById('ia-data-inicio').value;
-            const fim = document.getElementById('ia-data-fim').value;
-            const pergunta = document.getElementById('ia-pergunta').value.trim();
-            const resultadoBox = document.getElementById('ia-resultado-box');
-            const respostaTexto = document.getElementById('ia-resposta-texto');
-
-            if (!ini || !fim || !pergunta) {
-                alert('Preencha a data inicial, a data final e a sua pergunta.');
-                return;
-            }
-
-            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const dadosFiltrados = hist.filter(item => item.dataIso >= ini && item.dataIso <= fim);
-
-            if (dadosFiltrados.length === 0) {
-                resultadoBox.style.display = 'block';
-                respostaTexto.innerText = 'Nenhum registro encontrado neste período para enviar à IA.';
-                return;
-            }
-
-            resultadoBox.style.display = 'block';
-            respostaTexto.innerText = 'Analisando dados com a IA... Aguarde um instante.';
-
-            const prompt = `
-            Você é um assistente de análise de produção de uma oficina de costura.
-            Abaixo estão os dados de produção do período de ${ini} até ${fim} em formato JSON:
-            ${JSON.stringify(dadosFiltrados, null, 2)}
-
-            Pergunta do usuário: "${pergunta}"
-
-            Responda de forma clara, direta e objetiva em português, baseando-se estritamente nos dados fornecidos.
-            `;
-
-            try {
-                const API_KEY = "COLOQUE_SUA_CHAVE_API_AQUI"; // Substitua pela sua chave da API do Google Gemini
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
-                });
-
-                const resultado = await response.json();
-                if (resultado.candidates && resultado.candidates[0].content) {
-                    respostaTexto.innerText = resultado.candidates[0].content.parts[0].text;
-                } else {
-                    respostaTexto.innerText = 'Ocorreu um erro ao obter a resposta da IA. Verifique sua chave de API.';
-                }
-            } catch (err) {
-                respostaTexto.innerText = 'Erro de conexão ao tentar falar com a IA.';
-            }
         }
 
         function fazerBackup() {
