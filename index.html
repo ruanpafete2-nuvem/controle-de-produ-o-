@@ -2,352 +2,495 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Produção</title>
-
-    <!-- Fonte Inter (Moderna e Ultra Leve) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <style>
         :root {
-            --primary-color: #10b981;
-            --primary-dark: #047857;
-            --bg-color: #f8fafc;
+            --primary-color: #2e7d32;
+            --primary-hover: #1b5e20;
+            --bg-color: #f4f6f8;
             --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --danger-color: #ef4444;
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            --text-color: #1a252f;
+            --border-color: #e0e0e0;
+            --danger-color: #d9534f;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 0;
+            padding: 15px;
             background-color: var(--bg-color);
-            color: var(--text-main);
+            color: var(--text-color);
             display: flex;
             justify-content: center;
+            align-items: center;
             min-height: 100vh;
-            letter-spacing: -0.2px;
+            box-sizing: border-box;
         }
 
         .app-container {
             width: 100%;
-            max-width: 480px;
-            background-color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            max-width: 450px;
+            margin: 0 auto;
             position: relative;
-            padding-bottom: 75px;
-            box-shadow: 0 0 25px rgba(0,0,0,0.04);
+            padding-bottom: 70px; /* Espaço para a barra fixa no rodapé */
         }
 
         .app-header {
-            background: #ffffff;
-            color: var(--text-main);
-            padding: 14px 16px;
+            background: linear-gradient(135deg, #2e7d32, #1b5e20);
+            color: #ffffff;
+            padding: 18px 15px;
+            border-radius: 12px;
             text-align: center;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(46, 125, 50, 0.2);
         }
 
         .app-header h1 {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: 700;
             margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            color: var(--text-main);
+            gap: 8px;
+            color: #ffffff;
         }
 
-        /* LOGIN */
+        .app-header p {
+            font-size: 12px;
+            color: #e8f5e9;
+            margin: 4px 0 0 0;
+            opacity: 0.9;
+        }
+
+        h2 {
+            font-size: 16px;
+            margin-top: 0;
+            color: #444;
+        }
+
         .login-card {
-            padding: 30px 20px;
-            margin: auto 15px;
             background: var(--card-bg);
-            border-radius: 16px;
+            padding: 30px 20px;
+            border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid var(--border-color);
+            border: 1px solid #edf0f2;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .login-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        .login-header .icon-logo { font-size: 42px; display: block; margin-bottom: 6px; }
-        .login-header h2 { font-size: 20px; margin: 0; font-weight: 700; }
-        .login-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+        .login-header .icon-logo {
+            font-size: 38px;
+            margin-bottom: 8px;
+            display: block;
+        }
 
-        .input-group { margin-bottom: 14px; }
-        .input-group label { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+        .login-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .login-header p {
+            font-size: 13px;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 13px;
+            font-weight: 600;
+        }
 
         .remember-me {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
+            color: #555;
+            margin-bottom: 15px;
             cursor: pointer;
         }
 
-        .error { color: var(--danger-color); font-size: 13px; text-align: center; margin-top: 10px; font-weight: 500; }
-        .hidden { display: none !important; }
-
-        /* DATA BAR */
-        .date-bar {
-            background: #f8fafc;
-            padding: 10px 16px;
-            display: flex;
-            gap: 8px;
-            border-bottom: 1px solid var(--border-color);
+        .remember-me input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-color);
+            cursor: pointer;
         }
 
-        .date-field { flex: 1; }
-        .date-field label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
+        .error {
+            color: var(--danger-color);
+            font-size: 13px;
+            text-align: center;
+            margin-top: 12px;
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .date-card {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .date-field {
+            flex: 1;
+        }
+
+        .date-field label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
 
         input[type="text"], input[type="number"], input[type="password"], input[type="date"], select {
             width: 100%;
-            padding: 8px 10px;
+            padding: 10px 12px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 13px;
-            font-family: 'Inter', sans-serif;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
             outline: none;
-            background-color: #fff;
-            color: var(--text-main);
-            transition: all 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-color: #fafafa;
         }
 
         input:focus, select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+            background-color: #fff;
+            box-shadow: 0 0 0 2px rgba(46, 125, 50, 0.1);
         }
 
-        /* RESUMO DE LUCRO */
-        .summary-card {
-            background: #ffffff;
-            border-bottom: 1px solid var(--border-color);
-            padding: 14px 16px;
+        .op-card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            margin-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid #edf0f2;
         }
 
-        .summary-main {
+        .op-header {
+            background-color: #f8f9fa;
+            padding: 10px 12px;
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 8px;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: bold;
+            font-size: 14px;
         }
 
-        .summary-main .title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .summary-main .value { font-size: 22px; font-weight: 800; color: var(--primary-dark); }
+        .btn-delete {
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .op-body {
+            padding: 12px;
+        }
+
+        .op-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .op-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .op-label {
+            width: 35%;
+            font-size: 13px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .op-input {
+            width: 65%;
+        }
+
+        .total-op-val {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 15px;
+        }
+
+        .btn {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-green {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+        }
+
+        .btn-green:active {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .total-section {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #edf0f2;
+        }
+
+        .total-section h2 {
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        .total-amount {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-align: center;
+        }
 
         .lucro-detalhe {
-            font-size: 12px;
-            border-top: 1px dashed var(--border-color);
-            padding-top: 8px;
-            margin-top: 4px;
+            font-size: 13px;
+            color: #444;
+            margin-top: 10px;
+            border-top: 1px dashed #e0e0e0;
+            padding-top: 10px;
+            text-align: left;
         }
 
         .lucro-linha {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
-            color: #334155;
-            align-items: center;
+            margin-bottom: 5px;
+            font-size: 12px;
         }
 
         .lucro-linha.destaque-sobra {
-            background: #ecfdf5;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid #a7f3d0;
-            font-weight: 700;
-            margin-top: 8px;
-            color: var(--primary-dark);
-        }
-
-        /* ITENS DE OPERAÇÃO */
-        .op-list { padding: 14px; }
-
-        .op-row-item {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 10px 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-
-        .op-row-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .op-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .op-grid-3 {
-            display: grid;
-            grid-template-columns: 1.2fr 0.9fr 0.9fr;
-            gap: 8px;
-            align-items: end;
-        }
-
-        .op-grid-cell label {
-            display: block;
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-bottom: 2px;
-            font-weight: 600;
-        }
-
-        .total-badge {
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 800;
-            color: var(--primary-dark);
+            background: #f0fdf4;
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: 1px solid #c6f6d5;
             font-size: 13px;
+            margin-top: 6px;
         }
 
-        /* BOTÕES */
-        .btn {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            padding: 9px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
+        .box-section {
+            display: none;
+            background-color: var(--card-bg);
             border-radius: 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            color: var(--text-main);
-            transition: all 0.15s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #edf0f2;
         }
 
-        .btn:active { background-color: #f1f5f9; transform: scale(0.98); }
-
-        .btn-green {
-            background-color: var(--primary-color);
-            color: #ffffff;
-            border: none;
-        }
-
-        .btn-green:active { background-color: var(--primary-dark); }
-        .btn-full { width: 100%; }
-
-        /* RODAPÉ NAV */
+        /* BARRA DE NAVEGAÇÃO FIXA NO RODAPÉ */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-width: 480px;
+            max-width: 450px;
             background: #ffffff;
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
             padding: 8px 0 10px 0;
             z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 10px;
-            font-weight: 500;
-            font-family: 'Inter', sans-serif;
-            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
             background: none;
             border: none;
             cursor: pointer;
             gap: 3px;
         }
 
-        .nav-item .icon { font-size: 18px; }
-        .nav-item.active { color: var(--primary-color); font-weight: 700; }
+        .nav-item .icon {
+            font-size: 18px;
+        }
 
-        /* PAINÉIS */
-        .box-panel { padding: 16px; display: none; }
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .filter-field {
+            margin-bottom: 10px;
+        }
+
+        .filter-field label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #555;
+        }
 
         .quick-filters {
             display: flex;
-            gap: 6px;
             flex-wrap: wrap;
+            gap: 6px;
             margin-bottom: 12px;
         }
 
         .btn-chip {
-            background: #f1f5f9;
-            border: 1px solid var(--border-color);
-            padding: 5px 10px;
-            border-radius: 20px;
+            background: #f0f4f8;
+            border: 1px solid #d0d7de;
+            padding: 4px 10px;
+            border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
-            color: var(--text-muted);
+            color: #444;
             cursor: pointer;
         }
 
         .btn-chip.active {
             background: var(--primary-color);
-            color: #fff;
-            border-color: var(--primary-color);
+            color: #ffffff;
+            border-color: var(--primary-hover);
+        }
+
+        .btn-chip:active {
+            background: #e2e8f0;
+        }
+
+        .resumo-periodo {
+            background-color: #e8f5e9;
+            border: 1px solid #a5d6a7;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            text-align: center;
         }
 
         .card-historico {
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 6px;
             padding: 10px 12px;
             margin-bottom: 10px;
-            background: #fff;
+            background-color: #fff;
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
-            font-weight: 700;
-            font-size: 12px;
-            border-bottom: 1px solid #f1f5f9;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 1px solid #f0f0f0;
             padding-bottom: 6px;
             margin-bottom: 6px;
         }
 
-        .ranking-card {
-            background: #ffffff;
+        .card-item {
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #444;
+        }
+
+        .chart-box {
+            background: #fff;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .bar-item {
+            margin-bottom: 10px;
+        }
+
+        .bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .bar-bg {
+            background: #eef2f5;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            background: var(--primary-color);
+            height: 100%;
+            width: 0%;
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .ranking-card {
+            background: #fdfdfd;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
             padding: 10px;
             margin-bottom: 15px;
         }
@@ -356,34 +499,45 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dashed #e2e8f0;
-            font-size: 12px;
+            padding: 8px 6px;
+            border-bottom: 1px dashed #edf2f7;
+            font-size: 13px;
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
         }
 
         .ranking-badge {
-            font-weight: 700;
-            color: var(--primary-dark);
-            background: #ecfdf5;
+            font-weight: bold;
+            color: var(--primary-color);
+            background: #e8f5e9;
             padding: 2px 8px;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 11px;
         }
 
         .backup-discreto {
-            margin-top: 20px;
+            margin-top: 30px;
             padding-top: 15px;
             border-top: 1px dashed var(--border-color);
             text-align: center;
             font-size: 11px;
-            color: var(--text-muted);
+            color: #888;
         }
 
         .btn-subtle {
-            background: none; border: none; color: var(--text-muted); font-size: 11px; text-decoration: underline; cursor: pointer;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 11px;
+            text-decoration: underline;
+            cursor: pointer;
+            margin: 0 5px;
         }
     </style>
 
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
@@ -391,173 +545,192 @@
 
     <div class="app-container">
         
-        <!-- LOGIN -->
+        <!-- TELA DE LOGIN ESTILIZADA -->
         <div id="login-screen" class="login-card">
             <div class="login-header">
                 <span class="icon-logo">📋</span>
                 <h2>Controle de Produção</h2>
-                <p>Acesse para gerenciar a produção</p>
+                <p>Acesse sua conta para continuar</p>
             </div>
             <div class="input-group">
                 <label for="username">Usuário</label>
-                <input type="text" id="username" placeholder="Seu usuário">
+                <input type="text" id="username" placeholder="Digite seu usuário">
             </div>
             <div class="input-group">
                 <label for="password">Senha</label>
-                <input type="password" id="password" placeholder="Sua senha">
+                <input type="password" id="password" placeholder="Digite sua senha">
             </div>
             
             <label class="remember-me">
                 <input type="checkbox" id="remember-me" checked>
-                <span>Lembrar credenciais</span>
+                <span>Lembrar minhas credenciais</span>
             </label>
 
-            <button class="btn btn-green btn-full" style="padding: 12px; font-size:14px;" onclick="fazerLogin()">Entrar</button>
+            <button class="btn btn-green btn-full" style="padding: 12px; font-size: 15px; margin-top: 5px;" onclick="fazerLogin()">Entrar</button>
             <div id="login-error" class="error"></div>
         </div>
 
-        <!-- APLICATIVO PRINCIPAL -->
+        <!-- TELA DO APLICATIVO -->
         <div id="app-screen" class="hidden">
             <div class="app-header">
                 <h1>📋 Controle de Produção</h1>
+                <p>Gerenciamento e cálculo diário</p>
             </div>
 
-            <!-- PAINEL LANÇAMENTO -->
+            <!-- PAINEL PRINCIPAL (LANÇAMENTO) -->
             <div id="main-panel">
-                <div class="date-bar">
+                <div class="date-card">
                     <div class="date-field">
-                        <label>Dia</label>
+                        <label for="dia">Dia</label>
                         <input type="number" id="dia" min="1" max="31" inputmode="numeric" onclick="this.select()" oninput="salvarRascunho()">
                     </div>
                     <div class="date-field">
-                        <label>Mês</label>
+                        <label for="mes">Mês</label>
                         <input type="text" id="mes" onclick="this.select()" oninput="salvarRascunho()">
                     </div>
                     <div class="date-field">
-                        <label>Ano</label>
+                        <label for="ano">Ano</label>
                         <input type="number" id="ano" inputmode="numeric" onclick="this.select()" oninput="salvarRascunho()">
                     </div>
                 </div>
 
-                <div class="summary-card">
-                    <div class="summary-main">
-                        <span class="title">Total Bruto Hoje</span>
-                        <span class="value" id="total-dia">R$ 0,00</span>
-                    </div>
+                <div id="operacoes-container"></div>
+
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-full" onclick="adicionarOperacao()">➕ Nova Operação</button>
+                    <button class="btn" title="Limpar Tela" onclick="novoDia()">🧹</button>
+                </div>
+
+                <div class="total-section">
+                    <h2>Total Bruto do Dia</h2>
+                    <div class="total-amount" id="total-dia">R$ 0,00</div>
                     <div class="lucro-detalhe" id="lucro-liquido-dia"></div>
                 </div>
 
-                <div class="op-list">
-                    <div id="operacoes-container"></div>
-
-                    <div style="display: flex; gap: 8px; margin-top: 10px;">
-                        <button class="btn btn-full" onclick="adicionarOperacao()">➕ Adicionar Item</button>
-                        <button class="btn" title="Limpar Tela" onclick="novoDia()">🧹</button>
-                    </div>
-
-                    <button class="btn btn-green btn-full" style="margin-top: 12px; padding: 12px; font-size: 13px;" onclick="finalizarDia()">💾 Salvar Dia</button>
-                </div>
+                <button class="btn btn-green btn-full" style="padding: 12px; font-size: 15px;" onclick="finalizarDia()">💾 Finalizar Dia</button>
             </div>
 
-            <!-- PAINEL EQUIPE -->
-            <div id="funcionarios-painel" class="box-panel">
-                <h2 style="font-size: 14px; margin-top:0;">🏆 Desempenho da Equipe</h2>
-                <div class="quick-filters">
+            <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS + COMPARATIVO -->
+            <div id="funcionarios-painel" class="box-section">
+                <h2>🏆 Comparativo de Desempenho</h2>
+                <div class="quick-filters" style="margin-top: 5px;">
                     <button class="btn-chip active" id="chip-rank-hoje" onclick="gerarRankingEquipe('hoje')">Hoje</button>
                     <button class="btn-chip" id="chip-rank-semana" onclick="gerarRankingEquipe('semana')">Esta Semana</button>
                     <button class="btn-chip" id="chip-rank-mes" onclick="gerarRankingEquipe('mes')">Este Mês</button>
                 </div>
                 <div id="ranking-container" class="ranking-card"></div>
 
-                <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 18px 0;">
 
-                <h2 style="font-size: 14px;">👤 Cadastrar Funcionário</h2>
-                <div class="input-group">
-                    <label>Nome do Funcionário</label>
-                    <input type="text" id="func-nome" placeholder="Ex: João">
+                <h2>👥 Cadastro de Funcionários</h2>
+                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Cadastre o funcionário e o valor pago por dia:</p>
+                
+                <div class="filter-field">
+                    <label for="func-nome">Nome do Funcionário:</label>
+                    <input type="text" id="func-nome" placeholder="Ex: João Silva">
                 </div>
-                <div class="input-group">
-                    <label>Valor da Diária / Salário (R$)</label>
+                <div class="filter-field">
+                    <label for="func-valor">Valor do Salário / Diária (R$):</label>
                     <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 100.00" onclick="this.select()">
                 </div>
-                <button class="btn btn-green btn-full" id="btn-salvar-func" onclick="salvarNovoFuncionarioCadastrado()">➕ Salvar Funcionário</button>
+                <button class="btn btn-green btn-full" id="btn-salvar-func" style="margin-top: 5px;" onclick="salvarNovoFuncionarioCadastrado()">➕ Cadastrar Funcionário</button>
                 
-                <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
                 <div id="lista-funcionarios-cadastrados"></div>
             </div>
 
-            <!-- PAINEL HISTÓRICO -->
-            <div id="historico-painel" class="box-panel">
-                <h2 style="font-size: 14px; margin-top:0;">📁 Histórico de Produção</h2>
-                <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 12px;">
+            <!-- PAINEL DE CADASTRO DE SERVIÇOS -->
+            <div id="servicos-painel" class="box-section">
+                <h2>⚙️ Serviços Predefinidos</h2>
+                <p style="font-size: 12px; color: #666; margin-bottom: 12px;">Cadastre seus serviços e valores para agilizar o preenchimento:</p>
+                <div class="filter-field">
+                    <label for="novo-servico-nome">Nome do Serviço:</label>
+                    <input type="text" id="novo-servico-nome" placeholder="Ex: Calça">
+                </div>
+                <div class="filter-field">
+                    <label for="novo-servico-valor">Valor da Peça (R$):</label>
+                    <input type="number" step="0.01" inputmode="decimal" id="novo-servico-valor" placeholder="Ex: 5.00" onclick="this.select()">
+                </div>
+                <button class="btn btn-green btn-full" style="margin-top: 5px;" onclick="salvarNovoServicoCadastrado()">➕ Cadastrar Serviço</button>
+                
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <div id="lista-servicos-cadastrados"></div>
+            </div>
+
+            <!-- PAINEL DE HISTÓRICO -->
+            <div id="historico-painel" class="box-section">
+                <h2>📁 Consulta de Histórico</h2>
+                
+                <div style="background: #f9f9f9; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 15px;">
                     <div class="quick-filters">
                         <button class="btn-chip" onclick="filtrarRapido('hoje')">Hoje</button>
-                        <button class="btn-chip" onclick="filtrarRapido('semana')">Semana</button>
-                        <button class="btn-chip" onclick="filtrarRapido('mes')">Mês</button>
+                        <button class="btn-chip" onclick="filtrarRapido('semana')">Esta Semana</button>
+                        <button class="btn-chip" onclick="filtrarRapido('mes')">Este Mês</button>
+                        <button class="btn-chip" onclick="filtrarLucrativo('dia')">🔥 Dia + Lucrativo</button>
+                        <button class="btn-chip" onclick="filtrarLucrativo('semana')">⭐ Semana + Lucrativa</button>
+                        <button class="btn-chip" onclick="filtrarLucrativo('mes')">🏆 Mês + Lucrativo</button>
                     </div>
-                    <div class="input-group">
-                        <label>Filtrar por Quem:</label>
-                        <select id="filtro-executor" onchange="buscarHistorico()"></select>
+                    
+                    <div class="filter-field">
+                        <label for="filtro-executor">Filtrar por Executor:</label>
+                        <select id="filtro-executor" onchange="buscarHistorico()">
+                            <option value="">Todos (Geral)</option>
+                            <option value="mim">Minha Produção</option>
+                        </select>
                     </div>
-                    <div style="display:flex; gap:6px;">
-                        <input type="date" id="data-inicio" style="font-size:11px;">
-                        <input type="date" id="data-fim" style="font-size:11px;">
+                    <div class="filter-field">
+                        <label for="data-inicio">De (Data Inicial):</label>
+                        <input type="date" id="data-inicio">
                     </div>
-                    <button class="btn btn-full" style="margin-top:8px; padding:8px;" onclick="buscarHistorico()">🔍 Buscar</button>
+                    <div class="filter-field">
+                        <label for="data-fim">Até (Data Final):</label>
+                        <input type="date" id="data-fim">
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <button class="btn" style="flex: 1;" onclick="buscarHistorico()">🔍 Filtrar</button>
+                        <button class="btn" style="flex: 1;" onclick="limparFiltro()">Ver Todos</button>
+                    </div>
                 </div>
 
-                <div id="resumo-total-periodo" style="display:none; background:#ecfdf5; border:1px solid #a7f3d0; padding:10px; border-radius:8px; text-align:center; margin-bottom:12px; font-size:12px; color:var(--primary-dark);"></div>
-                <button class="btn btn-green btn-full" id="btn-exportar" style="display:none; margin-bottom:12px;" onclick="exportarRelatorioWhatsApp()">📲 Relatório WhatsApp</button>
+                <div id="resumo-total-periodo" class="resumo-periodo" style="display:none;"></div>
+                
+                <button class="btn btn-green btn-full" id="btn-exportar" style="margin-bottom: 15px; display: none;" onclick="exportarRelatorioWhatsApp()">📲 Exportar Resumo (WhatsApp)</button>
 
-                <div id="grafico-container" style="display:none; background:#fff; border:1px solid var(--border-color); padding:10px; border-radius:8px; margin-bottom:12px;">
-                    <span style="font-size:11px; font-weight:700;">📊 Peças por Serviço</span>
-                    <div id="barras-grafico" style="margin-top:8px;"></div>
+                <!-- ÁREA DO GRÁFICO POR SERVIÇO -->
+                <div id="grafico-container" class="chart-box" style="display:none;">
+                    <h3 style="font-size: 13px; margin-top: 0; margin-bottom: 10px; color: #555;">📊 Total de Peças por Serviço</h3>
+                    <div id="barras-grafico"></div>
                 </div>
 
                 <div id="lista-historico"></div>
             </div>
 
-            <!-- PAINEL SERVIÇOS -->
-            <div id="servicos-painel" class="box-panel">
-                <h2 style="font-size: 14px; margin-top:0;">⚙️ Serviços Predefinidos</h2>
-                <div class="input-group">
-                    <label>Nome do Serviço</label>
-                    <input type="text" id="novo-servico-nome" placeholder="Ex: Calça">
-                </div>
-                <div class="input-group">
-                    <label>Valor Unitário (R$)</label>
-                    <input type="number" step="0.01" inputmode="decimal" id="novo-servico-valor" placeholder="Ex: 5.00" onclick="this.select()">
-                </div>
-                <button class="btn btn-green btn-full" onclick="salvarNovoServicoCadastrado()">➕ Cadastrar Serviço</button>
-                
-                <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
-                <div id="lista-servicos-cadastrados"></div>
-            </div>
-
-            <!-- BOTTOM NAVIGATION -->
+            <!-- BARRA DE NAVEGAÇÃO FIXA NO RODAPÉ -->
             <nav class="bottom-nav">
-                <button class="nav-item active" id="nav-inicio" onclick="navegarPara('main-panel', 'nav-inicio')">
+                <button class="nav-item active" id="nav-inicio" onclick="alternarPainel('main-panel', 'nav-inicio')">
                     <span class="icon">📱</span>
                     <span>Lançar</span>
                 </button>
-                <button class="nav-item" id="nav-equipe" onclick="navegarPara('funcionarios-painel', 'nav-equipe')">
-                    <span class="icon">🏆</span>
+                <button class="nav-item" id="nav-equipe" onclick="alternarPainel('funcionarios-painel', 'nav-equipe')">
+                    <span class="icon">👥</span>
                     <span>Equipe</span>
                 </button>
-                <button class="nav-item" id="nav-historico" onclick="navegarPara('historico-painel', 'nav-historico')">
+                <button class="nav-item" id="nav-historico" onclick="alternarPainel('historico-painel', 'nav-historico')">
                     <span class="icon">📁</span>
                     <span>Histórico</span>
                 </button>
-                <button class="nav-item" id="nav-servicos" onclick="navegarPara('servicos-painel', 'nav-servicos')">
+                <button class="nav-item" id="nav-servicos" onclick="alternarPainel('servicos-painel', 'nav-servicos')">
                     <span class="icon">⚙️</span>
                     <span>Serviços</span>
                 </button>
             </nav>
 
+            <!-- SEÇÃO DISCRETA DE BACKUP -->
             <div class="backup-discreto">
-                <button class="btn-subtle" onclick="fazerBackup()">Baixar Backup</button> | 
-                <button class="btn-subtle" onclick="document.getElementById('input-restaurar').click()">Restaurar Backup</button> | 
-                <button class="btn-subtle" style="color:var(--danger-color);" onclick="fazerLogout()">Sair</button>
+                <span>Segurança dos Dados:</span>
+                <button class="btn-subtle" onclick="fazerBackup()">⬇️ Baixar Backup</button> | 
+                <button class="btn-subtle" onclick="document.getElementById('input-restaurar').click()">⬆️ Restaurar Backup</button> | 
+                <button class="btn-subtle" style="color: var(--danger-color);" onclick="fazerLogout()">🚪 Sair</button>
                 <input type="file" id="input-restaurar" style="display: none;" accept=".json" onchange="restaurarBackup(event)">
             </div>
         </div>
@@ -605,7 +778,10 @@
             const errorDiv = document.getElementById('login-error');
 
             errorDiv.innerText = '';
-            if (!user || !pass) { errorDiv.innerText = 'Preencha usuário e senha!'; return; }
+            if (!user || !pass) {
+                errorDiv.innerText = 'Preencha usuário e senha!';
+                return;
+            }
 
             try {
                 const snapshot = await db.collection('usuarios')
@@ -613,11 +789,18 @@
                     .where('senha', '==', pass)
                     .get();
 
-                if (snapshot.empty) { errorDiv.innerText = 'Usuário ou senha incorretos!'; return; }
+                if (snapshot.empty) {
+                    errorDiv.innerText = 'Usuário ou senha incorretos!';
+                    return;
+                }
 
                 let userData = null;
                 snapshot.forEach(doc => userData = doc.data());
-                if (userData.ativo === false) { errorDiv.innerText = 'Sua conta está inativa!'; return; }
+
+                if (userData.ativo === false) {
+                    errorDiv.innerText = 'Sua conta está inativa!';
+                    return;
+                }
 
                 if (remember) {
                     localStorage.setItem('saved_user', user);
@@ -633,6 +816,7 @@
                 document.getElementById('app-screen').classList.remove('hidden');
 
                 inicializarApp();
+
             } catch (err) {
                 errorDiv.innerText = 'Erro ao conectar ao banco de dados.';
             }
@@ -659,26 +843,13 @@
             }
         }
 
-        function navegarPara(panelId, navBtnId) {
-            ['main-panel', 'funcionarios-painel', 'historico-painel', 'servicos-painel'].forEach(p => {
-                document.getElementById(p).style.display = 'none';
-            });
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-
-            document.getElementById(panelId).style.display = 'block';
-            document.getElementById(navBtnId).classList.add('active');
-
-            if(panelId === 'historico-painel') buscarHistorico();
-            if(panelId === 'funcionarios-painel') gerarRankingEquipe('hoje');
-        }
-
         function salvarRascunho() {
             const dia = document.getElementById('dia').value;
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
 
             const operacoes = [];
-            document.querySelectorAll('#operacoes-container .op-row-item').forEach((card) => {
+            document.querySelectorAll('#operacoes-container .op-card').forEach((card) => {
                 operacoes.push({
                     servico: card.querySelector('.servico').value,
                     qtd: card.querySelector('.qtd').value,
@@ -702,6 +873,7 @@
             document.getElementById('operacoes-container').innerHTML = '';
             contadorOperacoes = 0;
             rascunho.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
+
             return true;
         }
 
@@ -725,9 +897,23 @@
             }
         }
 
+        function alternarPainel(idPainel, idNavBtn) {
+            ['main-panel', 'funcionarios-painel', 'servicos-painel', 'historico-painel'].forEach(pId => {
+                document.getElementById(pId).style.display = 'none';
+            });
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(idPainel).style.display = 'block';
+            document.getElementById(idNavBtn).classList.add('active');
+
+            if(idPainel === 'historico-painel') buscarHistorico();
+            if(idPainel === 'funcionarios-painel') gerarRankingEquipe('hoje');
+        }
+
         function salvarNovoServicoCadastrado() {
             const nome = document.getElementById('novo-servico-nome').value.trim();
             const valor = parseFloat(document.getElementById('novo-servico-valor').value) || 0;
+
             if (!nome) { alert('Digite o nome do serviço!'); return; }
 
             let servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
@@ -766,6 +952,7 @@
         function salvarNovoFuncionarioCadastrado() {
             const nome = document.getElementById('func-nome').value.trim();
             const valor = parseFloat(document.getElementById('func-valor').value) || 0;
+
             if (!nome) { alert('Digite o nome do funcionário!'); return; }
 
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
@@ -790,14 +977,15 @@
             document.getElementById('func-valor').value = f.valor;
             funcionarioEmEdicaoIndex = index;
 
-            const btn = document.getElementById('btn-salvar-func');
-            btn.innerText = '💾 Salvar Alterações';
-            btn.setAttribute('onclick', 'salvarEdicaoFuncionario()');
+            const btnCadastrar = document.getElementById('btn-salvar-func');
+            btnCadastrar.innerText = '💾 Salvar Alterações';
+            btnCadastrar.setAttribute('onclick', 'salvarEdicaoFuncionario()');
         }
 
         function salvarEdicaoFuncionario() {
             const nome = document.getElementById('func-nome').value.trim();
             const valor = parseFloat(document.getElementById('func-valor').value) || 0;
+
             if (!nome) { alert('Digite o nome do funcionário!'); return; }
 
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
@@ -810,9 +998,9 @@
             document.getElementById('func-valor').value = '';
             funcionarioEmEdicaoIndex = null;
 
-            const btn = document.getElementById('btn-salvar-func');
-            btn.innerText = '➕ Salvar Funcionário';
-            btn.setAttribute('onclick', 'salvarNovoFuncionarioCadastrado()');
+            const btnCadastrar = document.getElementById('btn-salvar-func');
+            btnCadastrar.innerText = '➕ Cadastrar Funcionário';
+            btnCadastrar.setAttribute('onclick', 'salvarNovoFuncionarioCadastrado()');
 
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
@@ -851,7 +1039,8 @@
 
         function gerarRankingEquipe(periodo) {
             ['chip-rank-hoje', 'chip-rank-semana', 'chip-rank-mes'].forEach(id => {
-                const el = document.getElementById(id); if (el) el.classList.remove('active');
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('active');
             });
             const chipAtivo = document.getElementById(`chip-rank-${periodo}`);
             if (chipAtivo) chipAtivo.classList.add('active');
@@ -860,8 +1049,9 @@
             const hoje = new Date();
             let inicioIso = '';
 
-            if (periodo === 'hoje') { inicioIso = hoje.toISOString().slice(0, 10); } 
-            else if (periodo === 'semana') {
+            if (periodo === 'hoje') {
+                inicioIso = hoje.toISOString().slice(0, 10);
+            } else if (periodo === 'semana') {
                 const day = hoje.getDay();
                 const d = new Date(hoje);
                 d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
@@ -871,6 +1061,7 @@
             }
 
             const dados = {};
+
             hist.forEach(item => {
                 if (item.dataIso >= inicioIso) {
                     item.operacoes.forEach(op => {
@@ -883,12 +1074,14 @@
             });
 
             const listaOrdenada = Object.keys(dados).map(k => ({
-                nome: k, pecas: dados[k].pecas, valor: dados[k].valor
+                nome: k,
+                pecas: dados[k].pecas,
+                valor: dados[k].valor
             })).sort((a, b) => b.pecas - a.pecas);
 
             const container = document.getElementById('ranking-container');
             if (listaOrdenada.length === 0) {
-                container.innerHTML = `<p style="font-size:12px; color:#777; margin:0; text-align:center;">Nenhuma produção neste período.</p>`;
+                container.innerHTML = `<p style="font-size:12px; color:#777; margin:0; text-align:center;">Nenhuma produção registrada neste período.</p>`;
                 return;
             }
 
@@ -901,15 +1094,16 @@
                             <b>${medalha}${item.nome}</b>
                             <div style="font-size:11px; color:#666;">Gerou R$ ${item.valor.toFixed(2)}</div>
                         </div>
-                        <span class="ranking-badge">${item.pecas} pcs</span>
+                        <span class="ranking-badge">${item.pecas} peças</span>
                     </div>`;
             });
+
             container.innerHTML = html;
         }
 
         function gerarOptionsServicos(servicoAtual = '') {
             const servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            let options = `<option value="">Selecione...</option>`;
+            let options = `<option value="">-- Selecionar serviço --</option>`;
             servicos.forEach(s => {
                 options += `<option value="${s.nome}" data-valor="${s.valor}" ${s.nome === servicoAtual ? 'selected' : ''}>${s.nome} (R$ ${s.valor.toFixed(2)})</option>`;
             });
@@ -918,9 +1112,9 @@
 
         function gerarOptionsExecutores(executorAtual = 'mim') {
             const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            let options = `<option value="mim" ${executorAtual === 'mim' ? 'selected' : ''}>🟢 Eu (Minha Produção)</option>`;
+            let options = `<option value="mim" ${executorAtual === 'mim' ? 'selected' : ''}>Minha Produção</option>`;
             funcionarios.forEach(f => {
-                options += `<option value="${f.nome}" ${f.nome === executorAtual ? 'selected' : ''}>👤 ${f.nome}</option>`;
+                options += `<option value="${f.nome}" ${f.nome === executorAtual ? 'selected' : ''}>👤 Funcionário: ${f.nome}</option>`;
             });
             return options;
         }
@@ -956,37 +1150,18 @@
             contadorOperacoes++;
             const idAtual = contadorOperacoes;
             const html = `
-                <div class="op-row-item" id="op-card-${idAtual}">
-                    <div class="op-row-header">
-                        <span>Item #${idAtual}</span>
-                        <button style="background:none; border:none; cursor:pointer;" onclick="removerOperacao(${idAtual})">🗑️</button>
+                <div class="op-card" id="op-card-${idAtual}">
+                    <div class="op-header">
+                        <span>Operação ${idAtual}</span>
+                        <button class="btn-delete" onclick="removerOperacao(${idAtual})">🗑️</button>
                     </div>
-                    <div class="op-grid">
-                        <div class="op-grid-cell">
-                            <label>Quem Fez?</label>
-                            <select class="select-executor" onchange="calcularTotalDia(); salvarRascunho();">${gerarOptionsExecutores(executor)}</select>
-                        </div>
-                        <div class="op-grid-cell">
-                            <label>Atalho Serviço</label>
-                            <select class="select-servico" onchange="selecionarServicoPredefinido(${idAtual}, this)">${gerarOptionsServicos(servico)}</select>
-                        </div>
-                    </div>
-                    <div class="op-grid-3">
-                        <div class="op-grid-cell">
-                            <label>Serviço</label>
-                            <input type="text" class="servico" value="${servico}" oninput="salvarRascunho()">
-                        </div>
-                        <div class="op-grid-cell">
-                            <label>Qtd / R$ Peça</label>
-                            <div style="display:flex; gap:3px;">
-                                <input type="number" inputmode="numeric" class="qtd" value="${qtd}" placeholder="Qtd" oninput="calcularTotalOperacao(${idAtual})" onclick="this.select()">
-                                <input type="number" step="0.01" inputmode="decimal" class="valor" value="${valor}" placeholder="R$" oninput="calcularTotalOperacao(${idAtual})" onclick="this.select()">
-                            </div>
-                        </div>
-                        <div class="op-grid-cell">
-                            <label>Total Item</label>
-                            <div class="total-badge total-op">R$ 0,00</div>
-                        </div>
+                    <div class="op-body">
+                        <div class="op-row"><div class="op-label">Quem fez?</div><div class="op-input"><select class="select-executor" onchange="calcularTotalDia(); salvarRascunho();">${gerarOptionsExecutores(executor)}</select></div></div>
+                        <div class="op-row"><div class="op-label">Atalho</div><div class="op-input"><select class="select-servico" onchange="selecionarServicoPredefinido(${idAtual}, this)">${gerarOptionsServicos(servico)}</select></div></div>
+                        <div class="op-row"><div class="op-label">Serviço</div><div class="op-input"><input type="text" class="servico" value="${servico}" oninput="salvarRascunho()"></div></div>
+                        <div class="op-row"><div class="op-label">Quantidade</div><div class="op-input"><input type="number" inputmode="numeric" class="qtd" value="${qtd}" min="0" oninput="calcularTotalOperacao(${idAtual})" onclick="this.select()"></div></div>
+                        <div class="op-row"><div class="op-label">Valor da peça</div><div class="op-input"><input type="number" step="0.01" inputmode="decimal" class="valor" value="${valor}" min="0" oninput="calcularTotalOperacao(${idAtual})" onclick="this.select()"></div></div>
+                        <div class="op-row"><div class="op-label">Total</div><div class="op-input total-op-val total-op">R$ 0,00</div></div>
                     </div>
                 </div>`;
             document.getElementById('operacoes-container').insertAdjacentHTML('beforeend', html);
@@ -995,7 +1170,7 @@
         }
 
         function removerOperacao(id) {
-            if (document.querySelectorAll('#operacoes-container .op-row-item').length <= 1) { alert('Mínimo de 1 operação.'); return; }
+            if (document.querySelectorAll('#operacoes-container .op-card').length <= 1) { alert('Mínimo de 1 operação.'); return; }
             document.getElementById(`op-card-${id}`).remove();
             calcularTotalDia();
             salvarRascunho();
@@ -1015,12 +1190,12 @@
         function calcularTotalDia() {
             let totalBruto = 0;
             let minhaProducao = 0;
+            
             const prodFuncs = {};
             const funcsMap = {};
-
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
 
-            document.querySelectorAll('#operacoes-container .op-row-item').forEach(card => {
+            document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
                 const qtd = parseFloat(card.querySelector('.qtd').value) || 0;
                 const valor = parseFloat(card.querySelector('.valor').value) || 0;
                 const subTotal = qtd * valor;
@@ -1032,13 +1207,18 @@
                 } else {
                     if (!prodFuncs[exec]) prodFuncs[exec] = { gerado: 0, custo: 0 };
                     prodFuncs[exec].gerado += subTotal;
-                    if (funcsMap[exec]) prodFuncs[exec].custo = funcsMap[exec].valor;
+                    
+                    if (funcsMap[exec]) {
+                        prodFuncs[exec].custo = funcsMap[exec].valor;
+                    }
                 }
             });
 
             document.getElementById('total-dia').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            let htmlDetalhes = `<div class="lucro-linha"><span>🟢 Sua Produção:</span> <b>R$ ${minhaProducao.toFixed(2)}</b></div>`;
+            let htmlDetalhes = '';
+            htmlDetalhes += `<div class="lucro-linha"><span>🟢 Minha Produção:</span> <b>R$ ${minhaProducao.toFixed(2)}</b></div>`;
+
             let lucroTotalDoDia = minhaProducao;
 
             Object.keys(prodFuncs).forEach(nomeFunc => {
@@ -1048,17 +1228,17 @@
                 lucroTotalDoDia += sobra;
 
                 htmlDetalhes += `
-                    <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:6px 10px; border-radius:8px; margin:5px 0;">
-                        <div class="lucro-linha"><span>👤 Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
-                        <div class="lucro-linha" style="color:var(--danger-color);"><span>➖ Diária dele(a):</span> <span>- R$ ${custo.toFixed(2)}</span></div>
-                        <div class="lucro-linha" style="color:var(--primary-dark);"><span>👉 Sobra pra Você:</span> <b>R$ ${sobra.toFixed(2)}</b></div>
+                    <div style="background: #fafafa; border: 1px solid #eee; padding: 6px 8px; border-radius: 6px; margin: 6px 0;">
+                        <div class="lucro-linha" style="margin-bottom:2px;"><span>👤 Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
+                        <div class="lucro-linha" style="margin-bottom:2px; color: #d9534f;"><span>➖ Diária/Pagamento:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
+                        <div class="lucro-linha" style="margin-bottom:0; color: var(--primary-color);"><span>👉 Sobra do ${nomeFunc}:</span> <b>R$ ${sobra.toFixed(2)}</b></div>
                     </div>`;
             });
 
             htmlDetalhes += `
                 <div class="lucro-linha destaque-sobra">
-                    <span>💰 SEU LUCRO FINAL HOJE:</span> 
-                    <b style="font-size:15px;">R$ ${lucroTotalDoDia.toFixed(2)}</b>
+                    <span><b>💰 SEU LUCRO FINAL HOJE:</b></span> 
+                    <b style="color: var(--primary-color); font-size: 15px;">R$ ${lucroTotalDoDia.toFixed(2)}</b>
                 </div>`;
 
             document.getElementById('lucro-liquido-dia').innerHTML = htmlDetalhes;
@@ -1075,7 +1255,7 @@
             const brutoNum = parseFloat(totalBrutoStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
 
             const operacoes = [];
-            document.querySelectorAll('#operacoes-container .op-row-item').forEach(card => {
+            document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
                 operacoes.push({
                     servico: card.querySelector('.servico').value || 'Geral',
                     qtd: parseFloat(card.querySelector('.qtd').value) || 0,
@@ -1102,7 +1282,8 @@
 
             limparRascunho();
             registroEmEdicaoId = null;
-            alert('Dia salvo com sucesso!');
+            alert('Dia finalizado e salvo com sucesso!');
+            if (document.getElementById('historico-painel').style.display === 'block') buscarHistorico();
             gerarRankingEquipe('hoje');
         }
 
@@ -1116,10 +1297,53 @@
                 fim = new Date();
             }
             else if (tipo === 'mes') { inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1); fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); }
+            else if (tipo === 'mes_passado') { inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1); fim = new Date(hoje.getFullYear(), hoje.getMonth(), 0); }
 
             document.getElementById('data-inicio').value = inicio.toISOString().slice(0,10);
             document.getElementById('data-fim').value = fim.toISOString().slice(0,10);
             buscarHistorico();
+        }
+
+        function filtrarLucrativo(criterio) {
+            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            if (hist.length === 0) { alert('Nenhum histórico encontrado.'); return; }
+
+            if (criterio === 'dia') {
+                let maisLucrativo = hist.reduce((max, curr) => curr.totalNumerico > max.totalNumerico ? curr : max, hist[0]);
+                document.getElementById('data-inicio').value = maisLucrativo.dataIso;
+                document.getElementById('data-fim').value = maisLucrativo.dataIso;
+                buscarHistorico();
+                alert(`Dia mais lucrativo encontrado: ${maisLucrativo.dataTexto} (${maisLucrativo.total})`);
+            } else if (criterio === 'semana' || criterio === 'mes') {
+                const grupos = {};
+                hist.forEach(item => {
+                    let chave = '';
+                    const d = new Date(item.dataIso);
+                    if (criterio === 'mes') {
+                        chave = `${item.ano}-${item.mes}`;
+                    } else {
+                        const primeiroJan = new Date(d.getFullYear(), 0, 1);
+                        const semanaNum = Math.ceil((((d - primeiroJan) / 86400000) + primeiroJan.getDay() + 1) / 7);
+                        chave = `${d.getFullYear()}-S${semanaNum}`;
+                    }
+                    if (!grupos[chave]) grupos[chave] = { total: 0, itens: [] };
+                    grupos[chave].total += item.totalNumerico;
+                    grupos[chave].itens.push(item);
+                });
+
+                let melhorChave = Object.keys(grupos)[0];
+                Object.keys(grupos).forEach(k => {
+                    if (grupos[k].total > grupos[melhorChave].total) melhorChave = k;
+                });
+
+                if (melhorChave) {
+                    const itensDoGrupo = grupos[melhorChave].itens.sort((a,b) => a.dataIso.localeCompare(b.dataIso));
+                    document.getElementById('data-inicio').value = itensDoGrupo[0].dataIso;
+                    document.getElementById('data-fim').value = itensDoGrupo[itensDoGrupo.length - 1].dataIso;
+                    buscarHistorico();
+                    alert(`${criterio === 'semana' ? 'Semana' : 'Mês'} mais lucrativa encontrada com total de R$ ${grupos[melhorChave].total.toFixed(2)}!`);
+                }
+            }
         }
 
         function normalizarNomeServico(nome) {
@@ -1146,8 +1370,16 @@
             });
 
             filtrados.sort((a, b) => b.dataIso.localeCompare(a.dataIso));
+
             renderizarHistorico(filtrados, execFiltro);
             renderizarGrafico(filtrados, execFiltro);
+        }
+
+        function limparFiltro() {
+            document.getElementById('data-inicio').value = '';
+            document.getElementById('data-fim').value = '';
+            document.getElementById('filtro-executor').value = '';
+            buscarHistorico();
         }
 
         function renderizarHistorico(lista, filtroExecutor = '') {
@@ -1165,6 +1397,7 @@
             let somaTotalBruto = 0;
             let somaPecas = 0;
             let somaCustoFuncionario = 0;
+
             const funcsMap = {};
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
 
@@ -1184,12 +1417,13 @@
                     const qtd = op.qtd || 0;
                     const val = op.valor || 0;
                     const sub = qtd * val;
+                    
                     subTotalCard += sub;
                     somaPecas += qtd;
 
                     const nomeFormatado = normalizarNomeServico(op.servico);
-                    const quem = op.executor && op.executor !== 'mim' ? ` (${op.executor})` : ' (Você)';
-                    opsHTML += `<div style="font-size:12px; margin-bottom:2px; color:#444;">• <b>${nomeFormatado}</b>${quem}: ${qtd}x = R$ ${sub.toFixed(2)}</div>`;
+                    const quem = op.executor && op.executor !== 'mim' ? ` 👤 (${op.executor})` : ' 🟢 (Você)';
+                    opsHTML += `<div class="card-item">• <b>${nomeFormatado}</b>${quem}: ${qtd}x = R$ ${sub.toFixed(2)}</div>`;
 
                     const exec = op.executor || 'mim';
                     if (exec !== 'mim' && funcsMap[exec]) {
@@ -1204,7 +1438,7 @@
                         <div class="card-header">
                             <span>📅 ${item.dataTexto}</span>
                             <div>
-                                <span style="color:var(--primary-dark);">R$ ${subTotalCard.toFixed(2)}</span> 
+                                <span style="color:var(--primary-color);">R$ ${subTotalCard.toFixed(2)}</span> 
                                 <button style="background:none;border:none;" onclick="editarRegistro(${item.id})">✏️</button> 
                                 <button style="background:none;border:none;" onclick="excluirRegistro(${item.id})">🗑️</button>
                             </div>
@@ -1214,12 +1448,13 @@
             });
 
             const lucroLiquidoReal = somaTotalBruto - somaCustoFuncionario;
+
             resumoBox.style.display = 'block';
             let detalheLucro = (filtroExecutor && filtroExecutor !== 'mim') 
-                ? `<br><span style="font-size:11px; color:var(--danger-color);">Desconto diárias: R$ ${somaCustoFuncionario.toFixed(2)}</span><br><b style="color:var(--primary-dark);">Sobra pra Você: R$ ${lucroLiquidoReal.toFixed(2)}</b>`
+                ? `<div style="font-size:12px; margin-top:4px; color:#d9534f;">Desconto de pagamento: R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Sobra do Funcionário para Você: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
                 : '';
 
-            resumoBox.innerHTML = `Total Período (${lista.length} dias): <b>R$ ${somaTotalBruto.toFixed(2)}</b> | Peças: ${somaPecas}${detalheLucro}`;
+            resumoBox.innerHTML = `Total do Período (${lista.length} dias): <br><b style="font-size:18px;">R$ ${somaTotalBruto.toFixed(2)}</b><br><span style="font-size:12px;">Total de Peças: ${somaPecas}</span>${detalheLucro}`;
             btnExportar.style.display = 'block';
         }
 
@@ -1229,13 +1464,15 @@
             barras.innerHTML = '';
             if (lista.length === 0) { box.style.display = 'none'; return; }
 
-            const counts = {}; let max = 0;
+            const counts = {}; 
+            let max = 0;
+
             lista.forEach(i => i.operacoes.forEach(op => {
                 const exec = op.executor || 'mim';
                 if (!filtroExecutor || exec === filtroExecutor) {
-                    const nome = normalizarNomeServico(op.servico);
-                    counts[nome] = (counts[nome] || 0) + op.qtd;
-                    if (counts[nome] > max) max = counts[nome];
+                    const nomeNormalizado = normalizarNomeServico(op.servico);
+                    counts[nomeNormalizado] = (counts[nomeNormalizado] || 0) + op.qtd;
+                    if (counts[nomeNormalizado] > max) max = counts[nomeNormalizado];
                 }
             }));
 
@@ -1244,7 +1481,7 @@
 
             keys.forEach(k => {
                 const pct = max > 0 ? (counts[k] / max) * 100 : 0;
-                barras.innerHTML += `<div style="margin-bottom:6px;"><div style="display:flex; justify-content:space-between; font-size:11px;"><span>${k}</span><span>${counts[k]} pcs</span></div><div style="background:#e2e8f0; height:8px; border-radius:4px;"><div style="background:var(--primary-color); height:100%; width:${pct}%; border-radius:4px;"></div></div></div>`;
+                barras.innerHTML += `<div class="bar-item"><div class="bar-label"><span><b>${k}</b></span><span>${counts[k]} peças</span></div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div></div>`;
             });
             box.style.display = 'block';
         }
@@ -1257,7 +1494,8 @@
                 total += i.totalNumerico;
                 txt += `\n📅 *${i.dataTexto}* (${i.total})\n`;
                 i.operacoes.forEach(op => {
-                    txt += ` • ${normalizarNomeServico(op.servico)} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
+                    const nomeNorm = normalizarNomeServico(op.servico);
+                    txt += ` • ${nomeNorm} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
                 });
             });
             txt += `\n💰 *TOTAL GERAL: R$ ${total.toFixed(2)}*`;
@@ -1285,8 +1523,9 @@
             contadorOperacoes = 0;
 
             reg.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
-            navegarPara('main-panel', 'nav-inicio');
-            alert('Dados carregados! Altere o que precisar e clique em Salvar.');
+            alternarPainel('main-panel', 'nav-inicio');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            alert('Ajuste os dados no topo e clique em "Finalizar Dia".');
         }
 
         function fazerBackup() {
