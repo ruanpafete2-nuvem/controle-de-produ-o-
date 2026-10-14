@@ -4,16 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Controle de Produção</title>
+
+    <!-- Fonte Inter (Moderna e Ultra Leve) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary-color: #15803d;
-            --primary-dark: #166534;
+            --primary-color: #10b981;
+            --primary-dark: #047857;
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
-            --danger-color: #dc2626;
+            --danger-color: #ef4444;
         }
 
         * {
@@ -22,7 +28,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
@@ -30,6 +36,7 @@
             display: flex;
             justify-content: center;
             min-height: 100vh;
+            letter-spacing: -0.2px;
         }
 
         .app-container {
@@ -41,13 +48,13 @@
             flex-direction: column;
             position: relative;
             padding-bottom: 75px;
-            box-shadow: 0 0 25px rgba(0,0,0,0.05);
+            box-shadow: 0 0 25px rgba(0,0,0,0.04);
         }
 
         .app-header {
             background: #ffffff;
             color: var(--text-main);
-            padding: 16px;
+            padding: 14px 16px;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
             position: sticky;
@@ -56,13 +63,17 @@
         }
 
         .app-header h1 {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 700;
             margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             color: var(--text-main);
-            letter-spacing: -0.3px;
         }
 
+        /* LOGIN */
         .login-card {
             padding: 30px 20px;
             margin: auto 15px;
@@ -78,11 +89,11 @@
         }
 
         .login-header .icon-logo { font-size: 42px; display: block; margin-bottom: 6px; }
-        .login-header h2 { font-size: 20px; margin: 0; }
+        .login-header h2 { font-size: 20px; margin: 0; font-weight: 700; }
         .login-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 
         .input-group { margin-bottom: 14px; }
-        .input-group label { display: block; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+        .input-group label { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
 
         .remember-me {
             display: flex;
@@ -97,24 +108,25 @@
         .error { color: var(--danger-color); font-size: 13px; text-align: center; margin-top: 10px; font-weight: 500; }
         .hidden { display: none !important; }
 
-        /* BARRA DE DATA */
+        /* DATA BAR */
         .date-bar {
             background: #f8fafc;
-            padding: 12px 16px;
+            padding: 10px 16px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             border-bottom: 1px solid var(--border-color);
         }
 
         .date-field { flex: 1; }
-        .date-field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 3px; }
+        .date-field label { display: block; font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
 
         input[type="text"], input[type="number"], input[type="password"], input[type="date"], select {
             width: 100%;
-            padding: 9px 12px;
+            padding: 8px 10px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 13px;
+            font-family: 'Inter', sans-serif;
             outline: none;
             background-color: #fff;
             color: var(--text-main);
@@ -123,91 +135,95 @@
 
         input:focus, select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
         }
 
-        /* CARD DE RESUMO MINIMALISTA */
+        /* RESUMO DE LUCRO */
         .summary-card {
             background: #ffffff;
             border-bottom: 1px solid var(--border-color);
-            padding: 16px;
+            padding: 14px 16px;
         }
 
         .summary-main {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
-        .summary-main .title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .summary-main .value { font-size: 24px; font-weight: 800; color: var(--primary-color); }
+        .summary-main .title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .summary-main .value { font-size: 22px; font-weight: 800; color: var(--primary-dark); }
 
         .lucro-detalhe {
-            font-size: 13px;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 10px;
+            font-size: 12px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 8px;
+            margin-top: 4px;
         }
 
         .lucro-linha {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             color: #334155;
+            align-items: center;
         }
 
         .lucro-linha.destaque-sobra {
-            background: #f0fdf4;
-            padding: 10px 12px;
+            background: #ecfdf5;
+            padding: 8px 12px;
             border-radius: 8px;
-            border: 1px solid #bbf7d0;
-            font-weight: 600;
-            margin-top: 10px;
+            border: 1px solid #a7f3d0;
+            font-weight: 700;
+            margin-top: 8px;
             color: var(--primary-dark);
         }
 
-        /* LISTA DE ITENS LIMPA */
-        .op-list { padding: 16px; }
+        /* ITENS DE OPERAÇÃO */
+        .op-list { padding: 14px; }
 
         .op-row-item {
             background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 12px 14px;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
         .op-row-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            font-size: 12px;
+            margin-bottom: 8px;
+            font-size: 11px;
             font-weight: 700;
             color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .op-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .op-grid-3 {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
+            grid-template-columns: 1.2fr 0.9fr 0.9fr;
+            gap: 8px;
             align-items: end;
         }
 
         .op-grid-cell label {
             display: block;
-            font-size: 11px;
+            font-size: 10px;
             color: var(--text-muted);
-            margin-bottom: 3px;
-            font-weight: 500;
+            margin-bottom: 2px;
+            font-weight: 600;
         }
 
         .total-badge {
@@ -216,17 +232,19 @@
             padding: 8px;
             border-radius: 8px;
             text-align: center;
-            font-weight: 700;
-            color: var(--primary-color);
+            font-weight: 800;
+            color: var(--primary-dark);
             font-size: 13px;
         }
 
+        /* BOTÕES */
         .btn {
             background: #ffffff;
             border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            font-size: 13px;
+            padding: 9px 12px;
+            font-size: 12px;
             font-weight: 600;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
             border-radius: 8px;
             display: inline-flex;
@@ -234,10 +252,10 @@
             justify-content: center;
             gap: 6px;
             color: var(--text-main);
-            transition: all 0.15s ease;
+            transition: all 0.15s;
         }
 
-        .btn:active { background-color: #f1f5f9; transform: scale(0.99); }
+        .btn:active { background-color: #f1f5f9; transform: scale(0.98); }
 
         .btn-green {
             background-color: var(--primary-color);
@@ -248,7 +266,7 @@
         .btn-green:active { background-color: var(--primary-dark); }
         .btn-full { width: 100%; }
 
-        /* NAVEGAÇÃO RODAPÉ CLEAN */
+        /* RODAPÉ NAV */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -260,7 +278,7 @@
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
-            padding: 8px 0 12px 0;
+            padding: 8px 0 10px 0;
             z-index: 100;
         }
 
@@ -268,19 +286,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 500;
+            font-family: 'Inter', sans-serif;
             color: var(--text-muted);
             background: none;
             border: none;
             cursor: pointer;
-            gap: 4px;
+            gap: 3px;
         }
 
         .nav-item .icon { font-size: 18px; }
         .nav-item.active { color: var(--primary-color); font-weight: 700; }
 
-        /* PAINÉIS SECUNDÁRIOS */
+        /* PAINÉIS */
         .box-panel { padding: 16px; display: none; }
 
         .quick-filters {
@@ -293,7 +312,7 @@
         .btn-chip {
             background: #f1f5f9;
             border: 1px solid var(--border-color);
-            padding: 6px 12px;
+            padding: 5px 10px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 600;
@@ -310,7 +329,7 @@
         .card-historico {
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 12px;
+            padding: 10px 12px;
             margin-bottom: 10px;
             background: #fff;
         }
@@ -319,7 +338,7 @@
             display: flex;
             justify-content: space-between;
             font-weight: 700;
-            font-size: 13px;
+            font-size: 12px;
             border-bottom: 1px solid #f1f5f9;
             padding-bottom: 6px;
             margin-bottom: 6px;
@@ -329,7 +348,7 @@
             background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 12px;
+            padding: 10px;
             margin-bottom: 15px;
         }
 
@@ -338,15 +357,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 13px;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 12px;
         }
 
         .ranking-badge {
             font-weight: 700;
-            color: var(--primary-color);
-            background: #f0fdf4;
-            padding: 3px 10px;
+            color: var(--primary-dark);
+            background: #ecfdf5;
+            padding: 2px 8px;
             border-radius: 12px;
             font-size: 11px;
         }
@@ -377,7 +396,7 @@
             <div class="login-header">
                 <span class="icon-logo">📋</span>
                 <h2>Controle de Produção</h2>
-                <p>Acesse para continuar</p>
+                <p>Acesse para gerenciar a produção</p>
             </div>
             <div class="input-group">
                 <label for="username">Usuário</label>
@@ -393,14 +412,14 @@
                 <span>Lembrar credenciais</span>
             </label>
 
-            <button class="btn btn-green btn-full" style="padding: 12px;" onclick="fazerLogin()">Entrar</button>
+            <button class="btn btn-green btn-full" style="padding: 12px; font-size:14px;" onclick="fazerLogin()">Entrar</button>
             <div id="login-error" class="error"></div>
         </div>
 
         <!-- APLICATIVO PRINCIPAL -->
         <div id="app-screen" class="hidden">
             <div class="app-header">
-                <h1>Controle de Produção</h1>
+                <h1>📋 Controle de Produção</h1>
             </div>
 
             <!-- PAINEL LANÇAMENTO -->
@@ -432,870 +451,14 @@
                     <div id="operacoes-container"></div>
 
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
-                        <button class="btn btn-full" onclick="adicionarOperacao()">+ Adicionar Item</button>
+                        <button class="btn btn-full" onclick="adicionarOperacao()">➕ Adicionar Item</button>
                         <button class="btn" title="Limpar Tela" onclick="novoDia()">🧹</button>
                     </div>
 
-                    <button class="btn btn-green btn-full" style="margin-top: 14px; padding: 12px; font-size: 14px;" onclick="finalizarDia()">Salvar Dia</button>
+                    <button class="btn btn-green btn-full" style="margin-top: 12px; padding: 12px; font-size: 13px;" onclick="finalizarDia()">💾 Salvar Dia</button>
                 </div>
             </div>
 
             <!-- PAINEL EQUIPE -->
             <div id="funcionarios-painel" class="box-panel">
-                <h2 style="font-size: 15px; margin-top:0;">Desempenho da Equipe</h2>
-                <div class="quick-filters">
-                    <button class="btn-chip active" id="chip-rank-hoje" onclick="gerarRankingEquipe('hoje')">Hoje</button>
-                    <button class="btn-chip" id="chip-rank-semana" onclick="gerarRankingEquipe('semana')">Esta Semana</button>
-                    <button class="btn-chip" id="chip-rank-mes" onclick="gerarRankingEquipe('mes')">Este Mês</button>
-                </div>
-                <div id="ranking-container" class="ranking-card"></div>
-
-                <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
-
-                <h2 style="font-size: 15px;">Cadastrar Funcionário</h2>
-                <div class="input-group">
-                    <label>Nome do Funcionário</label>
-                    <input type="text" id="func-nome" placeholder="Ex: João">
-                </div>
-                <div class="input-group">
-                    <label>Valor da Diária / Salário (R$)</label>
-                    <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 100.00" onclick="this.select()">
-                </div>
-                <button class="btn btn-green btn-full" id="btn-salvar-func" onclick="salvarNovoFuncionarioCadastrado()">Salvar Funcionário</button>
-                
-                <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
-                <div id="lista-funcionarios-cadastrados"></div>
-            </div>
-
-            <!-- PAINEL HISTÓRICO -->
-            <div id="historico-painel" class="box-panel">
-                <h2 style="font-size: 15px; margin-top:0;">Histórico de Produção</h2>
-                <div style="background: #ffffff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 12px;">
-                    <div class="quick-filters">
-                        <button class="btn-chip" onclick="filtrarRapido('hoje')">Hoje</button>
-                        <button class="btn-chip" onclick="filtrarRapido('semana')">Semana</button>
-                        <button class="btn-chip" onclick="filtrarRapido('mes')">Mês</button>
-                    </div>
-                    <div class="input-group">
-                        <label>Filtrar por Quem:</label>
-                        <select id="filtro-executor" onchange="buscarHistorico()"></select>
-                    </div>
-                    <div style="display:flex; gap:6px;">
-                        <input type="date" id="data-inicio" style="font-size:11px;">
-                        <input type="date" id="data-fim" style="font-size:11px;">
-                    </div>
-                    <button class="btn btn-full" style="margin-top:8px; padding:8px;" onclick="buscarHistorico()">Buscar</button>
-                </div>
-
-                <div id="resumo-total-periodo" style="display:none; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:8px; text-align:center; margin-bottom:12px; font-size:13px; color:var(--primary-dark);"></div>
-                <button class="btn btn-green btn-full" id="btn-exportar" style="display:none; margin-bottom:12px;" onclick="exportarRelatorioWhatsApp()">Relatório WhatsApp</button>
-
-                <div id="grafico-container" style="display:none; background:#fff; border:1px solid var(--border-color); padding:12px; border-radius:8px; margin-bottom:12px;">
-                    <span style="font-size:12px; font-weight:700;">Peças por Serviço</span>
-                    <div id="barras-grafico" style="margin-top:8px;"></div>
-                </div>
-
-                <div id="lista-historico"></div>
-            </div>
-
-            <!-- PAINEL SERVIÇOS -->
-            <div id="servicos-painel" class="box-panel">
-                <h2 style="font-size: 15px; margin-top:0;">Serviços Predefinidos</h2>
-                <div class="input-group">
-                    <label>Nome do Serviço</label>
-                    <input type="text" id="novo-servico-nome" placeholder="Ex: Calça">
-                </div>
-                <div class="input-group">
-                    <label>Valor Unitário (R$)</label>
-                    <input type="number" step="0.01" inputmode="decimal" id="novo-servico-valor" placeholder="Ex: 5.00" onclick="this.select()">
-                </div>
-                <button class="btn btn-green btn-full" onclick="salvarNovoServicoCadastrado()">Cadastrar Serviço</button>
-                
-                <hr style="border:0; border-top: 1px solid #f1f5f9; margin: 16px 0;">
-                <div id="lista-servicos-cadastrados"></div>
-            </div>
-
-            <!-- BOTTOM NAVIGATION -->
-            <nav class="bottom-nav">
-                <button class="nav-item active" id="nav-inicio" onclick="navegarPara('main-panel', 'nav-inicio')">
-                    <span class="icon">📱</span>
-                    <span>Lançar</span>
-                </button>
-                <button class="nav-item" id="nav-equipe" onclick="navegarPara('funcionarios-painel', 'nav-equipe')">
-                    <span class="icon">👥</span>
-                    <span>Equipe</span>
-                </button>
-                <button class="nav-item" id="nav-historico" onclick="navegarPara('historico-painel', 'nav-historico')">
-                    <span class="icon">📁</span>
-                    <span>Histórico</span>
-                </button>
-                <button class="nav-item" id="nav-servicos" onclick="navegarPara('servicos-painel', 'nav-servicos')">
-                    <span class="icon">⚙️</span>
-                    <span>Serviços</span>
-                </button>
-            </nav>
-
-            <div class="backup-discreto">
-                <button class="btn-subtle" onclick="fazerBackup()">Baixar Backup</button> | 
-                <button class="btn-subtle" onclick="document.getElementById('input-restaurar').click()">Restaurar Backup</button> | 
-                <button class="btn-subtle" style="color:var(--danger-color);" onclick="fazerLogout()">Sair</button>
-                <input type="file" id="input-restaurar" style="display: none;" accept=".json" onchange="restaurarBackup(event)">
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBzV-QawZdO6LjHf5ZBw8EfPJfa5Bnbf3w",
-            authDomain: "controle-producao-c08c7.firebaseapp.com",
-            projectId: "controle-producao-c08c7",
-            storageBucket: "controle-producao-c08c7.firebasestorage.app",
-            messagingSenderId: "293400609855",
-            appId: "1:293400609855:web:d04338f74be3b34b1ae48a",
-            measurementId: "G-ZY7Z9BJ07J"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        let contadorOperacoes = 0;
-        let registroEmEdicaoId = null;
-        let funcionarioEmEdicaoIndex = null;
-        const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('saved_user');
-            const savedPass = localStorage.getItem('saved_pass');
-            const isLoggedIn = localStorage.getItem('is_logged_in');
-
-            if (savedUser && savedPass) {
-                document.getElementById('username').value = savedUser;
-                document.getElementById('password').value = savedPass;
-                document.getElementById('remember-me').checked = true;
-            }
-
-            if (isLoggedIn === 'true' && savedUser && savedPass) {
-                fazerLogin(true);
-            }
-        });
-
-        async function fazerLogin(autoLogin = false) {
-            const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-            const remember = document.getElementById('remember-me').checked;
-            const errorDiv = document.getElementById('login-error');
-
-            errorDiv.innerText = '';
-            if (!user || !pass) { errorDiv.innerText = 'Preencha usuário e senha!'; return; }
-
-            try {
-                const snapshot = await db.collection('usuarios')
-                    .where('usuario', '==', user)
-                    .where('senha', '==', pass)
-                    .get();
-
-                if (snapshot.empty) { errorDiv.innerText = 'Usuário ou senha incorretos!'; return; }
-
-                let userData = null;
-                snapshot.forEach(doc => userData = doc.data());
-                if (userData.ativo === false) { errorDiv.innerText = 'Sua conta está inativa!'; return; }
-
-                if (remember) {
-                    localStorage.setItem('saved_user', user);
-                    localStorage.setItem('saved_pass', pass);
-                    localStorage.setItem('is_logged_in', 'true');
-                } else {
-                    localStorage.removeItem('saved_user');
-                    localStorage.removeItem('saved_pass');
-                    localStorage.removeItem('is_logged_in');
-                }
-
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-
-                inicializarApp();
-            } catch (err) {
-                errorDiv.innerText = 'Erro ao conectar ao banco de dados.';
-            }
-        }
-
-        function fazerLogout() {
-            localStorage.removeItem('is_logged_in');
-            document.getElementById('app-screen').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-        }
-
-        function inicializarApp() {
-            if (!localStorage.getItem('servicosCadastrados')) localStorage.setItem('servicosCadastrados', JSON.stringify([]));
-            if (!localStorage.getItem('funcionariosCadastrados')) localStorage.setItem('funcionariosCadastrados', JSON.stringify([]));
-            
-            renderizarListaServicosCadastrados();
-            renderizarListaFuncionariosCadastrados();
-            atualizarSelectFiltroExecutor();
-            gerarRankingEquipe('hoje');
-
-            if (!carregarRascunho()) {
-                resetarDataHoje();
-                if (contadorOperacoes === 0) adicionarOperacao();
-            }
-        }
-
-        function navegarPara(panelId, navBtnId) {
-            ['main-panel', 'funcionarios-painel', 'historico-painel', 'servicos-painel'].forEach(p => {
-                document.getElementById(p).style.display = 'none';
-            });
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-
-            document.getElementById(panelId).style.display = 'block';
-            document.getElementById(navBtnId).classList.add('active');
-
-            if(panelId === 'historico-painel') buscarHistorico();
-            if(panelId === 'funcionarios-painel') gerarRankingEquipe('hoje');
-        }
-
-        function salvarRascunho() {
-            const dia = document.getElementById('dia').value;
-            const mes = document.getElementById('mes').value;
-            const ano = document.getElementById('ano').value;
-
-            const operacoes = [];
-            document.querySelectorAll('#operacoes-container .op-row-item').forEach((card) => {
-                operacoes.push({
-                    servico: card.querySelector('.servico').value,
-                    qtd: card.querySelector('.qtd').value,
-                    valor: card.querySelector('.valor').value,
-                    executor: card.querySelector('.select-executor').value
-                });
-            });
-
-            localStorage.setItem('rascunho_producao', JSON.stringify({ dia, mes, ano, operacoes, registroEmEdicaoId }));
-        }
-
-        function carregarRascunho() {
-            const rascunho = JSON.parse(localStorage.getItem('rascunho_producao'));
-            if (!rascunho || !rascunho.operacoes || rascunho.operacoes.length === 0) return false;
-
-            document.getElementById('dia').value = rascunho.dia || '';
-            document.getElementById('mes').value = rascunho.mes || '';
-            document.getElementById('ano').value = rascunho.ano || '';
-            registroEmEdicaoId = rascunho.registroEmEdicaoId || null;
-
-            document.getElementById('operacoes-container').innerHTML = '';
-            contadorOperacoes = 0;
-            rascunho.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
-            return true;
-        }
-
-        function limparRascunho() { localStorage.removeItem('rascunho_producao'); }
-
-        function resetarDataHoje() {
-            const hoje = new Date();
-            document.getElementById('dia').value = hoje.getDate();
-            document.getElementById('mes').value = mesesNomes[hoje.getMonth()];
-            document.getElementById('ano').value = hoje.getFullYear();
-        }
-
-        function novoDia() {
-            if (confirm("Deseja limpar as operações da tela para iniciar um novo dia?")) {
-                document.getElementById('operacoes-container').innerHTML = '';
-                contadorOperacoes = 0;
-                registroEmEdicaoId = null;
-                limparRascunho();
-                resetarDataHoje();
-                adicionarOperacao();
-            }
-        }
-
-        function salvarNovoServicoCadastrado() {
-            const nome = document.getElementById('novo-servico-nome').value.trim();
-            const valor = parseFloat(document.getElementById('novo-servico-valor').value) || 0;
-            if (!nome) { alert('Digite o nome do serviço!'); return; }
-
-            let servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            servicos.push({ nome, valor });
-            localStorage.setItem('servicosCadastrados', JSON.stringify(servicos));
-
-            document.getElementById('novo-servico-nome').value = '';
-            document.getElementById('novo-servico-valor').value = '';
-
-            renderizarListaServicosCadastrados();
-            atualizarTodosOsSelects();
-            alert('Serviço cadastrado!');
-        }
-
-        function removerServicoCadastrado(index) {
-            if (!confirm('Deseja excluir este serviço cadastrado?')) return;
-            let servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            servicos.splice(index, 1);
-            localStorage.setItem('servicosCadastrados', JSON.stringify(servicos));
-            renderizarListaServicosCadastrados();
-            atualizarTodosOsSelects();
-        }
-
-        function renderizarListaServicosCadastrados() {
-            const container = document.getElementById('lista-servicos-cadastrados');
-            const servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            if (servicos.length === 0) { container.innerHTML = '<p style="font-size:12px; color:#666;">Nenhum serviço cadastrado.</p>'; return; }
-
-            let html = '<ul style="padding-left: 18px; font-size: 13px; margin: 0;">';
-            servicos.forEach((s, idx) => {
-                html += `<li style="margin-bottom: 6px;"><b>${s.nome}</b> - R$ ${s.valor.toFixed(2)} <button style="background:none; border:none; cursor:pointer;" onclick="removerServicoCadastrado(${idx})">🗑️</button></li>`;
-            });
-            container.innerHTML = html + '</ul>';
-        }
-
-        function salvarNovoFuncionarioCadastrado() {
-            const nome = document.getElementById('func-nome').value.trim();
-            const valor = parseFloat(document.getElementById('func-valor').value) || 0;
-            if (!nome) { alert('Digite o nome do funcionário!'); return; }
-
-            let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            funcionarios.push({ nome, valor });
-            localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
-
-            document.getElementById('func-nome').value = '';
-            document.getElementById('func-valor').value = '';
-
-            renderizarListaFuncionariosCadastrados();
-            atualizarTodosOsSelects();
-            gerarRankingEquipe('hoje');
-            alert('Funcionário cadastrado!');
-        }
-
-        function prepararEdicaoFuncionario(index) {
-            const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            const f = funcionarios[index];
-            if (!f) return;
-
-            document.getElementById('func-nome').value = f.nome;
-            document.getElementById('func-valor').value = f.valor;
-            funcionarioEmEdicaoIndex = index;
-
-            const btn = document.getElementById('btn-salvar-func');
-            btn.innerText = 'Salvar Alterações';
-            btn.setAttribute('onclick', 'salvarEdicaoFuncionario()');
-        }
-
-        function salvarEdicaoFuncionario() {
-            const nome = document.getElementById('func-nome').value.trim();
-            const valor = parseFloat(document.getElementById('func-valor').value) || 0;
-            if (!nome) { alert('Digite o nome do funcionário!'); return; }
-
-            let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            if (funcionarioEmEdicaoIndex !== null && funcionarios[funcionarioEmEdicaoIndex]) {
-                funcionarios[funcionarioEmEdicaoIndex] = { nome, valor };
-                localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
-            }
-
-            document.getElementById('func-nome').value = '';
-            document.getElementById('func-valor').value = '';
-            funcionarioEmEdicaoIndex = null;
-
-            const btn = document.getElementById('btn-salvar-func');
-            btn.innerText = 'Salvar Funcionário';
-            btn.setAttribute('onclick', 'salvarNovoFuncionarioCadastrado()');
-
-            renderizarListaFuncionariosCadastrados();
-            atualizarTodosOsSelects();
-            gerarRankingEquipe('hoje');
-            alert('Funcionário atualizado com sucesso!');
-        }
-
-        function removerFuncionarioCadastrado(index) {
-            if (!confirm('Deseja excluir este funcionário?')) return;
-            let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            funcionarios.splice(index, 1);
-            localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
-            renderizarListaFuncionariosCadastrados();
-            atualizarTodosOsSelects();
-            gerarRankingEquipe('hoje');
-        }
-
-        function renderizarListaFuncionariosCadastrados() {
-            const container = document.getElementById('lista-funcionarios-cadastrados');
-            const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            if (funcionarios.length === 0) { container.innerHTML = '<p style="font-size:12px; color:#666;">Nenhum funcionário cadastrado.</p>'; return; }
-
-            let html = '<ul style="padding-left: 18px; font-size: 13px; margin: 0;">';
-            funcionarios.forEach((f, idx) => {
-                html += `
-                    <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <span><b>${f.nome}</b> - R$ ${f.valor.toFixed(2)}/dia</span>
-                        <div>
-                            <button style="background:none; border:none; cursor:pointer;" onclick="prepararEdicaoFuncionario(${idx})" title="Editar">✏️</button>
-                            <button style="background:none; border:none; cursor:pointer;" onclick="removerFuncionarioCadastrado(${idx})" title="Excluir">🗑️</button>
-                        </div>
-                    </li>`;
-            });
-            container.innerHTML = html + '</ul>';
-        }
-
-        function gerarRankingEquipe(periodo) {
-            ['chip-rank-hoje', 'chip-rank-semana', 'chip-rank-mes'].forEach(id => {
-                const el = document.getElementById(id); if (el) el.classList.remove('active');
-            });
-            const chipAtivo = document.getElementById(`chip-rank-${periodo}`);
-            if (chipAtivo) chipAtivo.classList.add('active');
-
-            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const hoje = new Date();
-            let inicioIso = '';
-
-            if (periodo === 'hoje') { inicioIso = hoje.toISOString().slice(0, 10); } 
-            else if (periodo === 'semana') {
-                const day = hoje.getDay();
-                const d = new Date(hoje);
-                d.setDate(d.getDate() - day + (day === 0 ? -6 : 1));
-                inicioIso = d.toISOString().slice(0, 10);
-            } else if (periodo === 'mes') {
-                inicioIso = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().slice(0, 10);
-            }
-
-            const dados = {};
-            hist.forEach(item => {
-                if (item.dataIso >= inicioIso) {
-                    item.operacoes.forEach(op => {
-                        const exec = op.executor && op.executor !== 'mim' ? op.executor : 'Você';
-                        if (!dados[exec]) dados[exec] = { pecas: 0, valor: 0 };
-                        dados[exec].pecas += (op.qtd || 0);
-                        dados[exec].valor += ((op.qtd || 0) * (op.valor || 0));
-                    });
-                }
-            });
-
-            const listaOrdenada = Object.keys(dados).map(k => ({
-                nome: k, pecas: dados[k].pecas, valor: dados[k].valor
-            })).sort((a, b) => b.pecas - a.pecas);
-
-            const container = document.getElementById('ranking-container');
-            if (listaOrdenada.length === 0) {
-                container.innerHTML = `<p style="font-size:12px; color:#777; margin:0; text-align:center;">Nenhuma produção neste período.</p>`;
-                return;
-            }
-
-            let html = '';
-            listaOrdenada.forEach((item, idx) => {
-                const medalha = idx === 0 ? '🏆 ' : `${idx + 1}º `;
-                html += `
-                    <div class="ranking-item">
-                        <div>
-                            <b>${medalha}${item.nome}</b>
-                            <div style="font-size:11px; color:#666;">Gerou R$ ${item.valor.toFixed(2)}</div>
-                        </div>
-                        <span class="ranking-badge">${item.pecas} pcs</span>
-                    </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        function gerarOptionsServicos(servicoAtual = '') {
-            const servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            let options = `<option value="">Selecione...</option>`;
-            servicos.forEach(s => {
-                options += `<option value="${s.nome}" data-valor="${s.valor}" ${s.nome === servicoAtual ? 'selected' : ''}>${s.nome} (R$ ${s.valor.toFixed(2)})</option>`;
-            });
-            return options;
-        }
-
-        function gerarOptionsExecutores(executorAtual = 'mim') {
-            const funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            let options = `<option value="mim" ${executorAtual === 'mim' ? 'selected' : ''}>Minha Produção</option>`;
-            funcionarios.forEach(f => {
-                options += `<option value="${f.nome}" ${f.nome === executorAtual ? 'selected' : ''}>${f.nome}</option>`;
-            });
-            return options;
-        }
-
-        function atualizarTodosOsSelects() {
-            document.querySelectorAll('.select-servico').forEach(s => s.innerHTML = gerarOptionsServicos(s.value));
-            document.querySelectorAll('.select-executor').forEach(s => s.innerHTML = gerarOptionsExecutores(s.value));
-            atualizarSelectFiltroExecutor();
-        }
-
-        function atualizarSelectFiltroExecutor() {
-            const sel = document.getElementById('filtro-executor');
-            const atual = sel.value;
-            let options = `<option value="">Todos (Geral)</option><option value="mim">Minha Produção</option>`;
-            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
-                options += `<option value="${f.nome}">${f.nome}</option>`;
-            });
-            sel.innerHTML = options;
-            sel.value = atual;
-        }
-
-        function selecionarServicoPredefinido(id, selectElement) {
-            const option = selectElement.options[selectElement.selectedIndex];
-            const card = document.getElementById(`op-card-${id}`);
-            if (selectElement.value !== "") {
-                card.querySelector('.servico').value = selectElement.value;
-                card.querySelector('.valor').value = option.getAttribute('data-valor') || 0;
-                calcularTotalOperacao(id);
-            }
-        }
-
-        function adicionarOperacao(servico = '', qtd = 0, valor = 0, executor = 'mim') {
-            contadorOperacoes++;
-            const idAtual = contadorOperacoes;
-            const html = `
-                <div class="op-row-item" id="op-card-${idAtual}">
-                    <div class="op-row-header">
-                        <span>Item #${idAtual}</span>
-                        <button style="background:none; border:none; cursor:pointer;" onclick="removerOperacao(${idAtual})">🗑️</button>
-                    </div>
-                    <div class="op-grid">
-                        <div class="op-grid-cell">
-                            <label>Quem Fez?</label>
-                            <select class="select-executor" onchange="calcularTotalDia(); salvarRascunho();">${gerarOptionsExecutores(executor)}</select>
-                        </div>
-                        <div class="op-grid-cell">
-                            <label>Atalho Serviço</label>
-                            <select class="select-servico" onchange="selecionarServicoPredefinido(${idAtual}, this)">${gerarOptionsServicos(servico)}</select>
-                        </div>
-                    </div>
-                    <div class="op-grid-3">
-                        <div class="op-grid-cell">
-                            <label>Serviço</label>
-                            <input type="text" class="servico" value="${servico}" oninput="salvarRascunho()">
-                        </div>
-                        <div class="op-grid-cell">
-                            <label>Qtd / Valor</label>
-                            <div style="display:flex; gap:2px;">
-                                <input type="number" inputmode="numeric" class="qtd" value="${qtd}" placeholder="Qtd" oninput="calcularTotalOperacao(${idAtual})" onclick="this.select()">
-                                <input type="number" step="0.01" inputmode="decimal" class="valor" value="${valor}" placeholder="R$" oninput="calcularTotalOperacao(${idAtual})" onclick="this.select()">
-                            </div>
-                        </div>
-                        <div class="op-grid-cell">
-                            <label>Subtotal</label>
-                            <div class="total-badge total-op">R$ 0,00</div>
-                        </div>
-                    </div>
-                </div>`;
-            document.getElementById('operacoes-container').insertAdjacentHTML('beforeend', html);
-            calcularTotalOperacao(idAtual);
-            salvarRascunho();
-        }
-
-        function removerOperacao(id) {
-            if (document.querySelectorAll('#operacoes-container .op-row-item').length <= 1) { alert('Mínimo de 1 operação.'); return; }
-            document.getElementById(`op-card-${id}`).remove();
-            calcularTotalDia();
-            salvarRascunho();
-        }
-
-        function calcularTotalOperacao(id) {
-            const card = document.getElementById(`op-card-${id}`);
-            if (!card) return;
-            const qtd = parseFloat(card.querySelector('.qtd').value) || 0;
-            const valor = parseFloat(card.querySelector('.valor').value) || 0;
-            const total = qtd * valor;
-            card.querySelector('.total-op').innerText = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            calcularTotalDia();
-            salvarRascunho();
-        }
-
-        function calcularTotalDia() {
-            let totalBruto = 0;
-            let minhaProducao = 0;
-            const prodFuncs = {};
-            const funcsMap = {};
-
-            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
-
-            document.querySelectorAll('#operacoes-container .op-row-item').forEach(card => {
-                const qtd = parseFloat(card.querySelector('.qtd').value) || 0;
-                const valor = parseFloat(card.querySelector('.valor').value) || 0;
-                const subTotal = qtd * valor;
-                totalBruto += subTotal;
-
-                const exec = card.querySelector('.select-executor').value;
-                if (exec === 'mim') {
-                    minhaProducao += subTotal;
-                } else {
-                    if (!prodFuncs[exec]) prodFuncs[exec] = { gerado: 0, custo: 0 };
-                    prodFuncs[exec].gerado += subTotal;
-                    if (funcsMap[exec]) prodFuncs[exec].custo = funcsMap[exec].valor;
-                }
-            });
-
-            document.getElementById('total-dia').innerText = totalBruto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-            let htmlDetalhes = `<div class="lucro-linha"><span>Sua Produção:</span> <b>R$ ${minhaProducao.toFixed(2)}</b></div>`;
-            let lucroTotalDoDia = minhaProducao;
-
-            Object.keys(prodFuncs).forEach(nomeFunc => {
-                const gerado = prodFuncs[nomeFunc].gerado;
-                const custo = prodFuncs[nomeFunc].custo;
-                const sobra = gerado - custo;
-                lucroTotalDoDia += sobra;
-
-                htmlDetalhes += `
-                    <div style="background:#ffffff; border:1px solid #e2e8f0; padding:6px 10px; border-radius:8px; margin:6px 0;">
-                        <div class="lucro-linha"><span>Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
-                        <div class="lucro-linha" style="color:var(--danger-color);"><span>Diária:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
-                        <div class="lucro-linha" style="color:var(--primary-color);"><span>Sobra de ${nomeFunc}:</span> <b>R$ ${sobra.toFixed(2)}</b></div>
-                    </div>`;
-            });
-
-            htmlDetalhes += `
-                <div class="lucro-linha destaque-sobra">
-                    <span>SEU LUCRO FINAL HOJE:</span> 
-                    <b style="font-size:15px;">R$ ${lucroTotalDoDia.toFixed(2)}</b>
-                </div>`;
-
-            document.getElementById('lucro-liquido-dia').innerHTML = htmlDetalhes;
-        }
-
-        function finalizarDia() {
-            const dia = document.getElementById('dia').value.trim();
-            const mes = document.getElementById('mes').value.trim().toLowerCase();
-            const ano = document.getElementById('ano').value.trim();
-
-            if (!dia || !mes || !ano) { alert('Preencha a data!'); return; }
-
-            const totalBrutoStr = document.getElementById('total-dia').innerText;
-            const brutoNum = parseFloat(totalBrutoStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
-
-            const operacoes = [];
-            document.querySelectorAll('#operacoes-container .op-row-item').forEach(card => {
-                operacoes.push({
-                    servico: card.querySelector('.servico').value || 'Geral',
-                    qtd: parseFloat(card.querySelector('.qtd').value) || 0,
-                    valor: parseFloat(card.querySelector('.valor').value) || 0,
-                    total: card.querySelector('.total-op').innerText,
-                    executor: card.querySelector('.select-executor').value
-                });
-            });
-
-            const registro = {
-                id: registroEmEdicaoId ? registroEmEdicaoId : Date.now(),
-                dia, mes, ano,
-                dataTexto: `${dia}/${mes}/${ano}`,
-                dataIso: `${ano}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`,
-                total: totalBrutoStr,
-                totalNumerico: brutoNum,
-                operacoes
-            };
-
-            let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const idx = hist.findIndex(i => i.id === registro.id);
-            if (idx !== -1) hist[idx] = registro; else hist.push(registro);
-            localStorage.setItem('historicoProducao', JSON.stringify(hist));
-
-            limparRascunho();
-            registroEmEdicaoId = null;
-            alert('Dia salvo com sucesso!');
-            gerarRankingEquipe('hoje');
-        }
-
-        function filtrarRapido(tipo) {
-            const hoje = new Date();
-            let inicio, fim;
-            if (tipo === 'hoje') { inicio = new Date(hoje); fim = new Date(hoje); }
-            else if (tipo === 'semana') {
-                const day = hoje.getDay();
-                inicio = new Date(hoje.setDate(hoje.getDate() - day + (day === 0 ? -6 : 1)));
-                fim = new Date();
-            }
-            else if (tipo === 'mes') { inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1); fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); }
-
-            document.getElementById('data-inicio').value = inicio.toISOString().slice(0,10);
-            document.getElementById('data-fim').value = fim.toISOString().slice(0,10);
-            buscarHistorico();
-        }
-
-        function normalizarNomeServico(nome) {
-            if (!nome) return "Geral";
-            let str = nome.trim().toLowerCase();
-            if (str === "manda aberta") str = "manga aberta";
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        function buscarHistorico() {
-            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const ini = document.getElementById('data-inicio').value;
-            const fim = document.getElementById('data-fim').value;
-            const execFiltro = document.getElementById('filtro-executor').value;
-
-            let filtrados = hist.filter(item => {
-                if (ini && item.dataIso < ini) return false;
-                if (fim && item.dataIso > fim) return false;
-                if (execFiltro) {
-                    const tem = item.operacoes.some(op => (op.executor || 'mim') === execFiltro);
-                    if (!tem) return false;
-                }
-                return true;
-            });
-
-            filtrados.sort((a, b) => b.dataIso.localeCompare(a.dataIso));
-            renderizarHistorico(filtrados, execFiltro);
-            renderizarGrafico(filtrados, execFiltro);
-        }
-
-        function renderizarHistorico(lista, filtroExecutor = '') {
-            const container = document.getElementById('lista-historico');
-            const resumoBox = document.getElementById('resumo-total-periodo');
-            const btnExportar = document.getElementById('btn-exportar');
-            container.innerHTML = '';
-
-            if (lista.length === 0) {
-                container.innerHTML = '<p style="color:#666; font-size:13px;">Nenhum registro encontrado.</p>';
-                resumoBox.style.display = 'none'; btnExportar.style.display = 'none';
-                return;
-            }
-
-            let somaTotalBruto = 0;
-            let somaPecas = 0;
-            let somaCustoFuncionario = 0;
-            const funcsMap = {};
-            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
-
-            lista.forEach(item => {
-                let subTotalCard = 0;
-                let opsHTML = '';
-
-                const operacoesExibidas = item.operacoes.filter(op => {
-                    const exec = op.executor || 'mim';
-                    if (filtroExecutor && exec !== filtroExecutor) return false;
-                    return true;
-                });
-
-                if (operacoesExibidas.length === 0) return;
-
-                operacoesExibidas.forEach(op => {
-                    const qtd = op.qtd || 0;
-                    const val = op.valor || 0;
-                    const sub = qtd * val;
-                    subTotalCard += sub;
-                    somaPecas += qtd;
-
-                    const nomeFormatado = normalizarNomeServico(op.servico);
-                    const quem = op.executor && op.executor !== 'mim' ? ` (${op.executor})` : ' (Você)';
-                    opsHTML += `<div style="font-size:12px; margin-bottom:2px; color:#444;">• <b>${nomeFormatado}</b>${quem}: ${qtd}x = R$ ${sub.toFixed(2)}</div>`;
-
-                    const exec = op.executor || 'mim';
-                    if (exec !== 'mim' && funcsMap[exec]) {
-                        somaCustoFuncionario += funcsMap[exec].valor;
-                    }
-                });
-
-                somaTotalBruto += subTotalCard;
-
-                container.innerHTML += `
-                    <div class="card-historico">
-                        <div class="card-header">
-                            <span>📅 ${item.dataTexto}</span>
-                            <div>
-                                <span style="color:var(--primary-color);">R$ ${subTotalCard.toFixed(2)}</span> 
-                                <button style="background:none;border:none;" onclick="editarRegistro(${item.id})">✏️</button> 
-                                <button style="background:none;border:none;" onclick="excluirRegistro(${item.id})">🗑️</button>
-                            </div>
-                        </div>
-                        ${opsHTML}
-                    </div>`;
-            });
-
-            const lucroLiquidoReal = somaTotalBruto - somaCustoFuncionario;
-            resumoBox.style.display = 'block';
-            let detalheLucro = (filtroExecutor && filtroExecutor !== 'mim') 
-                ? `<br><span style="font-size:11px; color:var(--danger-color);">Desconto diárias: R$ ${somaCustoFuncionario.toFixed(2)}</span><br><b style="color:var(--primary-color);">Sobra pra Você: R$ ${lucroLiquidoReal.toFixed(2)}</b>`
-                : '';
-
-            resumoBox.innerHTML = `Total Período (${lista.length} dias): <b>R$ ${somaTotalBruto.toFixed(2)}</b> | Peças: ${somaPecas}${detalheLucro}`;
-            btnExportar.style.display = 'block';
-        }
-
-        function renderizarGrafico(lista, filtroExecutor = '') {
-            const box = document.getElementById('grafico-container');
-            const barras = document.getElementById('barras-grafico');
-            barras.innerHTML = '';
-            if (lista.length === 0) { box.style.display = 'none'; return; }
-
-            const counts = {}; let max = 0;
-            lista.forEach(i => i.operacoes.forEach(op => {
-                const exec = op.executor || 'mim';
-                if (!filtroExecutor || exec === filtroExecutor) {
-                    const nome = normalizarNomeServico(op.servico);
-                    counts[nome] = (counts[nome] || 0) + op.qtd;
-                    if (counts[nome] > max) max = counts[nome];
-                }
-            }));
-
-            const keys = Object.keys(counts);
-            if (keys.length === 0) { box.style.display = 'none'; return; }
-
-            keys.forEach(k => {
-                const pct = max > 0 ? (counts[k] / max) * 100 : 0;
-                barras.innerHTML += `<div style="margin-bottom:6px;"><div style="display:flex; justify-content:space-between; font-size:11px;"><span>${k}</span><span>${counts[k]} pcs</span></div><div style="background:#e2e8f0; height:8px; border-radius:4px;"><div style="background:var(--primary-color); height:100%; width:${pct}%; border-radius:4px;"></div></div></div>`;
-            });
-            box.style.display = 'block';
-        }
-
-        function exportarRelatorioWhatsApp() {
-            let txt = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
-            let total = 0;
-            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            hist.forEach(i => {
-                total += i.totalNumerico;
-                txt += `\n📅 *${i.dataTexto}* (${i.total})\n`;
-                i.operacoes.forEach(op => {
-                    txt += ` • ${normalizarNomeServico(op.servico)} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
-                });
-            });
-            txt += `\n💰 *TOTAL GERAL: R$ ${total.toFixed(2)}*`;
-            navigator.clipboard.writeText(txt).then(() => alert('Relatório copiado para colar no WhatsApp!'));
-        }
-
-        function excluirRegistro(id) {
-            if (!confirm('Deseja excluir este registro?')) return;
-            let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            localStorage.setItem('historicoProducao', JSON.stringify(hist.filter(i => i.id !== id)));
-            buscarHistorico();
-            gerarRankingEquipe('hoje');
-        }
-
-        function editarRegistro(id) {
-            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const reg = hist.find(i => i.id === id);
-            if (!reg) return;
-
-            registroEmEdicaoId = reg.id;
-            document.getElementById('dia').value = reg.dia;
-            document.getElementById('mes').value = reg.mes;
-            document.getElementById('ano').value = reg.ano;
-            document.getElementById('operacoes-container').innerHTML = '';
-            contadorOperacoes = 0;
-
-            reg.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
-            navegarPara('main-panel', 'nav-inicio');
-            alert('Dados carregados! Altere o que precisar e clique em Salvar.');
-        }
-
-        function fazerBackup() {
-            const dados = {
-                historico: JSON.parse(localStorage.getItem('historicoProducao')),
-                servicos: JSON.parse(localStorage.getItem('servicosCadastrados')),
-                funcionarios: JSON.parse(localStorage.getItem('funcionariosCadastrados'))
-            };
-            const link = document.createElement('a');
-            link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dados, null, 2));
-            link.download = `backup_producao_${new Date().toISOString().slice(0,10)}.json`;
-            link.click();
-        }
-
-        function restaurarBackup(e) {
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const d = JSON.parse(evt.target.result);
-                    if(d.historico) localStorage.setItem('historicoProducao', JSON.stringify(d.historico));
-                    if(d.servicos) localStorage.setItem('servicosCadastrados', JSON.stringify(d.servicos));
-                    if(d.funcionarios) localStorage.setItem('funcionariosCadastrados', JSON.stringify(d.funcionarios));
-                    inicializarApp();
-                    alert('Backup restaurado com sucesso!');
-                } catch(err) { alert('Arquivo de backup inválido.'); }
-            };
-            reader.readAsText(e.target.files[0]);
-        }
-    </script>
-</body>
-</html>
+                <h2 style="font-size: 14px; margin-top:
