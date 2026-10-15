@@ -831,7 +831,6 @@
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Carregar tema salvo
             const savedTheme = localStorage.getItem('app_theme') || 'light';
             if (savedTheme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
@@ -1361,11 +1360,21 @@
                 });
             });
 
+            // Correção robusta da data ISO para evitar problemas de fuso horário / string de comparação
+            const mesIndex = mesesNomes.indexOf(mes);
+            let dataIsoStr = '';
+            if (mesIndex !== -1) {
+                const dObj = new Date(parseInt(ano), mesIndex, parseInt(dia));
+                dataIsoStr = dObj.toISOString().slice(0, 10);
+            } else {
+                dataIsoStr = `${ano}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`;
+            }
+
             const registro = {
                 id: registroEmEdicaoId ? registroEmEdicaoId : Date.now(),
                 dia, mes, ano,
                 dataTexto: `${dia}/${mes}/${ano}`,
-                dataIso: `${ano}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`,
+                dataIso: dataIsoStr,
                 total: totalBrutoStr,
                 totalNumerico: brutoNum,
                 operacoes
@@ -1456,8 +1465,18 @@
             const execFiltro = document.getElementById('filtro-executor').value;
 
             let filtrados = hist.filter(item => {
-                if (ini && item.dataIso < ini) return false;
-                if (fim && item.dataIso > fim) return false;
+                // Assegurar fallback de dataIso caso algum registro antigo não tenha a propriedade
+                let itemIso = item.dataIso;
+                if (!itemIso && item.dia && item.mes && item.ano) {
+                    const mIdx = mesesNomes.indexOf(item.mes.toLowerCase());
+                    if (mIdx !== -1) {
+                        itemIso = new Date(parseInt(item.ano), mIdx, parseInt(item.dia)).toISOString().slice(0, 10);
+                    }
+                }
+
+                if (ini && itemIso < ini) return false;
+                if (fim && itemIso > fim) return false;
+                
                 if (execFiltro) {
                     const tem = item.operacoes.some(op => (op.executor || 'mim') === execFiltro);
                     if (!tem) return false;
@@ -1620,7 +1639,7 @@
 
             reg.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
             alternarPainel('main-panel', 'nav-inicio');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 'smooth' });
             alert('Ajuste os dados no topo e clique em "Finalizar Dia".');
         }
 
