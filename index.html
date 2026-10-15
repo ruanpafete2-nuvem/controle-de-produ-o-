@@ -1340,11 +1340,11 @@
         }
 
         function finalizarDia() {
-            const dia = document.getElementById('dia').value.trim();
-            const mes = document.getElementById('mes').value.trim().toLowerCase();
-            const ano = document.getElementById('ano').value.trim();
+            const diaStr = document.getElementById('dia').value.trim();
+            const mesStr = document.getElementById('mes').value.trim().toLowerCase();
+            const anoStr = document.getElementById('ano').value.trim();
 
-            if (!dia || !mes || !ano) { alert('Preencha a data!'); return; }
+            if (!diaStr || !mesStr || !anoStr) { alert('Preencha a data!'); return; }
 
             const totalBrutoStr = document.getElementById('total-dia').innerText;
             const brutoNum = parseFloat(totalBrutoStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
@@ -1360,20 +1360,22 @@
                 });
             });
 
-            // Correção robusta da data ISO para evitar problemas de fuso horário / string de comparação
-            const mesIndex = mesesNomes.indexOf(mes);
-            let dataIsoStr = '';
-            if (mesIndex !== -1) {
-                const dObj = new Date(parseInt(ano), mesIndex, parseInt(dia));
-                dataIsoStr = dObj.toISOString().slice(0, 10);
-            } else {
-                dataIsoStr = `${ano}-${mes.padStart(2,'0')}-${dia.padStart(2,'0')}`;
-            }
+            // Geração blindada da data ISO evitando erros com nomes de mês
+            let mesIndex = mesesNomes.findIndex(m => m.startsWith(mesStr));
+            if (mesIndex === -1) mesIndex = 9; // Fallback para outubro se houver digitação divergente
+
+            const dObj = new Date(parseInt(anoStr), mesIndex, parseInt(diaStr));
+            const y = dObj.getFullYear();
+            const m = String(dObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dObj.getDate()).padStart(2, '0');
+            const dataIsoStr = `${y}-${m}-${d}`;
 
             const registro = {
                 id: registroEmEdicaoId ? registroEmEdicaoId : Date.now(),
-                dia, mes, ano,
-                dataTexto: `${dia}/${mes}/${ano}`,
+                dia: diaStr, 
+                mes: mesStr, 
+                ano: anoStr,
+                dataTexto: `${diaStr}/${mesStr}/${anoStr}`,
                 dataIso: dataIsoStr,
                 total: totalBrutoStr,
                 totalNumerico: brutoNum,
@@ -1465,14 +1467,16 @@
             const execFiltro = document.getElementById('filtro-executor').value;
 
             let filtrados = hist.filter(item => {
-                // Assegurar fallback de dataIso caso algum registro antigo não tenha a propriedade
                 let itemIso = item.dataIso;
                 if (!itemIso && item.dia && item.mes && item.ano) {
-                    const mIdx = mesesNomes.indexOf(item.mes.toLowerCase());
+                    const mIdx = mesesNomes.findIndex(m => m.startsWith(item.mes.toLowerCase()));
                     if (mIdx !== -1) {
-                        itemIso = new Date(parseInt(item.ano), mIdx, parseInt(item.dia)).toISOString().slice(0, 10);
+                        const dObj = new Date(parseInt(item.ano), mIdx, parseInt(item.dia));
+                        itemIso = dObj.toISOString().slice(0, 10);
                     }
                 }
+
+                if (!itemIso) return false;
 
                 if (ini && itemIso < ini) return false;
                 if (fim && itemIso > fim) return false;
@@ -1639,7 +1643,7 @@
 
             reg.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
             alternarPainel('main-panel', 'nav-inicio');
-            window.scrollTo({ top: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             alert('Ajuste os dados no topo e clique em "Finalizar Dia".');
         }
 
