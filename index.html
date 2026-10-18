@@ -426,7 +426,7 @@
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
-            padding: 10px 0 12px 0;
+            padding: 8px 0 10px 0;
             z-index: 100;
             box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
         }
@@ -435,19 +435,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             font-family: 'Inter', sans-serif;
             color: var(--text-muted);
             background: none;
             border: none;
             cursor: pointer;
-            gap: 4px;
+            gap: 2px;
             transition: color 0.15s ease;
+            flex: 1;
         }
 
         .nav-item .icon {
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .nav-item.active {
@@ -591,6 +592,19 @@
             font-size: 11px;
         }
 
+        .ponto-btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .ponto-btn-grid button {
+            padding: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
         .backup-discreto {
             margin-top: 24px;
             padding-top: 14px;
@@ -683,6 +697,38 @@
                 </div>
 
                 <button class="btn btn-green btn-full" style="padding: 12px; font-size: 14px;" onclick="finalizarDia()">💾 Finalizar Dia</button>
+            </div>
+
+            <!-- PAINEL DE CONTROLE DE PONTO -->
+            <div id="ponto-painel" class="box-section">
+                <h2>⏱️ Controle de Ponto</h2>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Selecione o funcionário e registre os horários do dia:</p>
+                
+                <div class="filter-field">
+                    <label for="ponto-funcionario">Funcionário:</label>
+                    <select id="ponto-funcionario" onchange="carregarPontoFuncionarioDia()"></select>
+                </div>
+
+                <div class="filter-field">
+                    <label for="ponto-data">Data do Ponto:</label>
+                    <input type="date" id="ponto-data" onchange="carregarPontoFuncionarioDia()">
+                </div>
+
+                <div class="ponto-btn-grid" style="margin-top: 15px;">
+                    <button class="btn" onclick="baterPonto('chegada')">🟢 Chegada</button>
+                    <button class="btn" onclick="baterPonto('saidaCafe')">☕ Saída Café</button>
+                    <button class="btn" onclick="baterPonto('voltaCafe')">✅ Volta Café</button>
+                    <button class="btn" onclick="baterPonto('saidaAlmoco')">🍽️ Saída Almoço</button>
+                    <button class="btn" onclick="baterPonto('voltaAlmoco')">🔙 Volta Almoço</button>
+                    <button class="btn btn-green" onclick="baterPonto('saida')">🏁 Fim do Dia</button>
+                </div>
+
+                <div id="resumo-ponto-dia" style="background: var(--op-header-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 12px;">
+                    <b>Horários Registrados:</b>
+                    <div id="lista-horarios-ponto" style="margin-top: 6px; color: var(--text-muted);">Nenhum horário registrado.</div>
+                </div>
+
+                <button class="btn btn-green btn-full" style="margin-top: 15px;" onclick="salvarPontoDia()">💾 Salvar Ponto</button>
             </div>
 
             <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS + COMPARATIVO -->
@@ -786,6 +832,10 @@
                     <span class="icon">📱</span>
                     <span>Lançar</span>
                 </button>
+                <button class="nav-item" id="nav-ponto" onclick="alternarPainel('ponto-painel', 'nav-ponto')">
+                    <span class="icon">⏱️</span>
+                    <span>Ponto</span>
+                </button>
                 <button class="nav-item" id="nav-equipe" onclick="alternarPainel('funcionarios-painel', 'nav-equipe')">
                     <span class="icon">👥</span>
                     <span>Equipe</span>
@@ -828,6 +878,7 @@
         let contadorOperacoes = 0;
         let registroEmEdicaoId = null;
         let funcionarioEmEdicaoIndex = null;
+        let pontoAtualTemp = { chegada: '', saidaCafe: '', voltaCafe: '', saidaAlmoco: '', voltaAlmoco: '', saida: '' };
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -926,11 +977,17 @@
         function inicializarApp() {
             if (!localStorage.getItem('servicosCadastrados')) localStorage.setItem('servicosCadastrados', JSON.stringify([]));
             if (!localStorage.getItem('funcionariosCadastrados')) localStorage.setItem('funcionariosCadastrados', JSON.stringify([]));
+            if (!localStorage.getItem('controlePonto')) localStorage.setItem('controlePonto', JSON.stringify([]));
             
             renderizarListaServicosCadastrados();
             renderizarListaFuncionariosCadastrados();
-            atualizarSelectFiltroExecutor();
+            atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
+
+            const hojeIso = new Date().toISOString().slice(0, 10);
+            const inputPontoData = document.getElementById('ponto-data');
+            if (inputPontoData) inputPontoData.value = hojeIso;
+            carregarPontoFuncionarioDia();
 
             if (!carregarRascunho()) {
                 resetarDataHoje();
@@ -993,7 +1050,7 @@
         }
 
         function alternarPainel(idPainel, idNavBtn) {
-            ['main-panel', 'funcionarios-painel', 'servicos-painel', 'historico-painel'].forEach(pId => {
+            ['main-panel', 'ponto-painel', 'funcionarios-painel', 'servicos-painel', 'historico-painel'].forEach(pId => {
                 document.getElementById(pId).style.display = 'none';
             });
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
@@ -1003,6 +1060,72 @@
 
             if(idPainel === 'historico-painel') buscarHistorico();
             if(idPainel === 'funcionarios-painel') gerarRankingEquipe('hoje');
+            if(idPainel === 'ponto-painel') carregarPontoFuncionarioDia();
+        }
+
+        // Funções de Controle de Ponto
+        function atualizarSelectPontoFuncionario() {
+            const sel = document.getElementById('ponto-funcionario');
+            if (!sel) return;
+            const atual = sel.value;
+            let options = `<option value="mim">Minha Pessoa (Você)</option>`;
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
+                options += `<option value="${f.nome}">${f.nome}</option>`;
+            });
+            sel.innerHTML = options;
+            if (atual) sel.value = atual;
+        }
+
+        function carregarPontoFuncionarioDia() {
+            atualizarSelectPontoFuncionario();
+            const func = document.getElementById('ponto-funcionario').value;
+            const data = document.getElementById('ponto-data').value;
+
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            const registro = listaPontos.find(p => p.funcionario === func && p.data === data);
+
+            if (registro) {
+                pontoAtualTemp = { ...registro };
+            } else {
+                pontoAtualTemp = { chegada: '', saidaCafe: '', voltaCafe: '', saidaAlmoco: '', voltaAlmoco: '', saida: '' };
+            }
+            renderizarVisualizacaoPonto();
+        }
+
+        function baterPonto(tipo) {
+            const agora = new Date();
+            const horaFormatada = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+            pontoAtualTemp[tipo] = horaFormatada;
+            renderizarVisualizacaoPonto();
+        }
+
+        function renderizarVisualizacaoPonto() {
+            const container = document.getElementById('lista-horarios-ponto');
+            let html = `
+                <div>🟢 Chegada: <b>${pontoAtualTemp.chegada || '--:--'}</b></div>
+                <div>☕ Saída Café: <b>${pontoAtualTemp.saidaCafe || '--:--'}</b> | Volta: <b>${pontoAtualTemp.voltaCafe || '--:--'}</b></div>
+                <div>🍽️ Saída Almoço: <b>${pontoAtualTemp.saidaAlmoco || '--:--'}</b> | Volta: <b>${pontoAtualTemp.voltaAlmoco || '--:--'}</b></div>
+                <div>🏁 Fim do Dia: <b>${pontoAtualTemp.saida || '--:--'}</b></div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function salvarPontoDia() {
+            const func = document.getElementById('ponto-funcionario').value;
+            const data = document.getElementById('ponto-data').value;
+            if (!data) { alert('Selecione a data!'); return; }
+
+            let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            listaPontos = listaPontos.filter(p => !(p.funcionario === func && p.data === data));
+
+            listaPontos.push({
+                funcionario: func,
+                data: data,
+                ...pontoAtualTemp
+            });
+
+            localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
+            alert('Horários de ponto salvos com sucesso!');
         }
 
         function salvarNovoServicoCadastrado() {
@@ -1218,6 +1341,7 @@
             document.querySelectorAll('.select-servico').forEach(s => s.innerHTML = gerarOptionsServicos(s.value));
             document.querySelectorAll('.select-executor').forEach(s => s.innerHTML = gerarOptionsExecutores(s.value));
             atualizarSelectFiltroExecutor();
+            atualizarSelectPontoFuncionario();
         }
 
         function atualizarSelectFiltroExecutor() {
@@ -1360,9 +1484,8 @@
                 });
             });
 
-            // Geração blindada da data ISO evitando erros com nomes de mês
             let mesIndex = mesesNomes.findIndex(m => m.startsWith(mesStr));
-            if (mesIndex === -1) mesIndex = 9; // Fallback para outubro se houver digitação divergente
+            if (mesIndex === -1) mesIndex = 9;
 
             const dObj = new Date(parseInt(anoStr), mesIndex, parseInt(diaStr));
             const y = dObj.getFullYear();
@@ -1651,7 +1774,8 @@
             const dados = {
                 historico: JSON.parse(localStorage.getItem('historicoProducao')),
                 servicos: JSON.parse(localStorage.getItem('servicosCadastrados')),
-                funcionarios: JSON.parse(localStorage.getItem('funcionariosCadastrados'))
+                funcionarios: JSON.parse(localStorage.getItem('funcionariosCadastrados')),
+                ponto: JSON.parse(localStorage.getItem('controlePonto'))
             };
             const link = document.createElement('a');
             link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dados, null, 2));
@@ -1667,6 +1791,7 @@
                     if(d.historico) localStorage.setItem('historicoProducao', JSON.stringify(d.historico));
                     if(d.servicos) localStorage.setItem('servicosCadastrados', JSON.stringify(d.servicos));
                     if(d.funcionarios) localStorage.setItem('funcionariosCadastrados', JSON.stringify(d.funcionarios));
+                    if(d.ponto) localStorage.setItem('controlePonto', JSON.stringify(d.ponto));
                     inicializarApp();
                     alert('Backup restaurado com sucesso!');
                 } catch(err) { alert('Arquivo de backup inválido.'); }
