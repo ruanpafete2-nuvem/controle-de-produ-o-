@@ -696,7 +696,7 @@
             <!-- PAINEL DE CONTROLE DE PONTO -->
             <div id="ponto-painel" class="box-section">
                 <h2>⏱️ Controle de Ponto e Imprevistos</h2>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Registre os horários e saídas antecipadas:</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Registre os horários (clique para alterar o horário):</p>
                 
                 <div class="filter-field">
                     <label for="ponto-funcionario">Funcionário:</label>
@@ -745,7 +745,7 @@
                 
                 <div class="filter-field">
                     <label for="func-nome">Nome do Funcionário:</label>
-                    <input type="text" id="func-nome" placeholder="Ex: João Silva">
+                    <input type="text" id="func-nome" placeholder="Ex: Micos">
                 </div>
                 <div class="filter-field">
                     <label for="func-valor">Valor do Salário / Diária (R$):</label>
@@ -1089,10 +1089,16 @@
             renderizarVisualizacaoPonto();
         }
 
+        /* PERMITIR EDITAR OU MARCAR HORA ATUAL DO PONTO */
         function baterPonto(tipo) {
             const agora = new Date();
-            const horaFormatada = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
-            pontoAtualTemp[tipo] = horaFormatada;
+            const horaPadrao = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
+            const valorAtual = pontoAtualTemp[tipo] || horaPadrao;
+
+            const novaHora = prompt(`Digite o horário de ${tipo.toUpperCase()} (ex: 08:00 ou 12:30):`, valorAtual);
+            if (novaHora === null) return; // Cancelou
+
+            pontoAtualTemp[tipo] = novaHora.trim();
             renderizarVisualizacaoPonto();
         }
 
@@ -1185,23 +1191,34 @@
             container.innerHTML = html + '</ul>';
         }
 
+        /* ADICIONAR NOVO FUNCIONÁRIO (SEM LIMITES E SEM TRAVAR) */
         function salvarNovoFuncionarioCadastrado() {
-            const nome = document.getElementById('func-nome').value.trim();
-            const valor = parseFloat(document.getElementById('func-valor').value) || 0;
+            const nomeInput = document.getElementById('func-nome');
+            const valorInput = document.getElementById('func-valor');
+            const nome = nomeInput.value.trim();
+            const valor = parseFloat(valorInput.value) || 0;
 
             if (!nome) { alert('Digite o nome do funcionário!'); return; }
 
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            
+            // Verifica se já existe um funcionário com mesmo nome
+            const existe = funcionarios.some(f => f.nome.toLowerCase() === nome.toLowerCase());
+            if (existe) {
+                alert('Já existe um funcionário cadastrado com esse nome!');
+                return;
+            }
+
             funcionarios.push({ nome, valor });
             localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
 
-            document.getElementById('func-nome').value = '';
-            document.getElementById('func-valor').value = '';
+            nomeInput.value = '';
+            valorInput.value = '';
 
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
-            alert('Funcionário cadastrado!');
+            alert(`Funcionário ${nome} cadastrado com sucesso!`);
         }
 
         function prepararEdicaoFuncionario(index) {
@@ -1215,12 +1232,14 @@
 
             const btnCadastrar = document.getElementById('btn-salvar-func');
             btnCadastrar.innerText = '💾 Salvar Alterações';
-            btnCadastrar.setAttribute('onclick', 'salvarEdicaoFuncionario()');
+            btnCadastrar.onclick = function() { salvarEdicaoFuncionario(); };
         }
 
         function salvarEdicaoFuncionario() {
-            const nome = document.getElementById('func-nome').value.trim();
-            const valor = parseFloat(document.getElementById('func-valor').value) || 0;
+            const nomeInput = document.getElementById('func-nome');
+            const valorInput = document.getElementById('func-valor');
+            const nome = nomeInput.value.trim();
+            const valor = parseFloat(valorInput.value) || 0;
 
             if (!nome) { alert('Digite o nome do funcionário!'); return; }
 
@@ -1230,13 +1249,13 @@
                 localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
             }
 
-            document.getElementById('func-nome').value = '';
-            document.getElementById('func-valor').value = '';
+            nomeInput.value = '';
+            valorInput.value = '';
             funcionarioEmEdicaoIndex = null;
 
             const btnCadastrar = document.getElementById('btn-salvar-func');
             btnCadastrar.innerText = '➕ Cadastrar Funcionário';
-            btnCadastrar.setAttribute('onclick', 'salvarNovoFuncionarioCadastrado()');
+            btnCadastrar.onclick = function() { salvarNovoFuncionarioCadastrado(); };
 
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
@@ -1365,6 +1384,7 @@
 
         function atualizarSelectFiltroExecutor() {
             const sel = document.getElementById('filtro-executor');
+            if (!sel) return;
             const atual = sel.value;
             let options = `<option value="">Todos (Geral)</option><option value="mim">Minha Produção</option>`;
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
