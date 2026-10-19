@@ -719,7 +719,7 @@
 
                 <button class="btn btn-green btn-full" onclick="salvarTodosPontosDia()">💾 Salvar Todos os Pontos</button>
 
-                <!-- SEÇÃO DO HISTÓRICO VISUAL DE PONTOS SALVOS -->
+                <!-- SEÇÃO DO HISTÓRICO VISUAL DE PONTOS SALVOS COM EDIÇÃO -->
                 <hr style="border:0; border-top: 1px solid var(--border-color); margin: 20px 0;">
                 <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">📜 Histórico de Pontos Registrados</h3>
                 <div id="historico-pontos-salvos-container"></div>
@@ -1069,7 +1069,7 @@
 
         function calcularResumoPontoCard(c, a, r, s, sImp, rImp) {
             let horasTrabalhadas = 0;
-            if (c && s) {
+            if (c && s && c !== '--:--' && s !== '--:--') {
                 let totalBruto = calcularDiferencaHoras(c, s);
                 let almocoHoras = calcularDiferencaHoras(a, r);
                 horasTrabalhadas = Math.max(0, totalBruto - almocoHoras);
@@ -1242,6 +1242,7 @@
                 const res = calcularResumoPontoCard(c, a, r, s, sImp, rImp);
 
                 listaPontos.push({
+                    id: Date.now() + Math.random(),
                     funcionario: func,
                     data: data,
                     chegada: c !== '--:--' ? c : '',
@@ -1257,12 +1258,12 @@
             });
 
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
-            alert('Pontos e horários salvos com sucesso!');
+            alert('Pontos salvos e atualizados com sucesso!');
             renderizarHistoricoPontosSalvos();
             calcularTotalDia();
         }
 
-        /* EXIBIR O HISTÓRICO DE PONTOS REGISTRADOS NA ABA PONTO */
+        /* EXIBIR O HISTÓRICO DE PONTOS REGISTRADOS COM BOTÕES DE EDIÇÃO E EXCLUSÃO */
         function renderizarHistoricoPontosSalvos() {
             const dataSel = document.getElementById('ponto-data').value;
             const container = document.getElementById('historico-pontos-salvos-container');
@@ -1276,21 +1277,55 @@
             }
 
             let html = '';
-            pontosFiltrados.forEach(p => {
+            pontosFiltrados.forEach((p, idx) => {
                 const nomeDisplay = p.funcionario === 'mim' ? 'Você (Sua Produção)' : p.funcionario;
                 let impInfo = p.saidaImprevisto ? `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${p.saidaImprevisto} até ${p.retornoImprevisto} (${p.motivoImprevisto || 'Motivo não informado'})</span>` : '';
 
+                const hTrabalhadas = typeof p.horasTrabalhadas === 'number' ? p.horasTrabalhadas.toFixed(1) : '0.0';
+                const hDesconto = typeof p.horasDesconto === 'number' ? p.horasDesconto.toFixed(1) : '0.0';
+
                 html += `
-                    <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; padding:10px; margin-bottom:8px; font-size:12px;">
-                        <div style="font-weight:700; color:var(--primary-color); margin-bottom:4px;">👤 ${nomeDisplay}</div>
+                    <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; padding:10px; margin-bottom:10px; font-size:12px; position:relative;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <span style="font-weight:700; color:var(--primary-color);">👤 ${nomeDisplay}</span>
+                            <div>
+                                <button style="background:none; border:none; cursor:pointer;" onclick="editarPontoSalvo('${p.data}', '${p.funcionario}')" title="Carregar no Cartão">✏️</button>
+                                <button style="background:none; border:none; cursor:pointer;" onclick="excluirPontoSalvo(${p.id || idx})" title="Excluir Registro">🗑️</button>
+                            </div>
+                        </div>
                         <div>🟢 Chegada: <b>${p.chegada || '--:--'}</b> | 🏁 Saída: <b>${p.saida || '--:--'}</b></div>
                         <div>🍽️ Almoço: <b>${p.almoco || '--:--'}</b> | 🔙 Retorno: <b>${p.retorno || '--:--'}</b></div>
-                        <div style="margin-top:4px; font-weight:600;">⏱️ Horas Trabalhadas: ${p.horasTrabalhadas ? p.horasTrabalhadas.toFixed(1) : 0}h | Desconto: <span style="color:var(--danger-color);">${p.horasDesconto ? p.horasDesconto.toFixed(1) : 0}h</span></div>
+                        <div style="margin-top:6px; font-weight:600; background:var(--op-header-bg); padding:4px 6px; border-radius:4px;">⏱️ Trabalhado: ${hTrabalhadas}h | Desconto: <span style="color:var(--danger-color);">${hDesconto}h</span></div>
                         ${impInfo}
                     </div>`;
             });
 
             container.innerHTML = html;
+        }
+
+        function editarPontoSalvo(data, funcionario) {
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            const ponto = listaPontos.find(p => p.data === data && p.funcionario === funcionario);
+            if (!ponto) return;
+
+            const container = document.getElementById('lista-cartoes-ponto');
+            container.innerHTML = '';
+            contadorCartoesPonto = 0;
+            adicionarCartaoPonto(ponto);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            alert(`Ponto de ${funcionario} recarregado no cartão! Faça as alterações e clique em "Salvar Todos os Pontos".`);
+        }
+
+        function excluirPontoSalvo(idOuIdx) {
+            if (!confirm('Deseja excluir este registro de ponto?')) return;
+            let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            
+            listaPontos = listaPontos.filter((p, index) => p.id !== idOuIdx && index !== idOuIdx);
+            localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
+            
+            recarregarTodosPontos();
+            calcularTotalDia();
+            alert('Registro de ponto removido!');
         }
 
         function salvarNovoServicoCadastrado() {
