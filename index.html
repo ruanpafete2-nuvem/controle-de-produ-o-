@@ -763,7 +763,7 @@
 
                 <div class="filter-field">
                     <label for="ponto-data">DATA DO PONTO:</label>
-                    <input type="date" id="ponto-data" onchange="recarregarTodosPontos()">
+                    <input type="date" id="ponto-data" onchange="recarregarTodosPontos(true)">
                 </div>
 
                 <!-- CONTÊINER PARA MÚLTIPLOS CARTÕES DE PONTO -->
@@ -1035,7 +1035,11 @@
             const hojeIso = new Date().toISOString().slice(0, 10);
             const inputPontoData = document.getElementById('ponto-data');
             if (inputPontoData) inputPontoData.value = hojeIso;
-            recarregarTodosPontos();
+            
+            // Só carrega da base no início se não houver rascunho na tela
+            if (document.querySelectorAll('.card-ponto-item').length === 0) {
+                recarregarTodosPontos();
+            }
 
             if (!carregarRascunho()) {
                 resetarDataHoje();
@@ -1108,7 +1112,7 @@
 
             if(idPainel === 'historico-painel') buscarHistorico();
             if(idPainel === 'funcionarios-painel') gerarRankingEquipe('hoje');
-            if(idPainel === 'ponto-painel') recarregarTodosPontos();
+            // NÃO recarrega o ponto ao alternar abas para preservar a digitação!
         }
 
         /* CÁLCULO PRECISO DE HORAS DE TRABALHO E FALTAS */
@@ -1285,21 +1289,27 @@
                 <div style="margin-top:4px;">⏱️ Trabalhado: <b>${res.horasTrabalhadas.toFixed(1)}h</b> | Desconto: <b style="color:var(--danger-color);">${res.horasTotalDesconto.toFixed(1)}h</b></div>
                 ${textoImp}
             `;
+
+            calcularTotalDia();
         }
 
-        function recarregarTodosPontos() {
+        function recarregarTodosPontos(forcarRecarregar = false) {
             const data = document.getElementById('ponto-data').value;
             const container = document.getElementById('lista-cartoes-ponto');
-            container.innerHTML = '';
-            contadorCartoesPonto = 0;
 
-            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
-            const pontosDoDia = listaPontos.filter(p => p.data === data);
+            // Se forçar recarregamento (ex: ao trocar a data), limpa a tela e busca da memória
+            if (forcarRecarregar || container.children.length === 0) {
+                container.innerHTML = '';
+                contadorCartoesPonto = 0;
 
-            if (pontosDoDia.length > 0) {
-                pontosDoDia.forEach(p => adicionarCartaoPonto(p));
-            } else {
-                adicionarCartaoPonto();
+                const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+                const pontosDoDia = listaPontos.filter(p => p.data === data);
+
+                if (pontosDoDia.length > 0) {
+                    pontosDoDia.forEach(p => adicionarCartaoPonto(p));
+                } else {
+                    adicionarCartaoPonto();
+                }
             }
 
             renderizarHistoricoPontosSalvos();
@@ -1408,7 +1418,7 @@
             listaPontos = listaPontos.filter((p, index) => p.id !== idOuIdx && index !== idOuIdx);
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
             
-            recarregarTodosPontos();
+            recarregarTodosPontos(true);
             calcularTotalDia();
             alert('Registro de ponto removido!');
         }
@@ -1742,6 +1752,7 @@
                 dataIsoAtual = `${dObj.getFullYear()}-${String(dObj.getMonth()+1).padStart(2,'0')}-${String(dObj.getDate()).padStart(2,'0')}`;
             }
 
+            // Pega descontos tanto da memória quanto da digitação atual da tela
             const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
 
             document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
@@ -1764,9 +1775,33 @@
                         baseDiaria = parseFloat(manual);
                     } else if (funcsMap[exec]) {
                         baseDiaria = funcsMap[exec].valor;
-                        const pontoFunc = listaPontos.find(p => p.funcionario === exec && p.data === dataIsoAtual);
-                        if (pontoFunc && pontoFunc.horasDesconto > 0) {
-                            let descontoProporcional = (baseDiaria / 8) * pontoFunc.horasDesconto;
+                        
+                        // Verifica se há cartão digitado na tela agora para esse funcionário
+                        let horasDescontoAtual = 0;
+                        let encontrouTela = false;
+                        document.querySelectorAll('.card-ponto-item').forEach(pCard => {
+                            const fSel = pCard.querySelector('.sel-ponto-func').value;
+                            if (fSel === exec) {
+                                const idC = pCard.id.replace('ponto-card-', '');
+                                const c = document.getElementById(`inp-chegada-${idC}`).value;
+                                const a = document.getElementById(`inp-almoco-${idC}`).value;
+                                const r = document.getElementById(`inp-retorno-${idC}`).value;
+                                const s = document.getElementById(`inp-saida-${idC}`).value;
+                                const sImp = document.getElementById(`inp-saidaImprevisto-${idC}`).value;
+                                const rImp = document.getElementById(`inp-retornoImprevisto-${idC}`).value;
+                                const res = calcularResumoPontoCard(c, a, r, s, sImp, rImp);
+                                horasDescontoAtual = res.horasTotalDesconto;
+                                encontrouTela = true;
+                            }
+                        });
+
+                        if (!encontrouTela) {
+                            const pontoFunc = listaPontos.find(p => p.funcionario === exec && p.data === dataIsoAtual);
+                            if (pontoFunc) horasDescontoAtual = pontoFunc.horasDesconto || 0;
+                        }
+
+                        if (horasDescontoAtual > 0) {
+                            let descontoProporcional = (baseDiaria / 8) * horasDescontoAtual;
                             baseDiaria = Math.max(0, baseDiaria - descontoProporcional);
                         }
                     }
@@ -2093,7 +2128,7 @@
 
             lista.forEach(i => i.operacoes.forEach(op => {
                 const exec = op.executor || 'mim';
-                if (!filtroExecutor || exec === filtroExecutor) {
+                if (!filtroExecutor || exec === filetroExecutor) {
                     const nomeNormalizado = normalizarNomeServico(op.servico);
                     counts[nomeNormalizado] = (counts[nomeNormalizado] || 0) + op.qtd;
                     if (counts[nomeNormalizado] > max) max = counts[nomeNormalizado];
