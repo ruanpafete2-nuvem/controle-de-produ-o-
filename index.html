@@ -232,7 +232,7 @@
             text-transform: uppercase;
         }
 
-        input[type="text"], input[type="number"], input[type="password"], input[type="date"], select {
+        input[type="text"], input[type="number"], input[type="password"], input[type="date"], input[type="time"], select {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid var(--border-color);
@@ -601,11 +601,46 @@
             font-size: 11px;
         }
 
-        .ponto-btn-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-bottom: 12px;
+        .ponto-field-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .ponto-field-item label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .time-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .time-wrapper input[type="time"] {
+            font-size: 14px;
+            font-weight: 700;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-color);
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .btn-clear-time {
+            position: absolute;
+            right: 6px;
+            background: none;
+            border: none;
+            font-size: 12px;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 2px 4px;
         }
 
         .backup-discreto {
@@ -705,7 +740,7 @@
             <!-- PAINEL DE CONTROLE DE PONTO -->
             <div id="ponto-painel" class="box-section">
                 <h2>⏱️ Controle de Ponto e Imprevistos</h2>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Registre os horários de chegada, almoço e imprevistos:</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Selecione os horários usando o relógio do celular:</p>
 
                 <div class="filter-field">
                     <label for="ponto-data">DATA DO PONTO:</label>
@@ -1059,7 +1094,7 @@
 
         /* CÁLCULO PRECISO DE HORAS DE TRABALHO E FALTAS */
         function calcularDiferencaHoras(hInicio, hFim) {
-            if (!hInicio || !hFim || hInicio === '--:--' || hFim === '--:--') return 0;
+            if (!hInicio || !hFim) return 0;
             const [h1, m1] = hInicio.split(':').map(Number);
             const [h2, m2] = hFim.split(':').map(Number);
             if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return 0;
@@ -1069,7 +1104,7 @@
 
         function calcularResumoPontoCard(c, a, r, s, sImp, rImp) {
             let horasTrabalhadas = 0;
-            if (c && s && c !== '--:--' && s !== '--:--') {
+            if (c && s) {
                 let totalBruto = calcularDiferencaHoras(c, s);
                 let almocoHoras = calcularDiferencaHoras(a, r);
                 horasTrabalhadas = Math.max(0, totalBruto - almocoHoras);
@@ -1085,7 +1120,7 @@
             };
         }
 
-        /* SISTEMA MULTI-CARTÃO DE PONTO E HISTÓRICO */
+        /* SISTEMA MULTI-CARTÃO DE PONTO E SELEÇÃO TIPO DESPERTADOR DO IPHONE */
         function gerarOptionsPontoFuncionarios(selecionado = 'mim') {
             let options = `<option value="mim" ${selecionado === 'mim' ? 'selected' : ''}>Minha Pessoa (Você)</option>`;
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
@@ -1121,22 +1156,60 @@
                         </select>
                     </div>
 
-                    <div class="ponto-btn-grid" style="margin-top: 10px;">
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn" style="flex:1;" onclick="baterPontoCard(${idCard}, 'chegada')">🟢 Chegada: <span id="lbl-chegada-${idCard}">${chegada || '--:--'}</span></button>
-                            <button class="btn" style="flex:1;" onclick="baterPontoCard(${idCard}, 'almoco')">🍽️ Almoço: <span id="lbl-almoco-${idCard}">${almoco || '--:--'}</span></button>
+                    <!-- GRID COM CAMPOS NATIVOS DE HORA ESTILO DESPERTADOR DO IPHONE -->
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                        <div style="display: flex; gap: 8px;">
+                            <div class="ponto-field-item">
+                                <label>🟢 Chegada:</label>
+                                <div class="time-wrapper">
+                                    <input type="time" id="inp-chegada-${idCard}" value="${chegada}" onchange="atualizarResumoCardPonto(${idCard})">
+                                    <button class="btn-clear-time" onclick="limparCampoHora('${idCard}', 'chegada')">❌</button>
+                                </div>
+                            </div>
+                            <div class="ponto-field-item">
+                                <label>🍽️ Almoço:</label>
+                                <div class="time-wrapper">
+                                    <input type="time" id="inp-almoco-${idCard}" value="${almoco}" onchange="atualizarResumoCardPonto(${idCard})">
+                                    <button class="btn-clear-time" onclick="limparCampoHora('${idCard}', 'almoco')">❌</button>
+                                </div>
+                            </div>
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <button class="btn" style="flex:1;" onclick="baterPontoCard(${idCard}, 'retorno')">🔙 Retorno: <span id="lbl-retorno-${idCard}">${retorno || '--:--'}</span></button>
-                            <button class="btn btn-green" style="flex:1;" onclick="baterPontoCard(${idCard}, 'saida')">🏁 Saída: <span id="lbl-saida-${idCard}">${saida || '--:--'}</span></button>
+
+                        <div style="display: flex; gap: 8px;">
+                            <div class="ponto-field-item">
+                                <label>🔙 Retorno:</label>
+                                <div class="time-wrapper">
+                                    <input type="time" id="inp-retorno-${idCard}" value="${retorno}" onchange="atualizarResumoCardPonto(${idCard})">
+                                    <button class="btn-clear-time" onclick="limparCampoHora('${idCard}', 'retorno')">❌</button>
+                                </div>
+                            </div>
+                            <div class="ponto-field-item">
+                                <label>🏁 Saída:</label>
+                                <div class="time-wrapper">
+                                    <input type="time" id="inp-saida-${idCard}" value="${saida}" onchange="atualizarResumoCardPonto(${idCard})">
+                                    <button class="btn-clear-time" onclick="limparCampoHora('${idCard}', 'saida')">❌</button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- SEÇÃO DE IMPREVISTO -->
-                        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid var(--danger-color); padding: 10px; border-radius: 8px; margin-top: 6px;">
+                        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid var(--danger-color); padding: 10px; border-radius: 8px; margin-top: 4px;">
                             <div style="font-size: 11px; font-weight: 700; color: var(--danger-color); margin-bottom: 6px;">⚠️ IMPREVISTO (SAÍDA E RETORNO):</div>
                             <div style="display:flex; gap:8px; margin-bottom: 6px;">
-                                <button class="btn" style="flex:1; font-size:11px;" onclick="baterPontoCard(${idCard}, 'saidaImprevisto')">⚠️ Saída: <span id="lbl-saidaImprevisto-${idCard}">${saidaImprevisto || '--:--'}</span></button>
-                                <button class="btn" style="flex:1; font-size:11px;" onclick="baterPontoCard(${idCard}, 'retornoImprevisto')">🟢 Retorno: <span id="lbl-retornoImprevisto-${idCard}">${retornoImprevisto || '--:--'}</span></button>
+                                <div class="ponto-field-item">
+                                    <label style="color:var(--danger-color);">⚠️ Saída Imprevisto:</label>
+                                    <div class="time-wrapper">
+                                        <input type="time" id="inp-saidaImprevisto-${idCard}" value="${saidaImprevisto}" onchange="atualizarResumoCardPonto(${idCard})">
+                                        <button class="btn-clear-time" onclick="limparCampoHora('${idCard}', 'saidaImprevisto')">❌</button>
+                                    </div>
+                                </div>
+                                <div class="ponto-field-item">
+                                    <label style="color:var(--primary-color);">🟢 Retorno Imprevisto:</label>
+                                    <div class="time-wrapper">
+                                        <input type="time" id="inp-retornoImprevisto-${idCard}" value="${retornoImprevisto}" onchange="atualizarResumoCardPonto(${idCard})">
+                                        <button class="btn-clear-time" onclick="limparCampoHora('${idCard}', 'retornoImprevisto')">❌</button>
+                                    </div>
+                                </div>
                             </div>
                             <input type="text" id="motivo-imprevisto-${idCard}" class="input-motivo-imprevisto" value="${motivoImprevisto}" placeholder="Motivo do imprevisto (ex: Médico)" style="font-size:11px; padding:6px 8px;" oninput="atualizarResumoCardPonto(${idCard})">
                         </div>
@@ -1152,6 +1225,14 @@
             atualizarResumoCardPonto(idCard);
         }
 
+        function limparCampoHora(idCard, campo) {
+            const input = document.getElementById(`inp-${campo}-${idCard}`);
+            if (input) {
+                input.value = '';
+                atualizarResumoCardPonto(idCard);
+            }
+        }
+
         function removerCartaoPonto(idCard) {
             if (document.querySelectorAll('.card-ponto-item').length <= 1) {
                 alert('Mantenha pelo menos 1 cartão de ponto.');
@@ -1160,42 +1241,29 @@
             document.getElementById(`ponto-card-${idCard}`).remove();
         }
 
-        function baterPontoCard(idCard, campo) {
-            const agora = new Date();
-            const horaPadrao = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
-            const span = document.getElementById(`lbl-${campo}-${idCard}`);
-            const valorAtual = (span && span.innerText !== '--:--') ? span.innerText : horaPadrao;
-
-            const novaHora = prompt(`Digite o horário de ${campo.toUpperCase()} (ex: 08:00 ou 14:30):`, valorAtual);
-            if (novaHora === null) return;
-
-            if (span) span.innerText = novaHora.trim() || '--:--';
-            atualizarResumoCardPonto(idCard);
-        }
-
         function atualizarResumoCardPonto(idCard) {
             const card = document.getElementById(`ponto-card-${idCard}`);
             if (!card) return;
 
-            const c = document.getElementById(`lbl-chegada-${idCard}`).innerText;
-            const a = document.getElementById(`lbl-almoco-${idCard}`).innerText;
-            const r = document.getElementById(`lbl-retorno-${idCard}`).innerText;
-            const s = document.getElementById(`lbl-saida-${idCard}`).innerText;
+            const c = document.getElementById(`inp-chegada-${idCard}`).value;
+            const a = document.getElementById(`inp-almoco-${idCard}`).value;
+            const r = document.getElementById(`inp-retorno-${idCard}`).value;
+            const s = document.getElementById(`inp-saida-${idCard}`).value;
 
-            const sImp = document.getElementById(`lbl-saidaImprevisto-${idCard}`).innerText;
-            const rImp = document.getElementById(`lbl-retornoImprevisto-${idCard}`).innerText;
+            const sImp = document.getElementById(`inp-saidaImprevisto-${idCard}`).value;
+            const rImp = document.getElementById(`inp-retornoImprevisto-${idCard}`).value;
             const mot = document.getElementById(`motivo-imprevisto-${idCard}`).value;
 
             const res = calcularResumoPontoCard(c, a, r, s, sImp, rImp);
 
             let textoImp = '';
-            if (sImp !== '--:--' || rImp !== '--:--') {
-                textoImp = `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${sImp} até ${rImp} (${res.horasImprevisto.toFixed(1)}h fora) - ${mot || 'Sem motivo'}</span>`;
+            if (sImp || rImp) {
+                textoImp = `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${sImp || '--:--'} até ${rImp || '--:--'} (${res.horasImprevisto.toFixed(1)}h fora) - ${mot || 'Sem motivo'}</span>`;
             }
 
             document.getElementById(`resumo-card-${idCard}`).innerHTML = `
-                <div>🟢 Chegada: <b>${c}</b> | 🍽️ Almoço: <b>${a}</b></div>
-                <div>🔙 Retorno: <b>${r}</b> | 🏁 Saída: <b>${s}</b></div>
+                <div>🟢 Chegada: <b>${c || '--:--'}</b> | 🍽️ Almoço: <b>${a || '--:--'}</b></div>
+                <div>🔙 Retorno: <b>${r || '--:--'}</b> | 🏁 Saída: <b>${s || '--:--'}</b></div>
                 <div style="margin-top:4px;">⏱️ Trabalhado: <b>${res.horasTrabalhadas.toFixed(1)}h</b> | Desconto: <b style="color:var(--danger-color);">${res.horasTotalDesconto.toFixed(1)}h</b></div>
                 ${textoImp}
             `;
@@ -1230,13 +1298,13 @@
                 const idCard = card.id.replace('ponto-card-', '');
                 const func = card.querySelector('.sel-ponto-func').value;
 
-                const c = document.getElementById(`lbl-chegada-${idCard}`).innerText;
-                const a = document.getElementById(`lbl-almoco-${idCard}`).innerText;
-                const r = document.getElementById(`lbl-retorno-${idCard}`).innerText;
-                const s = document.getElementById(`lbl-saida-${idCard}`).innerText;
+                const c = document.getElementById(`inp-chegada-${idCard}`).value;
+                const a = document.getElementById(`inp-almoco-${idCard}`).value;
+                const r = document.getElementById(`inp-retorno-${idCard}`).value;
+                const s = document.getElementById(`inp-saida-${idCard}`).value;
 
-                const sImp = document.getElementById(`lbl-saidaImprevisto-${idCard}`).innerText;
-                const rImp = document.getElementById(`lbl-retornoImprevisto-${idCard}`).innerText;
+                const sImp = document.getElementById(`inp-saidaImprevisto-${idCard}`).value;
+                const rImp = document.getElementById(`inp-retornoImprevisto-${idCard}`).value;
                 const mot = document.getElementById(`motivo-imprevisto-${idCard}`).value;
 
                 const res = calcularResumoPontoCard(c, a, r, s, sImp, rImp);
@@ -1245,12 +1313,12 @@
                     id: Date.now() + Math.random(),
                     funcionario: func,
                     data: data,
-                    chegada: c !== '--:--' ? c : '',
-                    almoco: a !== '--:--' ? a : '',
-                    retorno: r !== '--:--' ? r : '',
-                    saida: s !== '--:--' ? s : '',
-                    saidaImprevisto: sImp !== '--:--' ? sImp : '',
-                    retornoImprevisto: rImp !== '--:--' ? rImp : '',
+                    chegada: c || '',
+                    almoco: a || '',
+                    retorno: r || '',
+                    saida: s || '',
+                    saidaImprevisto: sImp || '',
+                    retornoImprevisto: rImp || '',
                     motivoImprevisto: mot,
                     horasTrabalhadas: res.horasTrabalhadas,
                     horasDesconto: res.horasTotalDesconto
