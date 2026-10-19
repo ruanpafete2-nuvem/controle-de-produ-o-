@@ -414,6 +414,15 @@
             border: 1px solid var(--border-color);
         }
 
+        .card-ponto-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
         /* BARRA DE NAVEGAÇÃO FIXA NO RODAPÉ */
         .bottom-nav {
             position: fixed;
@@ -696,36 +705,19 @@
             <!-- PAINEL DE CONTROLE DE PONTO -->
             <div id="ponto-painel" class="box-section">
                 <h2>⏱️ Controle de Ponto e Imprevistos</h2>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Registre os horários (clique para alterar o horário):</p>
-                
-                <div class="filter-field">
-                    <label for="ponto-funcionario">Funcionário:</label>
-                    <select id="ponto-funcionario" onchange="carregarPontoFuncionarioDia()"></select>
-                </div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Registre os horários de chegada, almoço e imprevistos:</p>
 
                 <div class="filter-field">
-                    <label for="ponto-data">Data do Ponto:</label>
-                    <input type="date" id="ponto-data" onchange="carregarPontoFuncionarioDia()">
+                    <label for="ponto-data">DATA DO PONTO:</label>
+                    <input type="date" id="ponto-data" onchange="recarregarTodosPontos()">
                 </div>
 
-                <div class="ponto-btn-grid" style="margin-top: 15px;">
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn" style="flex:1;" onclick="baterPonto('chegada')">🟢 Chegada: <span id="lbl-chegada">--:--</span></button>
-                        <button class="btn" style="flex:1;" onclick="baterPonto('almoco')">🍽️ Almoço: <span id="lbl-almoco">--:--</span></button>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn" style="flex:1;" onclick="baterPonto('retorno')">🔙 Retorno: <span id="lbl-retorno">--:--</span></button>
-                        <button class="btn btn-green" style="flex:1;" onclick="baterPonto('saida')">🏁 Saída: <span id="lbl-saida">--:--</span></button>
-                    </div>
-                    <button class="btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border-color: var(--danger-color);" onclick="abrirModalImprevisto()">⚠️ Registrar Imprevisto / Saída Cedo</button>
-                </div>
+                <!-- CONTÊINER PARA MÚLTIPLOS CARTÕES DE PONTO -->
+                <div id="lista-cartoes-ponto"></div>
 
-                <div id="resumo-ponto-dia" style="background: var(--op-header-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 12px;">
-                    <b>Resumo do Ponto:</b>
-                    <div id="lista-horarios-ponto" style="margin-top: 6px; color: var(--text-muted);">Nenhum horário registrado.</div>
-                </div>
+                <button class="btn btn-full" style="margin-bottom: 15px;" onclick="adicionarCartaoPonto()">➕ Novo Ponto / Outro Funcionário</button>
 
-                <button class="btn btn-green btn-full" style="margin-top: 15px;" onclick="salvarPontoDia()">💾 Salvar Ponto</button>
+                <button class="btn btn-green btn-full" onclick="salvarTodosPontosDia()">💾 Salvar Todos os Pontos</button>
             </div>
 
             <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS + COMPARATIVO -->
@@ -873,9 +865,9 @@
         const db = firebase.firestore();
 
         let contadorOperacoes = 0;
+        let contadorCartoesPonto = 0;
         let registroEmEdicaoId = null;
         let funcionarioEmEdicaoIndex = null;
-        let pontoAtualTemp = { chegada: '', almoco: '', retorno: '', saida: '', horasDesconto: 0, motivoImprevisto: '' };
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -984,7 +976,7 @@
             const hojeIso = new Date().toISOString().slice(0, 10);
             const inputPontoData = document.getElementById('ponto-data');
             if (inputPontoData) inputPontoData.value = hojeIso;
-            carregarPontoFuncionarioDia();
+            recarregarTodosPontos();
 
             if (!carregarRascunho()) {
                 resetarDataHoje();
@@ -1057,98 +1049,191 @@
 
             if(idPainel === 'historico-painel') buscarHistorico();
             if(idPainel === 'funcionarios-painel') gerarRankingEquipe('hoje');
-            if(idPainel === 'ponto-painel') carregarPontoFuncionarioDia();
+            if(idPainel === 'ponto-painel') recarregarTodosPontos();
         }
 
-        // Funções de Controle de Ponto
-        function atualizarSelectPontoFuncionario() {
-            const sel = document.getElementById('ponto-funcionario');
-            if (!sel) return;
-            const atual = sel.value;
-            let options = `<option value="mim">Minha Pessoa (Você)</option>`;
+        /* SISTEMA MULTI-CARTÃO DE PONTO */
+        function gerarOptionsPontoFuncionarios(selecionado = 'mim') {
+            let options = `<option value="mim" ${selecionado === 'mim' ? 'selected' : ''}>Minha Pessoa (Você)</option>`;
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
-                options += `<option value="${f.nome}">${f.nome}</option>`;
+                options += `<option value="${f.nome}" ${selecionado === f.nome ? 'selected' : ''}>${f.nome}</option>`;
             });
-            sel.innerHTML = options;
-            if (atual) sel.value = atual;
+            return options;
         }
 
-        function carregarPontoFuncionarioDia() {
-            atualizarSelectPontoFuncionario();
-            const func = document.getElementById('ponto-funcionario').value;
-            const data = document.getElementById('ponto-data').value;
+        function adicionarCartaoPonto(dados = null) {
+            contadorCartoesPonto++;
+            const idCard = contadorCartoesPonto;
 
-            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
-            const registro = listaPontos.find(p => p.funcionario === func && p.data === data);
+            const funcVal = dados ? dados.funcionario : 'mim';
+            const chegada = dados ? (dados.chegada || '') : '';
+            const almoco = dados ? (dados.almoco || '') : '';
+            const retorno = dados ? (dados.retorno || '') : '';
+            const saida = dados ? (dados.saida || '') : '';
+            const saidaImprevisto = dados ? (dados.saidaImprevisto || '') : '';
+            const retornoImprevisto = dados ? (dados.retornoImprevisto || '') : '';
+            const motivoImprevisto = dados ? (dados.motivoImprevisto || '') : '';
 
-            if (registro) {
-                pontoAtualTemp = { ...registro };
-            } else {
-                pontoAtualTemp = { chegada: '', almoco: '', retorno: '', saida: '', horasDesconto: 0, motivoImprevisto: '' };
+            const html = `
+                <div class="card-ponto-item" id="ponto-card-${idCard}">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span style="font-weight:700; font-size:13px;">Cartão de Ponto #${idCard}</span>
+                        <button class="btn-delete" onclick="removerCartaoPonto(${idCard})">🗑️</button>
+                    </div>
+
+                    <div class="filter-field">
+                        <label>FUNCIONÁRIO:</label>
+                        <select class="sel-ponto-func" onchange="atualizarResumoCardPonto(${idCard})">
+                            ${gerarOptionsPontoFuncionarios(funcVal)}
+                        </select>
+                    </div>
+
+                    <div class="ponto-btn-grid" style="margin-top: 10px;">
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn" style="flex:1;" onclick="baterPontoCard(${idCard}, 'chegada')">🟢 Chegada: <span id="lbl-chegada-${idCard}">${chegada || '--:--'}</span></button>
+                            <button class="btn" style="flex:1;" onclick="baterPontoCard(${idCard}, 'almoco')">🍽️ Almoço: <span id="lbl-almoco-${idCard}">${almoco || '--:--'}</span></button>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn" style="flex:1;" onclick="baterPontoCard(${idCard}, 'retorno')">🔙 Retorno: <span id="lbl-retorno-${idCard}">${retorno || '--:--'}</span></button>
+                            <button class="btn btn-green" style="flex:1;" onclick="baterPontoCard(${idCard}, 'saida')">🏁 Saída: <span id="lbl-saida-${idCard}">${saida || '--:--'}</span></button>
+                        </div>
+
+                        <!-- SEÇÃO DE IMPREVISTO POR HORÁRIO DE SAÍDA E RETORNO -->
+                        <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid var(--danger-color); padding: 10px; border-radius: 8px; margin-top: 6px;">
+                            <div style="font-size: 11px; font-weight: 700; color: var(--danger-color); margin-bottom: 6px;">⚠️ IMPREVISTO (SAÍDA E RETORNO):</div>
+                            <div style="display:flex; gap:8px; margin-bottom: 6px;">
+                                <button class="btn" style="flex:1; font-size:11px;" onclick="baterPontoCard(${idCard}, 'saidaImprevisto')">⚠️ Saída: <span id="lbl-saidaImprevisto-${idCard}">${saidaImprevisto || '--:--'}</span></button>
+                                <button class="btn" style="flex:1; font-size:11px;" onclick="baterPontoCard(${idCard}, 'retornoImprevisto')">🟢 Retorno: <span id="lbl-retornoImprevisto-${idCard}">${retornoImprevisto || '--:--'}</span></button>
+                            </div>
+                            <input type="text" id="motivo-imprevisto-${idCard}" class="input-motivo-imprevisto" value="${motivoImprevisto}" placeholder="Motivo do imprevisto (ex: Médico)" style="font-size:11px; padding:6px 8px;">
+                        </div>
+                    </div>
+
+                    <div style="background: var(--op-header-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 12px;">
+                        <b>Resumo:</b>
+                        <div id="resumo-card-${idCard}" style="margin-top: 4px; color: var(--text-muted);"></div>
+                    </div>
+                </div>`;
+
+            document.getElementById('lista-cartoes-ponto').insertAdjacentHTML('beforeend', html);
+            atualizarResumoCardPonto(idCard);
+        }
+
+        function removerCartaoPonto(idCard) {
+            if (document.querySelectorAll('.card-ponto-item').length <= 1) {
+                alert('Mantenha pelo menos 1 cartão de ponto.');
+                return;
             }
-            renderizarVisualizacaoPonto();
+            document.getElementById(`ponto-card-${idCard}`).remove();
         }
 
-        /* PERMITIR EDITAR OU MARCAR HORA ATUAL DO PONTO */
-        function baterPonto(tipo) {
+        function baterPontoCard(idCard, campo) {
             const agora = new Date();
             const horaPadrao = String(agora.getHours()).padStart(2, '0') + ':' + String(agora.getMinutes()).padStart(2, '0');
-            const valorAtual = pontoAtualTemp[tipo] || horaPadrao;
+            const span = document.getElementById(`lbl-${campo}-${idCard}`);
+            const valorAtual = (span && span.innerText !== '--:--') ? span.innerText : horaPadrao;
 
-            const novaHora = prompt(`Digite o horário de ${tipo.toUpperCase()} (ex: 08:00 ou 12:30):`, valorAtual);
-            if (novaHora === null) return; // Cancelou
+            const novaHora = prompt(`Digite o horário de ${campo.toUpperCase()} (ex: 08:00 ou 14:30):`, valorAtual);
+            if (novaHora === null) return;
 
-            pontoAtualTemp[tipo] = novaHora.trim();
-            renderizarVisualizacaoPonto();
+            if (span) span.innerText = novaHora.trim() || '--:--';
+            atualizarResumoCardPonto(idCard);
         }
 
-        function abrirModalImprevisto() {
-            const horas = prompt("Quantas horas o funcionário saiu mais cedo ou faltou devido ao imprevisto? (Ex: 2 ou 1.5)", "2");
-            if (horas === null) return;
-            const numHoras = parseFloat(horas) || 0;
-            const motivo = prompt("Qual foi o motivo do imprevisto?", "Consulta médica / Saída antecipada");
+        function calcularHorasDescontoImp(saida, retorno) {
+            if (!saida || !retorno || saida === '--:--' || retorno === '--:--') return 0;
+            const [h1, m1] = saida.split(':').map(Number);
+            const [h2, m2] = retorno.split(':').map(Number);
+            if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return 0;
 
-            pontoAtualTemp.horasDesconto = numHoras;
-            pontoAtualTemp.motivoImprevisto = motivo || "Imprevisto";
-            renderizarVisualizacaoPonto();
-            alert(`Registrado desconto de ${numHoras} hora(s) por imprevisto.`);
+            const min1 = h1 * 60 + m1;
+            const min2 = h2 * 60 + m2;
+            const dif = min2 - min1;
+            return dif > 0 ? (dif / 60) : 0;
         }
 
-        function renderizarVisualizacaoPonto() {
-            document.getElementById('lbl-chegada').innerText = pontoAtualTemp.chegada || '--:--';
-            document.getElementById('lbl-almoco').innerText = pontoAtualTemp.almoco || '--:--';
-            document.getElementById('lbl-retorno').innerText = pontoAtualTemp.retorno || '--:--';
-            document.getElementById('lbl-saida').innerText = pontoAtualTemp.saida || '--:--';
+        function atualizarResumoCardPonto(idCard) {
+            const card = document.getElementById(`ponto-card-${idCard}`);
+            if (!card) return;
 
-            const container = document.getElementById('lista-horarios-ponto');
-            let imprevistoTxt = pontoAtualTemp.horasDesconto > 0 
-                ? `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${pontoAtualTemp.motivoImprevisto} (-${pontoAtualTemp.horasDesconto}h)</span>` 
-                : '';
+            const func = card.querySelector('.sel-ponto-func').value;
+            const c = document.getElementById(`lbl-chegada-${idCard}`).innerText;
+            const a = document.getElementById(`lbl-almoco-${idCard}`).innerText;
+            const r = document.getElementById(`lbl-retorno-${idCard}`).innerText;
+            const s = document.getElementById(`lbl-saida-${idCard}`).innerText;
 
-            let html = `
-                <div>🟢 Chegada: <b>${pontoAtualTemp.chegada || '--:--'}</b> | 🍽️ Almoço: <b>${pontoAtualTemp.almoco || '--:--'}</b></div>
-                <div>🔙 Retorno: <b>${pontoAtualTemp.retorno || '--:--'}</b> | 🏁 Saída: <b>${pontoAtualTemp.saida || '--:--'}</b></div>
-                ${imprevistoTxt}
+            const sImp = document.getElementById(`lbl-saidaImprevisto-${idCard}`).innerText;
+            const rImp = document.getElementById(`lbl-retornoImprevisto-${idCard}`).innerText;
+            const mot = document.getElementById(`motivo-imprevisto-${idCard}`).value;
+
+            const horasDesc = calcularHorasDescontoImp(sImp, rImp);
+
+            let textoImp = '';
+            if (sImp !== '--:--' || rImp !== '--:--') {
+                textoImp = `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: Saída ${sImp} | Retorno ${rImp} (${horasDesc.toFixed(1)}h fora) - ${mot || 'Sem motivo'}</span>`;
+            }
+
+            document.getElementById(`resumo-card-${idCard}`).innerHTML = `
+                <div>🟢 Chegada: <b>${c}</b> | 🍽️ Almoço: <b>${a}</b></div>
+                <div>🔙 Retorno: <b>${r}</b> | 🏁 Saída: <b>${s}</b></div>
+                ${textoImp}
             `;
-            container.innerHTML = html;
         }
 
-        function salvarPontoDia() {
-            const func = document.getElementById('ponto-funcionario').value;
+        function recarregarTodosPontos() {
+            const data = document.getElementById('ponto-data').value;
+            const container = document.getElementById('lista-cartoes-ponto');
+            container.innerHTML = '';
+            contadorCartoesPonto = 0;
+
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            const pontosDoDia = listaPontos.filter(p => p.data === data);
+
+            if (pontosDoDia.length > 0) {
+                pontosDoDia.forEach(p => adicionarCartaoPonto(p));
+            } else {
+                adicionarCartaoPonto();
+            }
+        }
+
+        function salvarTodosPontosDia() {
             const data = document.getElementById('ponto-data').value;
             if (!data) { alert('Selecione a data!'); return; }
 
             let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
-            listaPontos = listaPontos.filter(p => !(p.funcionario === func && p.data === data));
+            listaPontos = listaPontos.filter(p => p.data !== data);
 
-            listaPontos.push({
-                funcionario: func,
-                data: data,
-                ...pontoAtualTemp
+            document.querySelectorAll('.card-ponto-item').forEach(card => {
+                const idCard = card.id.replace('ponto-card-', '');
+                const func = card.querySelector('.sel-ponto-func').value;
+
+                const c = document.getElementById(`lbl-chegada-${idCard}`).innerText;
+                const a = document.getElementById(`lbl-almoco-${idCard}`).innerText;
+                const r = document.getElementById(`lbl-retorno-${idCard}`).innerText;
+                const s = document.getElementById(`lbl-saida-${idCard}`).innerText;
+
+                const sImp = document.getElementById(`lbl-saidaImprevisto-${idCard}`).innerText;
+                const rImp = document.getElementById(`lbl-retornoImprevisto-${idCard}`).innerText;
+                const mot = document.getElementById(`motivo-imprevisto-${idCard}`).value;
+
+                const horasDesc = calcularHorasDescontoImp(sImp, rImp);
+
+                listaPontos.push({
+                    funcionario: func,
+                    data: data,
+                    chegada: c !== '--:--' ? c : '',
+                    almoco: a !== '--:--' ? a : '',
+                    retorno: r !== '--:--' ? r : '',
+                    saida: s !== '--:--' ? s : '',
+                    saidaImprevisto: sImp !== '--:--' ? sImp : '',
+                    retornoImprevisto: rImp !== '--:--' ? rImp : '',
+                    motivoImprevisto: mot,
+                    horasDesconto: horasDesc
+                });
             });
 
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
-            alert('Horários e descontos salvos com sucesso!');
+            alert('Pontos salvos com sucesso!');
             calcularTotalDia();
         }
 
@@ -1191,7 +1276,6 @@
             container.innerHTML = html + '</ul>';
         }
 
-        /* ADICIONAR NOVO FUNCIONÁRIO (SEM LIMITES E SEM TRAVAR) */
         function salvarNovoFuncionarioCadastrado() {
             const nomeInput = document.getElementById('func-nome');
             const valorInput = document.getElementById('func-valor');
@@ -1202,7 +1286,6 @@
 
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
             
-            // Verifica se já existe um funcionário com mesmo nome
             const existe = funcionarios.some(f => f.nome.toLowerCase() === nome.toLowerCase());
             if (existe) {
                 alert('Já existe um funcionário cadastrado com esse nome!');
@@ -1378,8 +1461,8 @@
         function atualizarTodosOsSelects() {
             document.querySelectorAll('.select-servico').forEach(s => s.innerHTML = gerarOptionsServicos(s.value));
             document.querySelectorAll('.select-executor').forEach(s => s.innerHTML = gerarOptionsExecutores(s.value));
+            document.querySelectorAll('.sel-ponto-func').forEach(s => s.innerHTML = gerarOptionsPontoFuncionarios(s.value));
             atualizarSelectFiltroExecutor();
-            atualizarSelectPontoFuncionario();
         }
 
         function atualizarSelectFiltroExecutor() {
