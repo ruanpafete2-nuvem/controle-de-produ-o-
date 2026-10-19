@@ -1242,7 +1242,7 @@
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
             calcularTotalDia();
-            alert('Funcionário atualizado com sucesso!');
+            alert('Funcionário atualizado com sucesso! (Os dias já finalizados anteriormente não foram alterados).');
         }
 
         function removerFuncionarioCadastrado(index) {
@@ -1433,7 +1433,6 @@
             const funcsMap = {};
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
 
-            // Buscar registros de ponto do dia atual preenchido
             const diaStr = document.getElementById('dia').value.trim();
             const mesStr = document.getElementById('mes').value.trim().toLowerCase();
             const anoStr = document.getElementById('ano').value.trim();
@@ -1462,10 +1461,8 @@
                     
                     if (funcsMap[exec]) {
                         let baseDiaria = funcsMap[exec].valor;
-                        // Verificar se tem imprevisto/desconto para este funcionário nesta data
                         const pontoFunc = listaPontos.find(p => p.funcionario === exec && p.data === dataIsoAtual);
                         if (pontoFunc && pontoFunc.horasDesconto > 0) {
-                            // Considera 8 horas de jornada diária padrão para proporcionalidade
                             let descontoProporcional = (baseDiaria / 8) * pontoFunc.horasDesconto;
                             baseDiaria = Math.max(0, baseDiaria - descontoProporcional);
                         }
@@ -1515,15 +1512,8 @@
             const brutoNum = parseFloat(totalBrutoStr.replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
 
             const operacoes = [];
-            document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
-                operacoes.push({
-                    servico: card.querySelector('.servico').value || 'Geral',
-                    qtd: parseFloat(card.querySelector('.qtd').value) || 0,
-                    valor: parseFloat(card.querySelector('.valor').value) || 0,
-                    total: card.querySelector('.total-op').innerText,
-                    executor: card.querySelector('.select-executor').value
-                });
-            });
+            const funcsMap = {};
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
 
             let mesIndex = mesesNomes.findIndex(m => m.startsWith(mesStr));
             if (mesIndex === -1) mesIndex = 9;
@@ -1533,6 +1523,29 @@
             const m = String(dObj.getMonth() + 1).padStart(2, '0');
             const d = String(dObj.getDate()).padStart(2, '0');
             const dataIsoStr = `${y}-${m}-${d}`;
+
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+
+            document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
+                const exec = card.querySelector('.select-executor').value;
+                let diariaSalva = 0;
+                if (exec !== 'mim' && funcsMap[exec]) {
+                    diariaSalva = funcsMap[exec].valor;
+                    const p = listaPontos.find(pt => pt.funcionario === exec && pt.data === dataIsoStr);
+                    if (p && p.horasDesconto > 0) {
+                        diariaSalva = Math.max(0, diariaSalva - ((diariaSalva / 8) * p.horasDesconto));
+                    }
+                }
+
+                operacoes.push({
+                    servico: card.querySelector('.servico').value || 'Geral',
+                    qtd: parseFloat(card.querySelector('.qtd').value) || 0,
+                    valor: parseFloat(card.querySelector('.valor').value) || 0,
+                    total: card.querySelector('.total-op').innerText,
+                    executor: exec,
+                    diariaFixada: diariaSalva
+                });
+            });
 
             const registro = {
                 id: registroEmEdicaoId ? registroEmEdicaoId : Date.now(),
@@ -1697,7 +1710,7 @@
 
                 if (operacoesExibidas.length === 0) return;
 
-                operacoesExibidas.forEach(op => {
+                operacoesExibidas.forEach((op, opIdx) => {
                     const qtd = op.qtd || 0;
                     const val = op.valor || 0;
                     const sub = qtd * val;
@@ -1710,17 +1723,25 @@
                     opsHTML += `<div class="card-item">• <b>${nomeFormatado}</b>${quem}: ${qtd}x = R$ ${sub.toFixed(2)}</div>`;
 
                     const exec = op.executor || 'mim';
-                    if (exec !== 'mim' && funcsMap[exec]) {
-                        let custoDia = funcsMap[exec].valor;
-                        const p = listaPontos.find(pt => pt.funcionario === exec && pt.data === item.dataIso);
-                        if (p && p.horasDesconto > 0) {
-                            custoDia = Math.max(0, custoDia - ((custoDia / 8) * p.horasDesconto));
-                        }
+                    if (exec !== 'mim') {
+                        let custoDia = op.diariaFixada !== undefined ? op.diariaFixada : (funcsMap[exec] ? funcsMap[exec].valor : 0);
                         somaCustoFuncionario += custoDia;
                     }
                 });
 
                 somaTotalBruto += subTotalCard;
+
+                // Botão para alterar o valor pago da diária direto no histórico para dias antigos
+                let botaoAlterarDiaria = '';
+                item.operacoes.forEach((op, opIdx) => {
+                    if (op.executor && op.executor !== 'mim') {
+                        let valAtualDiaria = op.diariaFixada !== undefined ? op.diariaFixada : 0;
+                        botaoAlterarDiaria = `<div style="margin-top:6px; font-size:11px; display:flex; justify-content:space-between; align-items:center; background:var(--op-header-bg); padding:4px 8px; border-radius:4px;">
+                            <span>Diária do ${op.executor}: <b>R$ ${valAtualDiaria.toFixed(2)}</b></span>
+                            <button class="btn-subtle" onclick="alterarDiariaHistorico(${item.id}, ${opIdx})">✏️ Ajustar Valor Pago</button>
+                        </div>`;
+                    }
+                });
 
                 container.innerHTML += `
                     <div class="card-historico">
@@ -1733,6 +1754,7 @@
                             </div>
                         </div>
                         ${opsHTML}
+                        ${botaoAlterarDiaria}
                     </div>`;
             });
 
@@ -1740,11 +1762,29 @@
 
             resumoBox.style.display = 'block';
             let detalheLucro = (filtroExecutor && filtroExecutor !== 'mim') 
-                ? `<div style="font-size:12px; margin-top:4px; color:var(--danger-color);">Pagamento Líquido (com descontos): R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Sobra para Você: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
+                ? `<div style="font-size:12px; margin-top:4px; color:var(--danger-color);">Pagamento Líquido Real: R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Sobra para Você: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
                 : '';
 
             resumoBox.innerHTML = `Total do Período (${lista.length} dias): <br><b style="font-size:18px;">R$ ${somaTotalBruto.toFixed(2)}</b><br><span style="font-size:12px;">Total de Peças: ${somaPecas}</span>${detalheLucro}`;
             btnExportar.style.display = 'block';
+        }
+
+        function alterarDiariaHistorico(registroId, opIndex) {
+            let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            const reg = hist.find(i => i.id === registroId);
+            if (!reg || !reg.operacoes[opIndex]) return;
+
+            const op = reg.operacoes[opIndex];
+            const novoValorStr = prompt(`Digite o valor exato pago ao funcionário ${op.executor} neste dia (${reg.dataTexto}):`, op.diariaFixada !== undefined ? op.diariaFixada : 100);
+            if (novoValorStr === null) return;
+
+            const novoValor = parseFloat(novoValorStr);
+            if (isNaN(novoValor)) { alert('Valor inválido!'); return; }
+
+            op.diariaFixada = novoValor;
+            localStorage.setItem('historicoProducao', JSON.stringify(hist));
+            buscarHistorico();
+            alert('Valor da diária ajustado com sucesso para este dia!');
         }
 
         function renderizarGrafico(lista, filtroExecutor = '') {
