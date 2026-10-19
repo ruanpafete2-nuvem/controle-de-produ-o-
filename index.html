@@ -1242,7 +1242,7 @@
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
             calcularTotalDia();
-            alert('Funcionário atualizado com sucesso! (Os dias já finalizados anteriormente não foram alterados).');
+            alert('Funcionário atualizado com sucesso!');
         }
 
         function removerFuncionarioCadastrado(index) {
@@ -1384,11 +1384,11 @@
             }
         }
 
-        function adicionarOperacao(servico = '', qtd = 0, valor = 0, executor = 'mim') {
+        function adicionarOperacao(servico = '', qtd = 0, valor = 0, executor = 'mim', diariaManual = null) {
             contadorOperacoes++;
             const idAtual = contadorOperacoes;
             const html = `
-                <div class="op-card" id="op-card-${idAtual}">
+                <div class="op-card" id="op-card-${idAtual}" data-diariamanual="${diariaManual !== null ? diariaManual : ''}">
                     <div class="op-header">
                         <span>Operação ${idAtual}</span>
                         <button class="btn-delete" onclick="removerOperacao(${idAtual})">🗑️</button>
@@ -1425,6 +1425,25 @@
             salvarRascunho();
         }
 
+        function ajustarDiariaManual(cardId) {
+            const card = document.getElementById(`op-card-${cardId}`);
+            if (!card) return;
+            const exec = card.querySelector('.select-executor').value;
+            if (exec === 'mim') { alert('Esta operação é sua.'); return; }
+
+            const valorAtual = card.getAttribute('data-diariamanual') || '100';
+            const novoVal = prompt(`Digite o valor da diária ajustado para o funcionário ${exec} nesta operação:`, valorAtual);
+            if (novoVal === null) return;
+
+            const num = parseFloat(novoVal);
+            if (isNaN(num)) { alert('Valor inválido!'); return; }
+
+            card.setAttribute('data-diariamanual', num);
+            calcularTotalDia();
+            salvarRascunho();
+            alert('Diária ajustada com sucesso para esta operação!');
+        }
+
         function calcularTotalDia() {
             let totalBruto = 0;
             let minhaProducao = 0;
@@ -1456,18 +1475,23 @@
                 if (exec === 'mim') {
                     minhaProducao += subTotal;
                 } else {
-                    if (!prodFuncs[exec]) prodFuncs[exec] = { gerado: 0, custo: 0 };
+                    if (!prodFuncs[exec]) prodFuncs[exec] = { gerado: 0, custo: 0, cardIds: [] };
                     prodFuncs[exec].gerado += subTotal;
+                    prodFuncs[exec].cardIds.push(card.id);
                     
-                    if (funcsMap[exec]) {
-                        let baseDiaria = funcsMap[exec].valor;
+                    let baseDiaria = 0;
+                    const manual = card.getAttribute('data-diariamanual');
+                    if (manual !== null && manual !== '') {
+                        baseDiaria = parseFloat(manual);
+                    } else if (funcsMap[exec]) {
+                        baseDiaria = funcsMap[exec].valor;
                         const pontoFunc = listaPontos.find(p => p.funcionario === exec && p.data === dataIsoAtual);
                         if (pontoFunc && pontoFunc.horasDesconto > 0) {
                             let descontoProporcional = (baseDiaria / 8) * pontoFunc.horasDesconto;
                             baseDiaria = Math.max(0, baseDiaria - descontoProporcional);
                         }
-                        prodFuncs[exec].custo = baseDiaria;
                     }
+                    prodFuncs[exec].custo = baseDiaria;
                 }
             });
 
@@ -1484,10 +1508,16 @@
                 const sobra = gerado - custo;
                 lucroTotalDoDia += sobra;
 
+                const firstCardId = prodFuncs[nomeFunc].cardIds[0];
+                const cardNum = firstCardId ? firstCardId.replace('op-card-', '') : '1';
+
                 htmlDetalhes += `
                     <div style="background: var(--op-header-bg); border: 1px solid var(--border-color); padding: 6px 8px; border-radius: 6px; margin: 6px 0;">
                         <div class="lucro-linha" style="margin-bottom:2px;"><span>👤 Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
-                        <div class="lucro-linha" style="margin-bottom:2px; color: var(--danger-color);"><span>➖ Diária c/ Descontos:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
+                        <div class="lucro-linha" style="margin-bottom:2px; color: var(--danger-color);">
+                            <span>➖ Diária c/ Descontos: <button class="btn-subtle" onclick="ajustarDiariaManual('${cardNum}')" title="Editar valor">✏️</button></span> 
+                            <span>- R$ ${custo.toFixed(2)}</span>
+                        </div>
                         <div class="lucro-linha" style="margin-bottom:0; color: var(--primary-color);"><span>👉 Sobra do ${nomeFunc}:</span> <b>R$ ${sobra.toFixed(2)}</b></div>
                     </div>`;
             });
@@ -1528,12 +1558,18 @@
 
             document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
                 const exec = card.querySelector('.select-executor').value;
+                const manual = card.getAttribute('data-diariamanual');
                 let diariaSalva = 0;
-                if (exec !== 'mim' && funcsMap[exec]) {
-                    diariaSalva = funcsMap[exec].valor;
-                    const p = listaPontos.find(pt => pt.funcionario === exec && pt.data === dataIsoStr);
-                    if (p && p.horasDesconto > 0) {
-                        diariaSalva = Math.max(0, diariaSalva - ((diariaSalva / 8) * p.horasDesconto));
+
+                if (exec !== 'mim') {
+                    if (manual !== null && manual !== '') {
+                        diariaSalva = parseFloat(manual);
+                    } else if (funcsMap[exec]) {
+                        diariaSalva = funcsMap[exec].valor;
+                        const p = listaPontos.find(pt => pt.funcionario === exec && pt.data === dataIsoStr);
+                        if (p && p.horasDesconto > 0) {
+                            diariaSalva = Math.max(0, diariaSalva - ((diariaSalva / 8) * p.horasDesconto));
+                        }
                     }
                 }
 
@@ -1543,7 +1579,8 @@
                     valor: parseFloat(card.querySelector('.valor').value) || 0,
                     total: card.querySelector('.total-op').innerText,
                     executor: exec,
-                    diariaFixada: diariaSalva
+                    diariaFixada: diariaSalva,
+                    diariaManual: manual
                 });
             });
 
@@ -1696,7 +1733,6 @@
 
             const funcsMap = {};
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
-            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
 
             lista.forEach(item => {
                 let subTotalCard = 0;
@@ -1731,7 +1767,6 @@
 
                 somaTotalBruto += subTotalCard;
 
-                // Botão para alterar o valor pago da diária direto no histórico para dias antigos
                 let botaoAlterarDiaria = '';
                 item.operacoes.forEach((op, opIdx) => {
                     if (op.executor && op.executor !== 'mim') {
@@ -1851,7 +1886,7 @@
             document.getElementById('operacoes-container').innerHTML = '';
             contadorOperacoes = 0;
 
-            reg.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor));
+            reg.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor, op.diariaManual || null));
             alternarPainel('main-panel', 'nav-inicio');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             alert('Ajuste os dados no topo e clique em "Finalizar Dia".');
