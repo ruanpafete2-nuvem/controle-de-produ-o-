@@ -718,6 +718,11 @@
                 <button class="btn btn-full" style="margin-bottom: 15px;" onclick="adicionarCartaoPonto()">➕ Novo Ponto / Outro Funcionário</button>
 
                 <button class="btn btn-green btn-full" onclick="salvarTodosPontosDia()">💾 Salvar Todos os Pontos</button>
+
+                <!-- SEÇÃO DO HISTÓRICO VISUAL DE PONTOS SALVOS -->
+                <hr style="border:0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+                <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">📜 Histórico de Pontos Registrados</h3>
+                <div id="historico-pontos-salvos-container"></div>
             </div>
 
             <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS + COMPARATIVO -->
@@ -1052,7 +1057,35 @@
             if(idPainel === 'ponto-painel') recarregarTodosPontos();
         }
 
-        /* SISTEMA MULTI-CARTÃO DE PONTO */
+        /* CÁLCULO PRECISO DE HORAS DE TRABALHO E FALTAS */
+        function calcularDiferencaHoras(hInicio, hFim) {
+            if (!hInicio || !hFim || hInicio === '--:--' || hFim === '--:--') return 0;
+            const [h1, m1] = hInicio.split(':').map(Number);
+            const [h2, m2] = hFim.split(':').map(Number);
+            if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return 0;
+            const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+            return diff > 0 ? (diff / 60) : 0;
+        }
+
+        function calcularResumoPontoCard(c, a, r, s, sImp, rImp) {
+            let horasTrabalhadas = 0;
+            if (c && s) {
+                let totalBruto = calcularDiferencaHoras(c, s);
+                let almocoHoras = calcularDiferencaHoras(a, r);
+                horasTrabalhadas = Math.max(0, totalBruto - almocoHoras);
+            }
+
+            let horasImprevisto = calcularDiferencaHoras(sImp, rImp);
+            let horasTotalDesconto = Math.max(0, (8 - horasTrabalhadas) + horasImprevisto);
+
+            return {
+                horasTrabalhadas,
+                horasImprevisto,
+                horasTotalDesconto
+            };
+        }
+
+        /* SISTEMA MULTI-CARTÃO DE PONTO E HISTÓRICO */
         function gerarOptionsPontoFuncionarios(selecionado = 'mim') {
             let options = `<option value="mim" ${selecionado === 'mim' ? 'selected' : ''}>Minha Pessoa (Você)</option>`;
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
@@ -1098,19 +1131,19 @@
                             <button class="btn btn-green" style="flex:1;" onclick="baterPontoCard(${idCard}, 'saida')">🏁 Saída: <span id="lbl-saida-${idCard}">${saida || '--:--'}</span></button>
                         </div>
 
-                        <!-- SEÇÃO DE IMPREVISTO POR HORÁRIO DE SAÍDA E RETORNO -->
+                        <!-- SEÇÃO DE IMPREVISTO -->
                         <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid var(--danger-color); padding: 10px; border-radius: 8px; margin-top: 6px;">
                             <div style="font-size: 11px; font-weight: 700; color: var(--danger-color); margin-bottom: 6px;">⚠️ IMPREVISTO (SAÍDA E RETORNO):</div>
                             <div style="display:flex; gap:8px; margin-bottom: 6px;">
                                 <button class="btn" style="flex:1; font-size:11px;" onclick="baterPontoCard(${idCard}, 'saidaImprevisto')">⚠️ Saída: <span id="lbl-saidaImprevisto-${idCard}">${saidaImprevisto || '--:--'}</span></button>
                                 <button class="btn" style="flex:1; font-size:11px;" onclick="baterPontoCard(${idCard}, 'retornoImprevisto')">🟢 Retorno: <span id="lbl-retornoImprevisto-${idCard}">${retornoImprevisto || '--:--'}</span></button>
                             </div>
-                            <input type="text" id="motivo-imprevisto-${idCard}" class="input-motivo-imprevisto" value="${motivoImprevisto}" placeholder="Motivo do imprevisto (ex: Médico)" style="font-size:11px; padding:6px 8px;">
+                            <input type="text" id="motivo-imprevisto-${idCard}" class="input-motivo-imprevisto" value="${motivoImprevisto}" placeholder="Motivo do imprevisto (ex: Médico)" style="font-size:11px; padding:6px 8px;" oninput="atualizarResumoCardPonto(${idCard})">
                         </div>
                     </div>
 
                     <div style="background: var(--op-header-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 12px;">
-                        <b>Resumo:</b>
+                        <b>Resumo em tempo real:</b>
                         <div id="resumo-card-${idCard}" style="margin-top: 4px; color: var(--text-muted);"></div>
                     </div>
                 </div>`;
@@ -1140,23 +1173,10 @@
             atualizarResumoCardPonto(idCard);
         }
 
-        function calcularHorasDescontoImp(saida, retorno) {
-            if (!saida || !retorno || saida === '--:--' || retorno === '--:--') return 0;
-            const [h1, m1] = saida.split(':').map(Number);
-            const [h2, m2] = retorno.split(':').map(Number);
-            if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return 0;
-
-            const min1 = h1 * 60 + m1;
-            const min2 = h2 * 60 + m2;
-            const dif = min2 - min1;
-            return dif > 0 ? (dif / 60) : 0;
-        }
-
         function atualizarResumoCardPonto(idCard) {
             const card = document.getElementById(`ponto-card-${idCard}`);
             if (!card) return;
 
-            const func = card.querySelector('.sel-ponto-func').value;
             const c = document.getElementById(`lbl-chegada-${idCard}`).innerText;
             const a = document.getElementById(`lbl-almoco-${idCard}`).innerText;
             const r = document.getElementById(`lbl-retorno-${idCard}`).innerText;
@@ -1166,16 +1186,17 @@
             const rImp = document.getElementById(`lbl-retornoImprevisto-${idCard}`).innerText;
             const mot = document.getElementById(`motivo-imprevisto-${idCard}`).value;
 
-            const horasDesc = calcularHorasDescontoImp(sImp, rImp);
+            const res = calcularResumoPontoCard(c, a, r, s, sImp, rImp);
 
             let textoImp = '';
             if (sImp !== '--:--' || rImp !== '--:--') {
-                textoImp = `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: Saída ${sImp} | Retorno ${rImp} (${horasDesc.toFixed(1)}h fora) - ${mot || 'Sem motivo'}</span>`;
+                textoImp = `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${sImp} até ${rImp} (${res.horasImprevisto.toFixed(1)}h fora) - ${mot || 'Sem motivo'}</span>`;
             }
 
             document.getElementById(`resumo-card-${idCard}`).innerHTML = `
                 <div>🟢 Chegada: <b>${c}</b> | 🍽️ Almoço: <b>${a}</b></div>
                 <div>🔙 Retorno: <b>${r}</b> | 🏁 Saída: <b>${s}</b></div>
+                <div style="margin-top:4px;">⏱️ Trabalhado: <b>${res.horasTrabalhadas.toFixed(1)}h</b> | Desconto: <b style="color:var(--danger-color);">${res.horasTotalDesconto.toFixed(1)}h</b></div>
                 ${textoImp}
             `;
         }
@@ -1194,6 +1215,8 @@
             } else {
                 adicionarCartaoPonto();
             }
+
+            renderizarHistoricoPontosSalvos();
         }
 
         function salvarTodosPontosDia() {
@@ -1216,7 +1239,7 @@
                 const rImp = document.getElementById(`lbl-retornoImprevisto-${idCard}`).innerText;
                 const mot = document.getElementById(`motivo-imprevisto-${idCard}`).value;
 
-                const horasDesc = calcularHorasDescontoImp(sImp, rImp);
+                const res = calcularResumoPontoCard(c, a, r, s, sImp, rImp);
 
                 listaPontos.push({
                     funcionario: func,
@@ -1228,13 +1251,46 @@
                     saidaImprevisto: sImp !== '--:--' ? sImp : '',
                     retornoImprevisto: rImp !== '--:--' ? rImp : '',
                     motivoImprevisto: mot,
-                    horasDesconto: horasDesc
+                    horasTrabalhadas: res.horasTrabalhadas,
+                    horasDesconto: res.horasTotalDesconto
                 });
             });
 
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
-            alert('Pontos salvos com sucesso!');
+            alert('Pontos e horários salvos com sucesso!');
+            renderizarHistoricoPontosSalvos();
             calcularTotalDia();
+        }
+
+        /* EXIBIR O HISTÓRICO DE PONTOS REGISTRADOS NA ABA PONTO */
+        function renderizarHistoricoPontosSalvos() {
+            const dataSel = document.getElementById('ponto-data').value;
+            const container = document.getElementById('historico-pontos-salvos-container');
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+
+            const pontosFiltrados = listaPontos.filter(p => p.data === dataSel);
+
+            if (pontosFiltrados.length === 0) {
+                container.innerHTML = `<p style="font-size:12px; color:var(--text-muted);">Nenhum ponto gravado nesta data (${dataSel}).</p>`;
+                return;
+            }
+
+            let html = '';
+            pontosFiltrados.forEach(p => {
+                const nomeDisplay = p.funcionario === 'mim' ? 'Você (Sua Produção)' : p.funcionario;
+                let impInfo = p.saidaImprevisto ? `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${p.saidaImprevisto} até ${p.retornoImprevisto} (${p.motivoImprevisto || 'Motivo não informado'})</span>` : '';
+
+                html += `
+                    <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; padding:10px; margin-bottom:8px; font-size:12px;">
+                        <div style="font-weight:700; color:var(--primary-color); margin-bottom:4px;">👤 ${nomeDisplay}</div>
+                        <div>🟢 Chegada: <b>${p.chegada || '--:--'}</b> | 🏁 Saída: <b>${p.saida || '--:--'}</b></div>
+                        <div>🍽️ Almoço: <b>${p.almoco || '--:--'}</b> | 🔙 Retorno: <b>${p.retorno || '--:--'}</b></div>
+                        <div style="margin-top:4px; font-weight:600;">⏱️ Horas Trabalhadas: ${p.horasTrabalhadas ? p.horasTrabalhadas.toFixed(1) : 0}h | Desconto: <span style="color:var(--danger-color);">${p.horasDesconto ? p.horasDesconto.toFixed(1) : 0}h</span></div>
+                        ${impInfo}
+                    </div>`;
+            });
+
+            container.innerHTML = html;
         }
 
         function salvarNovoServicoCadastrado() {
