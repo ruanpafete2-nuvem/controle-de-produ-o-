@@ -594,15 +594,9 @@
 
         .ponto-btn-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr;
             gap: 10px;
             margin-bottom: 12px;
-        }
-
-        .ponto-btn-grid button {
-            padding: 12px;
-            font-size: 12px;
-            font-weight: 700;
         }
 
         .backup-discreto {
@@ -701,8 +695,8 @@
 
             <!-- PAINEL DE CONTROLE DE PONTO -->
             <div id="ponto-painel" class="box-section">
-                <h2>⏱️ Controle de Ponto</h2>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Selecione o funcionário e registre os horários do dia:</p>
+                <h2>⏱️ Controle de Ponto e Imprevistos</h2>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Registre os horários e saídas antecipadas:</p>
                 
                 <div class="filter-field">
                     <label for="ponto-funcionario">Funcionário:</label>
@@ -715,16 +709,19 @@
                 </div>
 
                 <div class="ponto-btn-grid" style="margin-top: 15px;">
-                    <button class="btn" onclick="baterPonto('chegada')">🟢 Chegada</button>
-                    <button class="btn" onclick="baterPonto('saidaCafe')">☕ Saída Café</button>
-                    <button class="btn" onclick="baterPonto('voltaCafe')">✅ Volta Café</button>
-                    <button class="btn" onclick="baterPonto('saidaAlmoco')">🍽️ Saída Almoço</button>
-                    <button class="btn" onclick="baterPonto('voltaAlmoco')">🔙 Volta Almoço</button>
-                    <button class="btn btn-green" onclick="baterPonto('saida')">🏁 Fim do Dia</button>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn" style="flex:1;" onclick="baterPonto('chegada')">🟢 Chegada: <span id="lbl-chegada">--:--</span></button>
+                        <button class="btn" style="flex:1;" onclick="baterPonto('almoco')">🍽️ Almoço: <span id="lbl-almoco">--:--</span></button>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn" style="flex:1;" onclick="baterPonto('retorno')">🔙 Retorno: <span id="lbl-retorno">--:--</span></button>
+                        <button class="btn btn-green" style="flex:1;" onclick="baterPonto('saida')">🏁 Saída: <span id="lbl-saida">--:--</span></button>
+                    </div>
+                    <button class="btn" style="background: rgba(239, 68, 68, 0.1); color: var(--danger-color); border-color: var(--danger-color);" onclick="abrirModalImprevisto()">⚠️ Registrar Imprevisto / Saída Cedo</button>
                 </div>
 
                 <div id="resumo-ponto-dia" style="background: var(--op-header-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 12px;">
-                    <b>Horários Registrados:</b>
+                    <b>Resumo do Ponto:</b>
                     <div id="lista-horarios-ponto" style="margin-top: 6px; color: var(--text-muted);">Nenhum horário registrado.</div>
                 </div>
 
@@ -878,7 +875,7 @@
         let contadorOperacoes = 0;
         let registroEmEdicaoId = null;
         let funcionarioEmEdicaoIndex = null;
-        let pontoAtualTemp = { chegada: '', saidaCafe: '', voltaCafe: '', saidaAlmoco: '', voltaAlmoco: '', saida: '' };
+        let pontoAtualTemp = { chegada: '', almoco: '', retorno: '', saida: '', horasDesconto: 0, motivoImprevisto: '' };
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1087,7 +1084,7 @@
             if (registro) {
                 pontoAtualTemp = { ...registro };
             } else {
-                pontoAtualTemp = { chegada: '', saidaCafe: '', voltaCafe: '', saidaAlmoco: '', voltaAlmoco: '', saida: '' };
+                pontoAtualTemp = { chegada: '', almoco: '', retorno: '', saida: '', horasDesconto: 0, motivoImprevisto: '' };
             }
             renderizarVisualizacaoPonto();
         }
@@ -1099,13 +1096,33 @@
             renderizarVisualizacaoPonto();
         }
 
+        function abrirModalImprevisto() {
+            const horas = prompt("Quantas horas o funcionário saiu mais cedo ou faltou devido ao imprevisto? (Ex: 2 ou 1.5)", "2");
+            if (horas === null) return;
+            const numHoras = parseFloat(horas) || 0;
+            const motivo = prompt("Qual foi o motivo do imprevisto?", "Consulta médica / Saída antecipada");
+
+            pontoAtualTemp.horasDesconto = numHoras;
+            pontoAtualTemp.motivoImprevisto = motivo || "Imprevisto";
+            renderizarVisualizacaoPonto();
+            alert(`Registrado desconto de ${numHoras} hora(s) por imprevisto.`);
+        }
+
         function renderizarVisualizacaoPonto() {
+            document.getElementById('lbl-chegada').innerText = pontoAtualTemp.chegada || '--:--';
+            document.getElementById('lbl-almoco').innerText = pontoAtualTemp.almoco || '--:--';
+            document.getElementById('lbl-retorno').innerText = pontoAtualTemp.retorno || '--:--';
+            document.getElementById('lbl-saida').innerText = pontoAtualTemp.saida || '--:--';
+
             const container = document.getElementById('lista-horarios-ponto');
+            let imprevistoTxt = pontoAtualTemp.horasDesconto > 0 
+                ? `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${pontoAtualTemp.motivoImprevisto} (-${pontoAtualTemp.horasDesconto}h)</span>` 
+                : '';
+
             let html = `
-                <div>🟢 Chegada: <b>${pontoAtualTemp.chegada || '--:--'}</b></div>
-                <div>☕ Saída Café: <b>${pontoAtualTemp.saidaCafe || '--:--'}</b> | Volta: <b>${pontoAtualTemp.voltaCafe || '--:--'}</b></div>
-                <div>🍽️ Saída Almoço: <b>${pontoAtualTemp.saidaAlmoco || '--:--'}</b> | Volta: <b>${pontoAtualTemp.voltaAlmoco || '--:--'}</b></div>
-                <div>🏁 Fim do Dia: <b>${pontoAtualTemp.saida || '--:--'}</b></div>
+                <div>🟢 Chegada: <b>${pontoAtualTemp.chegada || '--:--'}</b> | 🍽️ Almoço: <b>${pontoAtualTemp.almoco || '--:--'}</b></div>
+                <div>🔙 Retorno: <b>${pontoAtualTemp.retorno || '--:--'}</b> | 🏁 Saída: <b>${pontoAtualTemp.saida || '--:--'}</b></div>
+                ${imprevistoTxt}
             `;
             container.innerHTML = html;
         }
@@ -1125,7 +1142,8 @@
             });
 
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
-            alert('Horários de ponto salvos com sucesso!');
+            alert('Horários e descontos salvos com sucesso!');
+            calcularTotalDia();
         }
 
         function salvarNovoServicoCadastrado() {
@@ -1223,6 +1241,7 @@
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
+            calcularTotalDia();
             alert('Funcionário atualizado com sucesso!');
         }
 
@@ -1414,6 +1433,20 @@
             const funcsMap = {};
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
 
+            // Buscar registros de ponto do dia atual preenchido
+            const diaStr = document.getElementById('dia').value.trim();
+            const mesStr = document.getElementById('mes').value.trim().toLowerCase();
+            const anoStr = document.getElementById('ano').value.trim();
+            let dataIsoAtual = '';
+            if (diaStr && mesStr && anoStr) {
+                let mesIndex = mesesNomes.findIndex(m => m.startsWith(mesStr));
+                if (mesIndex === -1) mesIndex = 9;
+                const dObj = new Date(parseInt(anoStr), mesIndex, parseInt(diaStr));
+                dataIsoAtual = `${dObj.getFullYear()}-${String(dObj.getMonth()+1).padStart(2,'0')}-${String(dObj.getDate()).padStart(2,'0')}`;
+            }
+
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+
             document.querySelectorAll('#operacoes-container .op-card').forEach(card => {
                 const qtd = parseFloat(card.querySelector('.qtd').value) || 0;
                 const valor = parseFloat(card.querySelector('.valor').value) || 0;
@@ -1428,7 +1461,15 @@
                     prodFuncs[exec].gerado += subTotal;
                     
                     if (funcsMap[exec]) {
-                        prodFuncs[exec].custo = funcsMap[exec].valor;
+                        let baseDiaria = funcsMap[exec].valor;
+                        // Verificar se tem imprevisto/desconto para este funcionário nesta data
+                        const pontoFunc = listaPontos.find(p => p.funcionario === exec && p.data === dataIsoAtual);
+                        if (pontoFunc && pontoFunc.horasDesconto > 0) {
+                            // Considera 8 horas de jornada diária padrão para proporcionalidade
+                            let descontoProporcional = (baseDiaria / 8) * pontoFunc.horasDesconto;
+                            baseDiaria = Math.max(0, baseDiaria - descontoProporcional);
+                        }
+                        prodFuncs[exec].custo = baseDiaria;
                     }
                 }
             });
@@ -1449,7 +1490,7 @@
                 htmlDetalhes += `
                     <div style="background: var(--op-header-bg); border: 1px solid var(--border-color); padding: 6px 8px; border-radius: 6px; margin: 6px 0;">
                         <div class="lucro-linha" style="margin-bottom:2px;"><span>👤 Prod. ${nomeFunc}:</span> <b>R$ ${gerado.toFixed(2)}</b></div>
-                        <div class="lucro-linha" style="margin-bottom:2px; color: var(--danger-color);"><span>➖ Diária/Pagamento:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
+                        <div class="lucro-linha" style="margin-bottom:2px; color: var(--danger-color);"><span>➖ Diária c/ Descontos:</span> <span>- R$ ${custo.toFixed(2)}</span></div>
                         <div class="lucro-linha" style="margin-bottom:0; color: var(--primary-color);"><span>👉 Sobra do ${nomeFunc}:</span> <b>R$ ${sobra.toFixed(2)}</b></div>
                     </div>`;
             });
@@ -1642,6 +1683,7 @@
 
             const funcsMap = {};
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
 
             lista.forEach(item => {
                 let subTotalCard = 0;
@@ -1669,7 +1711,12 @@
 
                     const exec = op.executor || 'mim';
                     if (exec !== 'mim' && funcsMap[exec]) {
-                        somaCustoFuncionario += funcsMap[exec].valor;
+                        let custoDia = funcsMap[exec].valor;
+                        const p = listaPontos.find(pt => pt.funcionario === exec && pt.data === item.dataIso);
+                        if (p && p.horasDesconto > 0) {
+                            custoDia = Math.max(0, custoDia - ((custoDia / 8) * p.horasDesconto));
+                        }
+                        somaCustoFuncionario += custoDia;
                     }
                 });
 
@@ -1693,7 +1740,7 @@
 
             resumoBox.style.display = 'block';
             let detalheLucro = (filtroExecutor && filtroExecutor !== 'mim') 
-                ? `<div style="font-size:12px; margin-top:4px; color:var(--danger-color);">Desconto de pagamento: R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Sobra do Funcionário para Você: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
+                ? `<div style="font-size:12px; margin-top:4px; color:var(--danger-color);">Pagamento Líquido (com descontos): R$ ${somaCustoFuncionario.toFixed(2)}<br><b style="color:var(--primary-color); font-size:14px;">Sobra para Você: R$ ${lucroLiquidoReal.toFixed(2)}</b></div>`
                 : '';
 
             resumoBox.innerHTML = `Total do Período (${lista.length} dias): <br><b style="font-size:18px;">R$ ${somaTotalBruto.toFixed(2)}</b><br><span style="font-size:12px;">Total de Peças: ${somaPecas}</span>${detalheLucro}`;
