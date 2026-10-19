@@ -1767,13 +1767,12 @@
 
                 somaTotalBruto += subTotalCard;
 
-                let botaoAlterarDiaria = '';
+                let infoDiaria = '';
                 item.operacoes.forEach((op, opIdx) => {
                     if (op.executor && op.executor !== 'mim') {
                         let valAtualDiaria = op.diariaFixada !== undefined ? op.diariaFixada : 0;
-                        botaoAlterarDiaria = `<div style="margin-top:6px; font-size:11px; display:flex; justify-content:space-between; align-items:center; background:var(--op-header-bg); padding:4px 8px; border-radius:4px;">
-                            <span>Diária do ${op.executor}: <b>R$ ${valAtualDiaria.toFixed(2)}</b></span>
-                            <button class="btn-subtle" onclick="alterarDiariaHistorico(${item.id}, ${opIdx})">✏️ Ajustar Valor Pago</button>
+                        infoDiaria = `<div style="margin-top:6px; font-size:11px; background:var(--op-header-bg); padding:4px 8px; border-radius:4px;">
+                            Diária do ${op.executor}: <b>R$ ${valAtualDiaria.toFixed(2)}</b>
                         </div>`;
                     }
                 });
@@ -1789,7 +1788,7 @@
                             </div>
                         </div>
                         ${opsHTML}
-                        ${botaoAlterarDiaria}
+                        ${infoDiaria}
                     </div>`;
             });
 
@@ -1802,24 +1801,6 @@
 
             resumoBox.innerHTML = `Total do Período (${lista.length} dias): <br><b style="font-size:18px;">R$ ${somaTotalBruto.toFixed(2)}</b><br><span style="font-size:12px;">Total de Peças: ${somaPecas}</span>${detalheLucro}`;
             btnExportar.style.display = 'block';
-        }
-
-        function alterarDiariaHistorico(registroId, opIndex) {
-            let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const reg = hist.find(i => i.id === registroId);
-            if (!reg || !reg.operacoes[opIndex]) return;
-
-            const op = reg.operacoes[opIndex];
-            const novoValorStr = prompt(`Digite o valor exato pago ao funcionário ${op.executor} neste dia (${reg.dataTexto}):`, op.diariaFixada !== undefined ? op.diariaFixada : 100);
-            if (novoValorStr === null) return;
-
-            const novoValor = parseFloat(novoValorStr);
-            if (isNaN(novoValor)) { alert('Valor inválido!'); return; }
-
-            op.diariaFixada = novoValor;
-            localStorage.setItem('historicoProducao', JSON.stringify(hist));
-            buscarHistorico();
-            alert('Valor da diária ajustado com sucesso para este dia!');
         }
 
         function renderizarGrafico(lista, filtroExecutor = '') {
