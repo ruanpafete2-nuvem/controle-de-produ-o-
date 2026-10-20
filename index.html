@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Controle de Produção</title>
 
-    <!-- Fonte Inter para visual moderno e legível -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -29,7 +28,6 @@
             --op-header-bg: #f1f5f9;
         }
 
-        /* MODO ESCURO */
         [data-theme="dark"] {
             --primary-color: #34d399;
             --primary-hover: #10b981;
@@ -423,7 +421,6 @@
             box-shadow: var(--shadow-sm);
         }
 
-        /* BARRA DE NAVEGAÇÃO FIXA NO RODAPÉ */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -601,7 +598,6 @@
             font-size: 11px;
         }
 
-        /* ESTRUTURA DOS CAMPOS DE PONTO PERFEITAMENTE ESPAÇADOS */
         .ponto-grid-row {
             display: flex;
             gap: 12px;
@@ -660,6 +656,14 @@
         .btn-clear-minimal:hover {
             opacity: 1;
             color: var(--danger-color);
+        }
+
+        .banco-horas-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 16px;
         }
 
         .backup-discreto {
@@ -758,7 +762,7 @@
 
             <!-- PAINEL DE CONTROLE DE PONTO -->
             <div id="ponto-painel" class="box-section">
-                <h2>⏱️ Controle de Ponto e Imprevistos</h2>
+                <h2>⏱️ Controle de Ponto e Banco de Horas</h2>
                 <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Selecione os horários usando o relógio:</p>
 
                 <div class="filter-field">
@@ -770,11 +774,35 @@
                 <div id="lista-cartoes-ponto"></div>
 
                 <button class="btn btn-full" style="margin-bottom: 15px;" onclick="adicionarCartaoPonto()">➕ Novo Ponto / Outro Funcionário</button>
-
                 <button class="btn btn-green btn-full" onclick="salvarTodosPontosDia()">💾 Salvar Todos os Pontos</button>
 
-                <!-- SEÇÃO DO HISTÓRICO VISUAL DE PONTOS SALVOS COM EDIÇÃO -->
+                <!-- CONSULTA BANCO DE HORAS ACUMULADAS POR PERÍODO -->
                 <hr style="border:0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+                <div class="banco-horas-box">
+                    <h3 style="font-size: 14px; margin-top:0; margin-bottom:10px; color:var(--primary-color);">📊 Consulta de Banco de Horas</h3>
+                    
+                    <div class="filter-field">
+                        <label for="bh-funcionario">Funcionário:</label>
+                        <select id="bh-funcionario" onchange="gerarRelatorioBancoHoras()">
+                            <!-- Opções dinâmicas -->
+                        </select>
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                        <div class="filter-field" style="flex:1;">
+                            <label for="bh-inicio">De:</label>
+                            <input type="date" id="bh-inicio" onchange="gerarRelatorioBancoHoras()">
+                        </div>
+                        <div class="filter-field" style="flex:1;">
+                            <label for="bh-fim">Até:</label>
+                            <input type="date" id="bh-fim" onchange="gerarRelatorioBancoHoras()">
+                        </div>
+                    </div>
+
+                    <div id="resultado-banco-horas" style="margin-top:10px; padding:10px; background:var(--op-header-bg); border-radius:8px; font-size:12px;"></div>
+                </div>
+
+                <!-- HISTÓRICO VISUAL DE PONTOS SALVOS -->
                 <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">📜 Histórico de Pontos Registrados</h3>
                 <div id="historico-pontos-salvos-container"></div>
             </div>
@@ -865,7 +893,6 @@
                 
                 <button class="btn btn-green btn-full" id="btn-exportar" style="margin-bottom: 15px; display: none;" onclick="exportarRelatorioWhatsApp()">📲 Exportar Resumo (WhatsApp)</button>
 
-                <!-- ÁREA DO GRÁFICO POR SERVIÇO -->
                 <div id="grafico-container" class="chart-box" style="display:none;">
                     <h3 style="font-size: 13px; margin-top: 0; margin-bottom: 10px; color: var(--text-muted);">📊 Total de Peças por Serviço</h3>
                     <div id="barras-grafico"></div>
@@ -898,7 +925,6 @@
                 </button>
             </nav>
 
-            <!-- SEÇÃO DISCRETA DE BACKUP -->
             <div class="backup-discreto">
                 <span>Segurança dos Dados:</span>
                 <button class="btn-subtle" onclick="fazerBackup()">⬇️ Baixar Backup</button> | 
@@ -1035,10 +1061,18 @@
             const hojeIso = new Date().toISOString().slice(0, 10);
             const inputPontoData = document.getElementById('ponto-data');
             if (inputPontoData) inputPontoData.value = hojeIso;
+
+            // Datas default para consulta de Banco de Horas (Este mês)
+            const dHoje = new Date();
+            const dInicioMes = new Date(dHoje.getFullYear(), dHoje.getMonth(), 1).toISOString().slice(0, 10);
+            document.getElementById('bh-inicio').value = dInicioMes;
+            document.getElementById('bh-fim').value = hojeIso;
             
             if (document.querySelectorAll('.card-ponto-item').length === 0) {
                 recarregarTodosPontos();
             }
+
+            gerarRelatorioBancoHoras();
 
             if (!carregarRascunho()) {
                 resetarDataHoje();
@@ -1111,38 +1145,59 @@
 
             if(idPainel === 'historico-painel') buscarHistorico();
             if(idPainel === 'funcionarios-painel') gerarRankingEquipe('hoje');
-            if(idPainel === 'ponto-painel') renderizarHistoricoPontosSalvos();
+            if(idPainel === 'ponto-painel') {
+                renderizarHistoricoPontosSalvos();
+                gerarRelatorioBancoHoras();
+            }
         }
 
-        /* CÁLCULO PRECISO DE HORAS DE TRABALHO E FALTAS */
-        function calcularDiferencaHoras(hInicio, hFim) {
+        /* FUNÇÕES DE CÁLCULO EXATO DE HORAS E MINUTOS DO PONTO */
+        function calcularDiferencaMinutos(hInicio, hFim) {
             if (!hInicio || !hFim) return 0;
             const [h1, m1] = hInicio.split(':').map(Number);
             const [h2, m2] = hFim.split(':').map(Number);
             if (isNaN(h1) || isNaN(m1) || isNaN(h2) || isNaN(m2)) return 0;
             const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-            return diff > 0 ? (diff / 60) : 0;
+            return diff > 0 ? diff : 0;
+        }
+
+        function formatarMinutosParaTexto(minutosTotais) {
+            if (minutosTotais <= 0) return '0 min';
+            const hrs = Math.floor(minutosTotais / 60);
+            const mins = Math.round(minutosTotais % 60);
+            if (hrs === 0) return `${mins} min`;
+            if (mins === 0) return `${hrs}h`;
+            return `${hrs}h ${mins} min`;
         }
 
         function calcularResumoPontoCard(c, a, r, s, sImp, rImp) {
-            let horasTrabalhadas = 0;
+            let minutosTrabalhados = 0;
             if (c && s) {
-                let totalBruto = calcularDiferencaHoras(c, s);
-                let almocoHoras = calcularDiferencaHoras(a, r);
-                horasTrabalhadas = Math.max(0, totalBruto - almocoHoras);
+                let brutoMin = calcularDiferencaMinutos(c, s);
+                let almocoMin = calcularDiferencaMinutos(a, r);
+                minutosTrabalhados = Math.max(0, brutoMin - almocoMin);
             }
 
-            let horasImprevisto = calcularDiferencaHoras(sImp, rImp);
-            let horasTotalDesconto = Math.max(0, (8 - horasTrabalhadas) + horasImprevisto);
+            let minutosImprevisto = calcularDiferencaMinutos(sImp, rImp);
+            
+            // Jornada Padrão de 8 Horas = 480 minutos
+            const jornadaPadraoMin = 480;
+            
+            // Minutos que faltaram para completar 8h + imprevistos fora
+            let minutosFalta = Math.max(0, jornadaPadraoMin - minutosTrabalhados) + minutosImprevisto;
+            
+            // Minutos que excederam a jornada de 8h
+            let minutosExtra = Math.max(0, minutosTrabalhados - jornadaPadraoMin);
 
             return {
-                horasTrabalhadas,
-                horasImprevisto,
-                horasTotalDesconto
+                minutosTrabalhados,
+                minutosImprevisto,
+                minutosDesconto: minutosFalta,
+                minutosExtra,
+                horasDescontoNum: minutosFalta / 60 // Para cálculo retrocompatível de valor de diária
             };
         }
 
-        /* SISTEMA MULTI-CARTÃO DE PONTO ORGANIZADO */
         function gerarOptionsPontoFuncionarios(selecionado = 'mim') {
             let options = `<option value="mim" ${selecionado === 'mim' ? 'selected' : ''}>Minha Pessoa (Você)</option>`;
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
@@ -1178,7 +1233,6 @@
                         </select>
                     </div>
 
-                    <!-- LINHA 1: CHEGADA E ALMOÇO -->
                     <div class="ponto-grid-row">
                         <div class="ponto-field-item">
                             <label>🟢 Chegada:</label>
@@ -1196,7 +1250,6 @@
                         </div>
                     </div>
 
-                    <!-- LINHA 2: RETORNO E SAÍDA -->
                     <div class="ponto-grid-row">
                         <div class="ponto-field-item">
                             <label>🔙 Retorno:</label>
@@ -1214,7 +1267,6 @@
                         </div>
                     </div>
 
-                    <!-- SEÇÃO DE IMPREVISTO -->
                     <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid var(--border-color); padding: 12px; border-radius: 8px; margin-top: 10px;">
                         <div style="font-size: 11px; font-weight: 700; color: var(--danger-color); margin-bottom: 8px;">⚠️ IMPREVISTO (SAÍDA E RETORNO):</div>
                         <div class="ponto-grid-row" style="margin-bottom: 8px;">
@@ -1279,13 +1331,21 @@
 
             let textoImp = '';
             if (sImp || rImp) {
-                textoImp = `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${sImp || '--:--'} até ${rImp || '--:--'} (${res.horasImprevisto.toFixed(1)}h fora) - ${mot || 'Sem motivo'}</span>`;
+                textoImp = `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${sImp || '--:--'} até ${rImp || '--:--'} (${formatarMinutosParaTexto(res.minutosImprevisto)} fora) - ${mot || 'Sem motivo'}</span>`;
+            }
+
+            let resumoDescontoExtra = '';
+            if (res.minutosDesconto > 0) {
+                resumoDescontoExtra = ` | Desconto: <b style="color:var(--danger-color);">${formatarMinutosParaTexto(res.minutosDesconto)}</b>`;
+            }
+            if (res.minutosExtra > 0) {
+                resumoDescontoExtra += ` | Hora Extra: <b style="color:var(--primary-color);">${formatarMinutosParaTexto(res.minutosExtra)}</b>`;
             }
 
             document.getElementById(`resumo-card-${idCard}`).innerHTML = `
                 <div>🟢 Chegada: <b>${c || '--:--'}</b> | 🍽️ Almoço: <b>${a || '--:--'}</b></div>
                 <div style="margin-top:2px;">🔙 Retorno: <b>${r || '--:--'}</b> | 🏁 Saída: <b>${s || '--:--'}</b></div>
-                <div style="margin-top:4px;">⏱️ Trabalhado: <b>${res.horasTrabalhadas.toFixed(1)}h</b> | Desconto: <b style="color:var(--danger-color);">${res.horasTotalDesconto.toFixed(1)}h</b></div>
+                <div style="margin-top:4px;">⏱️ Trabalhado: <b>${formatarMinutosParaTexto(res.minutosTrabalhados)}</b>${resumoDescontoExtra}</div>
                 ${textoImp}
             `;
 
@@ -1311,6 +1371,7 @@
             }
 
             renderizarHistoricoPontosSalvos();
+            gerarRelatorioBancoHoras();
         }
 
         function salvarTodosPontosDia() {
@@ -1346,18 +1407,21 @@
                     saidaImprevisto: sImp || '',
                     retornoImprevisto: rImp || '',
                     motivoImprevisto: mot,
-                    horasTrabalhadas: res.horasTrabalhadas,
-                    horasDesconto: res.horasTotalDesconto
+                    minutosTrabalhados: res.minutosTrabalhados,
+                    minutosDesconto: res.minutosDesconto,
+                    minutosExtra: res.minutosExtra,
+                    horasTrabalhadas: res.minutosTrabalhados / 60,
+                    horasDesconto: res.horasDescontoNum
                 });
             });
 
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
             alert('Pontos salvos com sucesso!');
             renderizarHistoricoPontosSalvos();
+            gerarRelatorioBancoHoras();
             calcularTotalDia();
         }
 
-        /* FUNÇÃO ATUALIZADA: EXIBE A DATA EM TODOS OS CARTÕES SALVOS DO HISTÓRICO DE PONTOS */
         function renderizarHistoricoPontosSalvos() {
             const container = document.getElementById('historico-pontos-salvos-container');
             const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
@@ -1367,18 +1431,19 @@
                 return;
             }
 
-            // Ordena os registros do ponto do mais recente para o mais antigo
             const ordenados = [...listaPontos].sort((a, b) => (b.data || '').localeCompare(a.data || ''));
 
             let html = '';
             ordenados.forEach((p, idx) => {
                 const nomeDisplay = p.funcionario === 'mim' ? 'Você (Sua Produção)' : p.funcionario;
+                
+                // Suporte para registros antigos (migração automática para minutos)
+                const minTrab = p.minutosTrabalhados !== undefined ? p.minutosTrabalhados : Math.round((p.horasTrabalhadas || 0) * 60);
+                const minDesc = p.minutosDesconto !== undefined ? p.minutosDesconto : Math.round((p.horasDesconto || 0) * 60);
+                const minExtra = p.minutosExtra || 0;
+
                 let impInfo = p.saidaImprevisto ? `<br><span style="color:var(--danger-color);">⚠️ Imprevisto: ${p.saidaImprevisto} até ${p.retornoImprevisto} (${p.motivoImprevisto || 'Motivo não informado'})</span>` : '';
 
-                const hTrabalhadas = typeof p.horasTrabalhadas === 'number' ? p.horasTrabalhadas.toFixed(1) : '0.0';
-                const hDesconto = typeof p.horasDesconto === 'number' ? p.horasDesconto.toFixed(1) : '0.0';
-
-                // Formata a data no padrão DD/MM/AAAA
                 let dataFormatada = 'Data não informada';
                 if (p.data && p.data.includes('-')) {
                     const partes = p.data.split('-');
@@ -1386,6 +1451,10 @@
                 } else if (p.data) {
                     dataFormatada = p.data;
                 }
+
+                let badgeSaldos = '';
+                if (minDesc > 0) badgeSaldos += ` | Desconto: <span style="color:var(--danger-color);">${formatarMinutosParaTexto(minDesc)}</span>`;
+                if (minExtra > 0) badgeSaldos += ` | Extra: <span style="color:var(--primary-color);">${formatarMinutosParaTexto(minExtra)}</span>`;
 
                 html += `
                     <div style="background:var(--card-bg); border:1px solid var(--border-color); border-radius:8px; padding:10px; margin-bottom:10px; font-size:12px; position:relative;">
@@ -1401,12 +1470,69 @@
                         </div>
                         <div style="margin-top:4px;">🟢 Chegada: <b>${p.chegada || '--:--'}</b> | 🏁 Saída: <b>${p.saida || '--:--'}</b></div>
                         <div>🍽️ Almoço: <b>${p.almoco || '--:--'}</b> | 🔙 Retorno: <b>${p.retorno || '--:--'}</b></div>
-                        <div style="margin-top:6px; font-weight:600; background:var(--op-header-bg); padding:4px 6px; border-radius:4px;">⏱️ Trabalhado: ${hTrabalhadas}h | Desconto: <span style="color:var(--danger-color);">${hDesconto}h</span></div>
+                        <div style="margin-top:6px; font-weight:600; background:var(--op-header-bg); padding:4px 6px; border-radius:4px;">
+                            ⏱️ Trabalhado: ${formatarMinutosParaTexto(minTrab)}${badgeSaldos}
+                        </div>
                         ${impInfo}
                     </div>`;
             });
 
             container.innerHTML = html;
+        }
+
+        /* FUNÇÃO DE RELATÓRIO DO BANCO DE HORAS ACUMULADO */
+        function gerarRelatorioBancoHoras() {
+            const func = document.getElementById('bh-funcionario').value;
+            const ini = document.getElementById('bh-inicio').value;
+            const fim = document.getElementById('bh-fim').value;
+            const boxResultado = document.getElementById('resultado-banco-horas');
+
+            if (!boxResultado) return;
+
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+
+            let totalMinTrabalhados = 0;
+            let totalMinDesconto = 0;
+            let totalMinExtra = 0;
+            let diasContabilizados = 0;
+
+            listaPontos.forEach(p => {
+                if (func && p.funcionario !== func) return;
+                if (ini && p.data < ini) return;
+                if (fim && p.data > fim) return;
+
+                const minTrab = p.minutosTrabalhados !== undefined ? p.minutosTrabalhados : Math.round((p.horasTrabalhadas || 0) * 60);
+                const minDesc = p.minutosDesconto !== undefined ? p.minutosDesconto : Math.round((p.horasDesconto || 0) * 60);
+                const minExtra = p.minutosExtra || 0;
+
+                totalMinTrabalhados += minTrab;
+                totalMinDesconto += minDesc;
+                totalMinExtra += minExtra;
+                diasContabilizados++;
+            });
+
+            const saldoLiquido = totalMinExtra - totalMinDesconto;
+            let saldoTexto = '';
+            if (saldoLiquido > 0) {
+                saldoTexto = `<b style="color:var(--primary-color);">+ ${formatarMinutosParaTexto(saldoLiquido)} (Crédito de horas)</b>`;
+            } else if (saldoLiquido < 0) {
+                saldoTexto = `<b style="color:var(--danger-color);">- ${formatarMinutosParaTexto(Math.abs(saldoLiquido))} (Débito/Atrasos)</b>`;
+            } else {
+                saldoTexto = `<b>0 min (Sem devolução ou débito)</b>`;
+            }
+
+            const nomeSelText = document.getElementById('bh-funcionario').options[document.getElementById('bh-funcionario').selectedIndex]?.text || 'Geral';
+
+            boxResultado.innerHTML = `
+                <div style="font-weight:700; margin-bottom:4px;">Resumo do Período (${diasContabilizados} dias de ponto registrados):</div>
+                <div>👤 <b>${nomeSelText}</b></div>
+                <div>⏱️ Tempo Trabalhado: <b>${formatarMinutosParaTexto(totalMinTrabalhados)}</b></div>
+                <div>🔻 Atrasos/Faltas/Imprevistos: <b style="color:var(--danger-color);">${formatarMinutosParaTexto(totalMinDesconto)}</b></div>
+                <div>⭐ Horas Extras Acumuladas: <b style="color:var(--primary-color);">${formatarMinutosParaTexto(totalMinExtra)}</b></div>
+                <div style="margin-top:6px; padding-top:6px; border-top:1px dashed var(--border-color); font-size:13px;">
+                    Balanceamento Saldo Final: ${saldoTexto}
+                </div>
+            `;
         }
 
         function editarPontoSalvo(data, funcionario) {
@@ -1661,6 +1787,7 @@
             document.querySelectorAll('.select-executor').forEach(s => s.innerHTML = gerarOptionsExecutores(s.value));
             document.querySelectorAll('.sel-ponto-func').forEach(s => s.innerHTML = gerarOptionsPontoFuncionarios(s.value));
             atualizarSelectFiltroExecutor();
+            atualizarSelectBancoHoras();
         }
 
         function atualizarSelectFiltroExecutor() {
@@ -1668,6 +1795,18 @@
             if (!sel) return;
             const atual = sel.value;
             let options = `<option value="">Todos (Geral)</option><option value="mim">Minha Produção</option>`;
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
+                options += `<option value="${f.nome}">${f.nome}</option>`;
+            });
+            sel.innerHTML = options;
+            sel.value = atual;
+        }
+
+        function atualizarSelectBancoHoras() {
+            const sel = document.getElementById('bh-funcionario');
+            if (!sel) return;
+            const atual = sel.value;
+            let options = `<option value="">Todos os Funcionários</option><option value="mim">Você (Sua Produção)</option>`;
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
                 options += `<option value="${f.nome}">${f.nome}</option>`;
             });
@@ -1800,7 +1939,7 @@
                                 const sImp = document.getElementById(`inp-saidaImprevisto-${idC}`).value;
                                 const rImp = document.getElementById(`inp-retornoImprevisto-${idC}`).value;
                                 const res = calcularResumoPontoCard(c, a, r, s, sImp, rImp);
-                                horasDescontoAtual = res.horasTotalDesconto;
+                                horasDescontoAtual = res.horasDescontoNum;
                                 encontrouTela = true;
                             }
                         });
