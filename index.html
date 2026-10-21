@@ -765,10 +765,10 @@
                 <h2>⏱️ Controle de Ponto e Banco de Horas</h2>
                 <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Selecione a data e preencha os horários:</p>
 
-                <!-- DATA DO PONTO COM INDICADOR DE EDIÇÃO -->
+                <!-- DATA DO PONTO COM SUPORTE A MANTER OS HORÁRIOS -->
                 <div class="filter-field" style="background: var(--op-header-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
                     <label for="ponto-data" style="color: var(--primary-color);">📅 DATA DO PONTO:</label>
-                    <input type="date" id="ponto-data" onchange="recarregarTodosPontos(true)">
+                    <input type="date" id="ponto-data" onchange="aoMudarDataPonto()">
                     <input type="hidden" id="ponto-data-original" value="">
                 </div>
 
@@ -804,7 +804,7 @@
                     <div id="resultado-banco-horas" style="margin-top:10px; padding:10px; background:var(--op-header-bg); border-radius:8px; font-size:12px;"></div>
                 </div>
 
-                <!-- HISTÓRICO VISUAL DE PONTOS SALVOS COM ALTERAÇÃO RÁPIDA DE DATA -->
+                <!-- HISTÓRICO VISUAL DE PONTOS SALVOS -->
                 <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">📜 Histórico de Pontos Registrados</h3>
                 <div id="historico-pontos-salvos-container"></div>
             </div>
@@ -955,6 +955,7 @@
         let contadorCartoesPonto = 0;
         let registroEmEdicaoId = null;
         let funcionarioEmEdicaoIndex = null;
+        let modoEdicaoPontoManual = false; // Flag para proteger os dados na troca de data
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1350,6 +1351,15 @@
             calcularTotalDia();
         }
 
+        /* FUNÇÃO AJUSTADA PARA NÃO LIMPAR OS DADOS AO ALTERAR A DATA APÓS CLICAR NO LÁPIS */
+        function aoMudarDataPonto() {
+            if (modoEdicaoPontoManual) {
+                // Se o usuário está editando um ponto que puxou pelo lápis, apenas altera a data sem apagar os horários
+                return;
+            }
+            recarregarTodosPontos(true);
+        }
+
         function recarregarTodosPontos(forcarRecarregar = false) {
             const data = document.getElementById('ponto-data').value;
             document.getElementById('ponto-data-original').value = data;
@@ -1359,6 +1369,7 @@
             if (forcarRecarregar || container.children.length === 0) {
                 container.innerHTML = '';
                 contadorCartoesPonto = 0;
+                modoEdicaoPontoManual = false;
 
                 const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
                 const pontosDoDia = listaPontos.filter(p => p.data === data);
@@ -1374,7 +1385,7 @@
             gerarRelatorioBancoHoras();
         }
 
-        /* PERMITE SALVAR E ALTERAR A DATA CASO TENHA SIDO DIGITADA OU SELECIONADA UMA DATA DIFERENTE */
+        /* SALVA E MANTÉM OS HORÁRIOS DIGITADOS, MOVENDO PARA A NOVA DATA SELECCIONADA */
         function salvarTodosPontosDia() {
             const novaData = document.getElementById('ponto-data').value;
             const dataOriginal = document.getElementById('ponto-data-original').value;
@@ -1383,12 +1394,12 @@
 
             let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
 
-            // Se a data foi alterada durante a edição, remove os registros da data antiga para não duplicar
+            // Se a data foi alterada, remove os registros antigos da data anterior
             if (dataOriginal && dataOriginal !== novaData) {
                 listaPontos = listaPontos.filter(p => p.data !== dataOriginal);
             }
 
-            // Remove registros existentes na nova data para atualizar
+            // Remove registros existentes na nova data para atualização limpa
             listaPontos = listaPontos.filter(p => p.data !== novaData);
 
             document.querySelectorAll('.card-ponto-item').forEach(card => {
@@ -1427,6 +1438,7 @@
 
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
             document.getElementById('ponto-data-original').value = novaData;
+            modoEdicaoPontoManual = false;
 
             alert('Pontos salvos com sucesso!');
             renderizarHistoricoPontosSalvos();
@@ -1434,28 +1446,23 @@
             calcularTotalDia();
         }
 
-        /* FUNÇÃO PARA MUDAR A DATA DIRETAMENTE PELO BOTÃO NO HISTÓRICO */
-        function alterarDataPontoSalvoDirectamente(idRegistro, dataAtual, funcionario) {
-            const novaDataInput = prompt(`Digite ou altere a data para o ponto de ${funcionario} (no formato AAAA-MM-DD):`, dataAtual);
-            if (!novaDataInput) return;
+        function editarPontoSalvo(data, funcionario) {
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            const ponto = listaPontos.find(p => p.data === data && p.funcionario === funcionario);
+            if (!ponto) return;
 
-            // Validação simples de formato AAAA-MM-DD
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(novaDataInput.trim())) {
-                alert('Formato de data inválido! Use o padrão AAAA-MM-DD (exemplo: 2026-10-20).');
-                return;
-            }
+            document.getElementById('ponto-data').value = data;
+            document.getElementById('ponto-data-original').value = data;
 
-            let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
-            const idx = listaPontos.findIndex(p => (p.id === idRegistro) || (p.data === dataAtual && p.funcionario === funcionario));
+            modoEdicaoPontoManual = true; // Ativa a proteção para não apagar os campos ao alterar a data
 
-            if (idx !== -1) {
-                listaPontos[idx].data = novaDataInput.trim();
-                localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
-                alert(`Data alterada com sucesso de ${dataAtual} para ${novaDataInput.trim()}!`);
-                renderizarHistoricoPontosSalvos();
-                gerarRelatorioBancoHoras();
-                calcularTotalDia();
-            }
+            const container = document.getElementById('lista-cartoes-ponto');
+            container.innerHTML = '';
+            contadorCartoesPonto = 0;
+            adicionarCartaoPonto(ponto);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            alert(`Ponto de ${funcionario} recarregado! Você pode alterar a data no topo livremente sem perder os horários. Depois clique em "Salvar Todos os Pontos".`);
         }
 
         function renderizarHistoricoPontosSalvos() {
@@ -1498,9 +1505,8 @@
                                 <span style="font-weight:800; color:var(--primary-color); font-size:12px;">📅 ${dataFormatada}</span>
                                 <span style="font-weight:600; color:var(--text-color); margin-left:6px;">👤 ${nomeDisplay}</span>
                             </div>
-                            <div style="display:flex; gap:4px;">
-                                <button class="btn-subtle" onclick="alterarDataPontoSalvoDirectamente(${p.id || idx}, '${p.data}', '${p.funcionario}')" title="Mudar Apenas a Data">📅 Mudar Data</button>
-                                <button style="background:none; border:none; cursor:pointer;" onclick="editarPontoSalvo('${p.data}', '${p.funcionario}')" title="Carregar no Cartão de Ponto">✏️ Edição</button>
+                            <div>
+                                <button style="background:none; border:none; cursor:pointer;" onclick="editarPontoSalvo('${p.data}', '${p.funcionario}')" title="Carregar no Cartão de Ponto">✏️</button>
                                 <button style="background:none; border:none; cursor:pointer;" onclick="excluirPontoSalvo(${p.id || idx})" title="Excluir Registro">🗑️</button>
                             </div>
                         </div>
@@ -1568,22 +1574,6 @@
                     Balanceamento Saldo Final: ${saldoTexto}
                 </div>
             `;
-        }
-
-        function editarPontoSalvo(data, funcionario) {
-            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
-            const ponto = listaPontos.find(p => p.data === data && p.funcionario === funcionario);
-            if (!ponto) return;
-
-            document.getElementById('ponto-data').value = data;
-            document.getElementById('ponto-data-original').value = data;
-
-            const container = document.getElementById('lista-cartoes-ponto');
-            container.innerHTML = '';
-            contadorCartoesPonto = 0;
-            adicionarCartaoPonto(ponto);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            alert(`Ponto de ${funcionario} recarregado! Você pode alterar os horários e também alterar a DATA DO PONTO no campo superior. Depois clique em "Salvar Todos os Pontos".`);
         }
 
         function excluirPontoSalvo(idOuIdx) {
