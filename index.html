@@ -658,6 +658,23 @@
             color: var(--danger-color);
         }
 
+        .quick-time-chips {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+
+        .btn-mini-chip {
+            background: var(--op-header-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
         .banco-horas-box {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -763,9 +780,9 @@
             <!-- PAINEL DE CONTROLE DE PONTO -->
             <div id="ponto-painel" class="box-section">
                 <h2>⏱️ Controle de Ponto e Banco de Horas</h2>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Selecione a data e preencha os horários:</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Os horários preenchidos abaixo são **salvos como rascunho automaticamente**!</p>
 
-                <!-- DATA DO PONTO COM SUPORTE A MANTER OS HORÁRIOS -->
+                <!-- DATA DO PONTO -->
                 <div class="filter-field" style="background: var(--op-header-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
                     <label for="ponto-data" style="color: var(--primary-color);">📅 DATA DO PONTO:</label>
                     <input type="date" id="ponto-data" onchange="aoMudarDataPonto()">
@@ -955,7 +972,7 @@
         let contadorCartoesPonto = 0;
         let registroEmEdicaoId = null;
         let funcionarioEmEdicaoIndex = null;
-        let modoEdicaoPontoManual = false; // Flag para proteger os dados na troca de data
+        let modoEdicaoPontoManual = false;
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1072,8 +1089,9 @@
             const dInicioMes = new Date(dHoje.getFullYear(), dHoje.getMonth(), 1).toISOString().slice(0, 10);
             document.getElementById('bh-inicio').value = dInicioMes;
             document.getElementById('bh-fim').value = hojeIso;
-            
-            if (document.querySelectorAll('.card-ponto-item').length === 0) {
+
+            // CARREGA RASCUNHO DO PONTO SE EXISTIR
+            if (!carregarRascunhoPonto()) {
                 recarregarTodosPontos();
             }
 
@@ -1083,6 +1101,50 @@
                 resetarDataHoje();
                 if (contadorOperacoes === 0) adicionarOperacao();
             }
+        }
+
+        /* SISTEMA DE RASCUNHO AUTOMÁTICO DO PONTO */
+        function salvarRascunhoPonto() {
+            const dataPonto = document.getElementById('ponto-data').value;
+            const cartoes = [];
+
+            document.querySelectorAll('.card-ponto-item').forEach(card => {
+                const idCard = card.id.replace('ponto-card-', '');
+                cartoes.push({
+                    funcionario: card.querySelector('.sel-ponto-func').value,
+                    chegada: document.getElementById(`inp-chegada-${idCard}`).value,
+                    almoco: document.getElementById(`inp-almoco-${idCard}`).value,
+                    retorno: document.getElementById(`inp-retorno-${idCard}`).value,
+                    saida: document.getElementById(`inp-saida-${idCard}`).value,
+                    saidaImprevisto: document.getElementById(`inp-saidaImprevisto-${idCard}`).value,
+                    retornoImprevisto: document.getElementById(`inp-retornoImprevisto-${idCard}`).value,
+                    motivoImprevisto: document.getElementById(`motivo-imprevisto-${idCard}`).value
+                });
+            });
+
+            localStorage.setItem('rascunho_ponto_temp', JSON.stringify({ dataPonto, cartoes }));
+        }
+
+        function carregarRascunhoPonto() {
+            const rascunho = JSON.parse(localStorage.getItem('rascunho_ponto_temp'));
+            if (!rascunho || !rascunho.cartoes || rascunho.cartoes.length === 0) return false;
+
+            if (rascunho.dataPonto) {
+                document.getElementById('ponto-data').value = rascunho.dataPonto;
+                document.getElementById('ponto-data-original').value = rascunho.dataPonto;
+            }
+
+            const container = document.getElementById('lista-cartoes-ponto');
+            container.innerHTML = '';
+            contadorCartoesPonto = 0;
+
+            rascunho.cartoes.forEach(c => adicionarCartaoPonto(c));
+            renderizarHistoricoPontosSalvos();
+            return true;
+        }
+
+        function limparRascunhoPonto() {
+            localStorage.removeItem('rascunho_ponto_temp');
         }
 
         function salvarRascunho() {
@@ -1205,6 +1267,23 @@
             return options;
         }
 
+        /* AUTO PREENCHIMENTO INTELIGENTE DE HORÁRIOS ESTIMADOS */
+        function preencherHoraPadraoSeVazio(idInput, valorPadrao, idCard) {
+            const input = document.getElementById(idInput);
+            if (input && !input.value) {
+                input.value = valorPadrao;
+                atualizarResumoCardPonto(idCard);
+            }
+        }
+
+        function definirHoraInp(idInput, val, idCard) {
+            const input = document.getElementById(idInput);
+            if (input) {
+                input.value = val;
+                atualizarResumoCardPonto(idCard);
+            }
+        }
+
         function adicionarCartaoPonto(dados = null) {
             contadorCartoesPonto++;
             const idCard = contadorCartoesPonto;
@@ -1236,15 +1315,22 @@
                         <div class="ponto-field-item">
                             <label>🟢 Chegada:</label>
                             <div class="time-input-box">
-                                <input type="time" id="inp-chegada-${idCard}" value="${chegada}" onchange="atualizarResumoCardPonto(${idCard})">
+                                <input type="time" id="inp-chegada-${idCard}" value="${chegada}" onfocus="preencherHoraPadraoSeVazio('inp-chegada-${idCard}', '07:00', ${idCard})" onchange="atualizarResumoCardPonto(${idCard})">
                                 <button class="btn-clear-minimal" onclick="limparCampoHora('${idCard}', 'chegada')" title="Limpar">✕</button>
+                            </div>
+                            <div class="quick-time-chips">
+                                <button class="btn-mini-chip" onclick="definirHoraInp('inp-chegada-${idCard}', '07:00', ${idCard})">07:00</button>
+                                <button class="btn-mini-chip" onclick="definirHoraInp('inp-chegada-${idCard}', '08:00', ${idCard})">08:00</button>
                             </div>
                         </div>
                         <div class="ponto-field-item">
                             <label>🍽️ Almoço:</label>
                             <div class="time-input-box">
-                                <input type="time" id="inp-almoco-${idCard}" value="${almoco}" onchange="atualizarResumoCardPonto(${idCard})">
+                                <input type="time" id="inp-almoco-${idCard}" value="${almoco}" onfocus="preencherHoraPadraoSeVazio('inp-almoco-${idCard}', '12:00', ${idCard})" onchange="atualizarResumoCardPonto(${idCard})">
                                 <button class="btn-clear-minimal" onclick="limparCampoHora('${idCard}', 'almoco')" title="Limpar">✕</button>
+                            </div>
+                            <div class="quick-time-chips">
+                                <button class="btn-mini-chip" onclick="definirHoraInp('inp-almoco-${idCard}', '12:00', ${idCard})">12:00</button>
                             </div>
                         </div>
                     </div>
@@ -1253,15 +1339,21 @@
                         <div class="ponto-field-item">
                             <label>🔙 Retorno:</label>
                             <div class="time-input-box">
-                                <input type="time" id="inp-retorno-${idCard}" value="${retorno}" onchange="atualizarResumoCardPonto(${idCard})">
+                                <input type="time" id="inp-retorno-${idCard}" value="${retorno}" onfocus="preencherHoraPadraoSeVazio('inp-retorno-${idCard}', '13:00', ${idCard})" onchange="atualizarResumoCardPonto(${idCard})">
                                 <button class="btn-clear-minimal" onclick="limparCampoHora('${idCard}', 'retorno')" title="Limpar">✕</button>
+                            </div>
+                            <div class="quick-time-chips">
+                                <button class="btn-mini-chip" onclick="definirHoraInp('inp-retorno-${idCard}', '13:00', ${idCard})">13:00</button>
                             </div>
                         </div>
                         <div class="ponto-field-item">
                             <label>🏁 Saída:</label>
                             <div class="time-input-box">
-                                <input type="time" id="inp-saida-${idCard}" value="${saida}" onchange="atualizarResumoCardPonto(${idCard})">
+                                <input type="time" id="inp-saida-${idCard}" value="${saida}" onfocus="preencherHoraPadraoSeVazio('inp-saida-${idCard}', '17:00', ${idCard})" onchange="atualizarResumoCardPonto(${idCard})">
                                 <button class="btn-clear-minimal" onclick="limparCampoHora('${idCard}', 'saida')" title="Limpar">✕</button>
+                            </div>
+                            <div class="quick-time-chips">
+                                <button class="btn-mini-chip" onclick="definirHoraInp('inp-saida-${idCard}', '17:00', ${idCard})">17:00</button>
                             </div>
                         </div>
                     </div>
@@ -1311,6 +1403,7 @@
                 return;
             }
             document.getElementById(`ponto-card-${idCard}`).remove();
+            salvarRascunhoPonto();
         }
 
         function atualizarResumoCardPonto(idCard) {
@@ -1349,14 +1442,11 @@
             `;
 
             calcularTotalDia();
+            salvarRascunhoPonto(); // SALVA AUTOMATICAMENTE O RASCUNHO DO PONTO
         }
 
-        /* FUNÇÃO AJUSTADA PARA NÃO LIMPAR OS DADOS AO ALTERAR A DATA APÓS CLICAR NO LÁPIS */
         function aoMudarDataPonto() {
-            if (modoEdicaoPontoManual) {
-                // Se o usuário está editando um ponto que puxou pelo lápis, apenas altera a data sem apagar os horários
-                return;
-            }
+            if (modoEdicaoPontoManual) return;
             recarregarTodosPontos(true);
         }
 
@@ -1385,7 +1475,6 @@
             gerarRelatorioBancoHoras();
         }
 
-        /* SALVA E MANTÉM OS HORÁRIOS DIGITADOS, MOVENDO PARA A NOVA DATA SELECCIONADA */
         function salvarTodosPontosDia() {
             const novaData = document.getElementById('ponto-data').value;
             const dataOriginal = document.getElementById('ponto-data-original').value;
@@ -1394,12 +1483,10 @@
 
             let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
 
-            // Se a data foi alterada, remove os registros antigos da data anterior
             if (dataOriginal && dataOriginal !== novaData) {
                 listaPontos = listaPontos.filter(p => p.data !== dataOriginal);
             }
 
-            // Remove registros existentes na nova data para atualização limpa
             listaPontos = listaPontos.filter(p => p.data !== novaData);
 
             document.querySelectorAll('.card-ponto-item').forEach(card => {
@@ -1439,6 +1526,8 @@
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
             document.getElementById('ponto-data-original').value = novaData;
             modoEdicaoPontoManual = false;
+            
+            limparRascunhoPonto(); // LIMPA O RASCUNHO APÓS CONCLUIR E SALVAR DEFINITIVO
 
             alert('Pontos salvos com sucesso!');
             renderizarHistoricoPontosSalvos();
@@ -1454,7 +1543,7 @@
             document.getElementById('ponto-data').value = data;
             document.getElementById('ponto-data-original').value = data;
 
-            modoEdicaoPontoManual = true; // Ativa a proteção para não apagar os campos ao alterar a data
+            modoEdicaoPontoManual = true;
 
             const container = document.getElementById('lista-cartoes-ponto');
             container.innerHTML = '';
@@ -1462,7 +1551,7 @@
             adicionarCartaoPonto(ponto);
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            alert(`Ponto de ${funcionario} recarregado! Você pode alterar a data no topo livremente sem perder os horários. Depois clique em "Salvar Todos os Pontos".`);
+            alert(`Ponto de ${funcionario} recarregado! Faça suas alterações e clique em "Salvar Todos os Pontos".`);
         }
 
         function renderizarHistoricoPontosSalvos() {
