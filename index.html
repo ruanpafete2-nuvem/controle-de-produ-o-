@@ -763,11 +763,13 @@
             <!-- PAINEL DE CONTROLE DE PONTO -->
             <div id="ponto-painel" class="box-section">
                 <h2>⏱️ Controle de Ponto e Banco de Horas</h2>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Selecione os horários usando o relógio:</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Selecione a data e preencha os horários:</p>
 
-                <div class="filter-field">
-                    <label for="ponto-data">DATA DO PONTO:</label>
+                <!-- DATA DO PONTO COM INDICADOR DE EDIÇÃO -->
+                <div class="filter-field" style="background: var(--op-header-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <label for="ponto-data" style="color: var(--primary-color);">📅 DATA DO PONTO:</label>
                     <input type="date" id="ponto-data" onchange="recarregarTodosPontos(true)">
+                    <input type="hidden" id="ponto-data-original" value="">
                 </div>
 
                 <!-- CONTÊINER PARA MÚLTIPLOS CARTÕES DE PONTO -->
@@ -802,7 +804,7 @@
                     <div id="resultado-banco-horas" style="margin-top:10px; padding:10px; background:var(--op-header-bg); border-radius:8px; font-size:12px;"></div>
                 </div>
 
-                <!-- HISTÓRICO VISUAL DE PONTOS SALVOS -->
+                <!-- HISTÓRICO VISUAL DE PONTOS SALVOS COM ALTERAÇÃO RÁPIDA DE DATA -->
                 <h3 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">📜 Histórico de Pontos Registrados</h3>
                 <div id="historico-pontos-salvos-container"></div>
             </div>
@@ -1060,9 +1062,11 @@
 
             const hojeIso = new Date().toISOString().slice(0, 10);
             const inputPontoData = document.getElementById('ponto-data');
-            if (inputPontoData) inputPontoData.value = hojeIso;
+            if (inputPontoData) {
+                inputPontoData.value = hojeIso;
+                document.getElementById('ponto-data-original').value = hojeIso;
+            }
 
-            // Datas default para consulta de Banco de Horas (Este mês)
             const dHoje = new Date();
             const dInicioMes = new Date(dHoje.getFullYear(), dHoje.getMonth(), 1).toISOString().slice(0, 10);
             document.getElementById('bh-inicio').value = dInicioMes;
@@ -1151,7 +1155,6 @@
             }
         }
 
-        /* FUNÇÕES DE CÁLCULO EXATO DE HORAS E MINUTOS DO PONTO */
         function calcularDiferencaMinutos(hInicio, hFim) {
             if (!hInicio || !hFim) return 0;
             const [h1, m1] = hInicio.split(':').map(Number);
@@ -1179,14 +1182,9 @@
             }
 
             let minutosImprevisto = calcularDiferencaMinutos(sImp, rImp);
+            const jornadaPadraoMin = 480; // 8 Horas
             
-            // Jornada Padrão de 8 Horas = 480 minutos
-            const jornadaPadraoMin = 480;
-            
-            // Minutos que faltaram para completar 8h + imprevistos fora
             let minutosFalta = Math.max(0, jornadaPadraoMin - minutosTrabalhados) + minutosImprevisto;
-            
-            // Minutos que excederam a jornada de 8h
             let minutosExtra = Math.max(0, minutosTrabalhados - jornadaPadraoMin);
 
             return {
@@ -1194,7 +1192,7 @@
                 minutosImprevisto,
                 minutosDesconto: minutosFalta,
                 minutosExtra,
-                horasDescontoNum: minutosFalta / 60 // Para cálculo retrocompatível de valor de diária
+                horasDescontoNum: minutosFalta / 60
             };
         }
 
@@ -1354,6 +1352,8 @@
 
         function recarregarTodosPontos(forcarRecarregar = false) {
             const data = document.getElementById('ponto-data').value;
+            document.getElementById('ponto-data-original').value = data;
+
             const container = document.getElementById('lista-cartoes-ponto');
 
             if (forcarRecarregar || container.children.length === 0) {
@@ -1374,12 +1374,22 @@
             gerarRelatorioBancoHoras();
         }
 
+        /* PERMITE SALVAR E ALTERAR A DATA CASO TENHA SIDO DIGITADA OU SELECIONADA UMA DATA DIFERENTE */
         function salvarTodosPontosDia() {
-            const data = document.getElementById('ponto-data').value;
-            if (!data) { alert('Selecione a data!'); return; }
+            const novaData = document.getElementById('ponto-data').value;
+            const dataOriginal = document.getElementById('ponto-data-original').value;
+
+            if (!novaData) { alert('Selecione a data!'); return; }
 
             let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
-            listaPontos = listaPontos.filter(p => p.data !== data);
+
+            // Se a data foi alterada durante a edição, remove os registros da data antiga para não duplicar
+            if (dataOriginal && dataOriginal !== novaData) {
+                listaPontos = listaPontos.filter(p => p.data !== dataOriginal);
+            }
+
+            // Remove registros existentes na nova data para atualizar
+            listaPontos = listaPontos.filter(p => p.data !== novaData);
 
             document.querySelectorAll('.card-ponto-item').forEach(card => {
                 const idCard = card.id.replace('ponto-card-', '');
@@ -1399,7 +1409,7 @@
                 listaPontos.push({
                     id: Date.now() + Math.random(),
                     funcionario: func,
-                    data: data,
+                    data: novaData,
                     chegada: c || '',
                     almoco: a || '',
                     retorno: r || '',
@@ -1416,10 +1426,36 @@
             });
 
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
+            document.getElementById('ponto-data-original').value = novaData;
+
             alert('Pontos salvos com sucesso!');
             renderizarHistoricoPontosSalvos();
             gerarRelatorioBancoHoras();
             calcularTotalDia();
+        }
+
+        /* FUNÇÃO PARA MUDAR A DATA DIRETAMENTE PELO BOTÃO NO HISTÓRICO */
+        function alterarDataPontoSalvoDirectamente(idRegistro, dataAtual, funcionario) {
+            const novaDataInput = prompt(`Digite ou altere a data para o ponto de ${funcionario} (no formato AAAA-MM-DD):`, dataAtual);
+            if (!novaDataInput) return;
+
+            // Validação simples de formato AAAA-MM-DD
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(novaDataInput.trim())) {
+                alert('Formato de data inválido! Use o padrão AAAA-MM-DD (exemplo: 2026-10-20).');
+                return;
+            }
+
+            let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            const idx = listaPontos.findIndex(p => (p.id === idRegistro) || (p.data === dataAtual && p.funcionario === funcionario));
+
+            if (idx !== -1) {
+                listaPontos[idx].data = novaDataInput.trim();
+                localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
+                alert(`Data alterada com sucesso de ${dataAtual} para ${novaDataInput.trim()}!`);
+                renderizarHistoricoPontosSalvos();
+                gerarRelatorioBancoHoras();
+                calcularTotalDia();
+            }
         }
 
         function renderizarHistoricoPontosSalvos() {
@@ -1437,7 +1473,6 @@
             ordenados.forEach((p, idx) => {
                 const nomeDisplay = p.funcionario === 'mim' ? 'Você (Sua Produção)' : p.funcionario;
                 
-                // Suporte para registros antigos (migração automática para minutos)
                 const minTrab = p.minutosTrabalhados !== undefined ? p.minutosTrabalhados : Math.round((p.horasTrabalhadas || 0) * 60);
                 const minDesc = p.minutosDesconto !== undefined ? p.minutosDesconto : Math.round((p.horasDesconto || 0) * 60);
                 const minExtra = p.minutosExtra || 0;
@@ -1463,8 +1498,9 @@
                                 <span style="font-weight:800; color:var(--primary-color); font-size:12px;">📅 ${dataFormatada}</span>
                                 <span style="font-weight:600; color:var(--text-color); margin-left:6px;">👤 ${nomeDisplay}</span>
                             </div>
-                            <div>
-                                <button style="background:none; border:none; cursor:pointer;" onclick="editarPontoSalvo('${p.data}', '${p.funcionario}')" title="Carregar no Cartão">✏️</button>
+                            <div style="display:flex; gap:4px;">
+                                <button class="btn-subtle" onclick="alterarDataPontoSalvoDirectamente(${p.id || idx}, '${p.data}', '${p.funcionario}')" title="Mudar Apenas a Data">📅 Mudar Data</button>
+                                <button style="background:none; border:none; cursor:pointer;" onclick="editarPontoSalvo('${p.data}', '${p.funcionario}')" title="Carregar no Cartão de Ponto">✏️ Edição</button>
                                 <button style="background:none; border:none; cursor:pointer;" onclick="excluirPontoSalvo(${p.id || idx})" title="Excluir Registro">🗑️</button>
                             </div>
                         </div>
@@ -1480,7 +1516,6 @@
             container.innerHTML = html;
         }
 
-        /* FUNÇÃO DE RELATÓRIO DO BANCO DE HORAS ACUMULADO */
         function gerarRelatorioBancoHoras() {
             const func = document.getElementById('bh-funcionario').value;
             const ini = document.getElementById('bh-inicio').value;
@@ -1541,12 +1576,14 @@
             if (!ponto) return;
 
             document.getElementById('ponto-data').value = data;
+            document.getElementById('ponto-data-original').value = data;
+
             const container = document.getElementById('lista-cartoes-ponto');
             container.innerHTML = '';
             contadorCartoesPonto = 0;
             adicionarCartaoPonto(ponto);
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            alert(`Ponto de ${funcionario} do dia ${data} recarregado no cartão! Faça as alterações e clique em "Salvar Todos os Pontos".`);
+            alert(`Ponto de ${funcionario} recarregado! Você pode alterar os horários e também alterar a DATA DO PONTO no campo superior. Depois clique em "Salvar Todos os Pontos".`);
         }
 
         function excluirPontoSalvo(idOuIdx) {
