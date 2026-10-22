@@ -701,6 +701,19 @@
             cursor: pointer;
             margin: 0 4px;
         }
+
+        .alert-edicao-banner {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 
     <!-- Firebase SDKs -->
@@ -744,6 +757,12 @@
                 <p>Gerenciamento e cálculo diário</p>
             </div>
 
+            <!-- BANNER DE AVISO QUANDO EDITANDO DIA PASSADO -->
+            <div id="banner-edicao" class="alert-edicao-banner hidden">
+                <span>⚠️ Editando registro antigo!</span>
+                <button class="btn-mini-chip" onclick="cancelarEdicaoRestaurarHoje()">Voltar ao Dia de Hoje</button>
+            </div>
+
             <!-- PAINEL PRINCIPAL (LANÇAMENTO) -->
             <div id="main-panel">
                 <div class="date-card">
@@ -780,7 +799,7 @@
             <!-- PAINEL DE CONTROLE DE PONTO -->
             <div id="ponto-painel" class="box-section">
                 <h2>⏱️ Controle de Ponto e Banco de Horas</h2>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Os horários preenchidos abaixo são **salvos como rascunho automaticamente**!</p>
+                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Seus horários são **salvos como rascunho em tempo real**!</p>
 
                 <!-- DATA DO PONTO -->
                 <div class="filter-field" style="background: var(--op-header-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
@@ -1090,7 +1109,6 @@
             document.getElementById('bh-inicio').value = dInicioMes;
             document.getElementById('bh-fim').value = hojeIso;
 
-            // CARREGA RASCUNHO DO PONTO SE EXISTIR
             if (!carregarRascunhoPonto()) {
                 recarregarTodosPontos();
             }
@@ -1105,6 +1123,8 @@
 
         /* SISTEMA DE RASCUNHO AUTOMÁTICO DO PONTO */
         function salvarRascunhoPonto() {
+            if (registroEmEdicaoId) return; // Não polui o rascunho de hoje se estiver editando dia passado
+
             const dataPonto = document.getElementById('ponto-data').value;
             const cartoes = [];
 
@@ -1148,6 +1168,8 @@
         }
 
         function salvarRascunho() {
+            if (registroEmEdicaoId) return; // Se estiver editando registro antigo, não substitui o rascunho principal
+
             const dia = document.getElementById('dia').value;
             const mes = document.getElementById('mes').value;
             const ano = document.getElementById('ano').value;
@@ -1162,17 +1184,16 @@
                 });
             });
 
-            localStorage.setItem('rascunho_producao', JSON.stringify({ dia, mes, ano, operacoes, registroEmEdicaoId }));
+            localStorage.setItem('rascunho_producao_hoje', JSON.stringify({ dia, mes, ano, operacoes }));
         }
 
         function carregarRascunho() {
-            const rascunho = JSON.parse(localStorage.getItem('rascunho_producao'));
+            const rascunho = JSON.parse(localStorage.getItem('rascunho_producao_hoje'));
             if (!rascunho || !rascunho.operacoes || rascunho.operacoes.length === 0) return false;
 
             document.getElementById('dia').value = rascunho.dia || '';
             document.getElementById('mes').value = rascunho.mes || '';
             document.getElementById('ano').value = rascunho.ano || '';
-            registroEmEdicaoId = rascunho.registroEmEdicaoId || null;
 
             document.getElementById('operacoes-container').innerHTML = '';
             contadorOperacoes = 0;
@@ -1181,7 +1202,7 @@
             return true;
         }
 
-        function limparRascunho() { localStorage.removeItem('rascunho_producao'); }
+        function limparRascunho() { localStorage.removeItem('rascunho_producao_hoje'); }
 
         function resetarDataHoje() {
             const hoje = new Date();
@@ -1195,8 +1216,20 @@
                 document.getElementById('operacoes-container').innerHTML = '';
                 contadorOperacoes = 0;
                 registroEmEdicaoId = null;
+                document.getElementById('banner-edicao').classList.add('hidden');
                 limparRascunho();
                 resetarDataHoje();
+                adicionarOperacao();
+            }
+        }
+
+        function cancelarEdicaoRestaurarHoje() {
+            registroEmEdicaoId = null;
+            document.getElementById('banner-edicao').classList.add('hidden');
+            if (!carregarRascunho()) {
+                resetarDataHoje();
+                document.getElementById('operacoes-container').innerHTML = '';
+                contadorOperacoes = 0;
                 adicionarOperacao();
             }
         }
@@ -1245,7 +1278,7 @@
             }
 
             let minutosImprevisto = calcularDiferencaMinutos(sImp, rImp);
-            const jornadaPadraoMin = 480; // 8 Horas
+            const jornadaPadraoMin = 480;
             
             let minutosFalta = Math.max(0, jornadaPadraoMin - minutosTrabalhados) + minutosImprevisto;
             let minutosExtra = Math.max(0, minutosTrabalhados - jornadaPadraoMin);
@@ -1267,7 +1300,6 @@
             return options;
         }
 
-        /* AUTO PREENCHIMENTO INTELIGENTE DE HORÁRIOS ESTIMADOS */
         function preencherHoraPadraoSeVazio(idInput, valorPadrao, idCard) {
             const input = document.getElementById(idInput);
             if (input && !input.value) {
@@ -1442,7 +1474,7 @@
             `;
 
             calcularTotalDia();
-            salvarRascunhoPonto(); // SALVA AUTOMATICAMENTE O RASCUNHO DO PONTO
+            salvarRascunhoPonto();
         }
 
         function aoMudarDataPonto() {
@@ -1527,7 +1559,7 @@
             document.getElementById('ponto-data-original').value = novaData;
             modoEdicaoPontoManual = false;
             
-            limparRascunhoPonto(); // LIMPA O RASCUNHO APÓS CONCLUIR E SALVAR DEFINITIVO
+            limparRascunhoPonto();
 
             alert('Pontos salvos com sucesso!');
             renderizarHistoricoPontosSalvos();
@@ -2180,9 +2212,28 @@
             if (idx !== -1) hist[idx] = registro; else hist.push(registro);
             localStorage.setItem('historicoProducao', JSON.stringify(hist));
 
-            limparRascunho();
+            // Se estávamos editando um dia antigo, volta a restaurar os lançamentos de HOJE
+            const estavaEditando = registroEmEdicaoId !== null;
             registroEmEdicaoId = null;
-            alert('Dia finalizado e salvo com sucesso!');
+            document.getElementById('banner-edicao').classList.add('hidden');
+
+            if (estavaEditando) {
+                alert('Alteração salva no histórico! Restaurando seu rascunho de hoje...');
+                if (!carregarRascunho()) {
+                    resetarDataHoje();
+                    document.getElementById('operacoes-container').innerHTML = '';
+                    contadorOperacoes = 0;
+                    adicionarOperacao();
+                }
+            } else {
+                limparRascunho();
+                alert('Dia finalizado e salvo com sucesso!');
+                resetarDataHoje();
+                document.getElementById('operacoes-container').innerHTML = '';
+                contadorOperacoes = 0;
+                adicionarOperacao();
+            }
+
             if (document.getElementById('historico-painel').style.display === 'block') buscarHistorico();
             gerarRankingEquipe('hoje');
         }
@@ -2435,11 +2486,15 @@
         }
 
         function editarRegistro(id) {
+            if (!confirm("Deseja carregar este dia do histórico para alteração? O rascunho de hoje ficará guardado com segurança.")) return;
+
             const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
             const reg = hist.find(i => i.id === id);
             if (!reg) return;
 
             registroEmEdicaoId = reg.id;
+            document.getElementById('banner-edicao').classList.remove('hidden');
+
             document.getElementById('dia').value = reg.dia;
             document.getElementById('mes').value = reg.mes;
             document.getElementById('ano').value = reg.ano;
@@ -2449,7 +2504,6 @@
             reg.operacoes.forEach(op => adicionarOperacao(op.servico, op.qtd, op.valor, op.executor, op.diariaManual || null));
             alternarPainel('main-panel', 'nav-inicio');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            alert('Ajuste os dados no topo e clique em "Finalizar Dia".');
         }
 
         function fazerBackup() {
