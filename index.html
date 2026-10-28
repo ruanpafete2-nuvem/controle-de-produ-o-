@@ -715,7 +715,7 @@
             align-items: center;
         }
 
-        /* ESTILO MINIMALISTA PARA O BOTÃO DE DETALHES DE DIÁRIA */
+        /* ESTILO MINIMALISTA COM PONTO DE INTERROGAÇÃO (?) */
         .btn-info-incompleto {
             background: transparent;
             color: var(--text-muted);
@@ -726,7 +726,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 600;
             cursor: pointer;
             margin-left: 6px;
@@ -1292,7 +1292,6 @@
             return `${hrs}h ${mins} min`;
         }
 
-        /* FUNÇÃO AUXILIAR PARA TRANSFORMAR HORAS DECIMAIS EM HORA E MINUTOS EXATOS (EX: 0.85 -> 51min) */
         function formatarHorasDecimaisEmHorasMinutos(horasDecimais) {
             if (!horasDecimais || horasDecimais <= 0) return '0 min';
             const totalMinutos = Math.round(horasDecimais * 60);
@@ -2337,7 +2336,6 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
-        /* FUNÇÃO QUE EXIBE OS DETALHES DE DESCONTO FORMATADOS CORRETAMENTE COM HORA E MINUTOS EXATOS */
         function mostrarMotivoDiariaIncompleta(nomeFunc, valorDiaria, valorBase, horasDesconto, motivoImp) {
             const tempoFormatado = formatarHorasDecimaisEmHorasMinutos(horasDesconto);
             let descMsg = `👤 Funcionário: ${nomeFunc}\n💵 Diária paga: R$ ${valorDiaria.toFixed(2)} (Valor padrão: R$ ${valorBase.toFixed(2)})\n\n`;
@@ -2458,8 +2456,8 @@
                         const horasDesc = pontoFunc ? (pontoFunc.horasDesconto || 0) : 0;
                         const motImp = pontoFunc ? (pontoFunc.motivoImprevisto || '') : '';
 
-                        /* BOTÃO MINIMALISTA COM SÍMBOLO MAIS DISCRETO */
-                        btnInfo = `<button class="btn-info-incompleto" onclick="mostrarMotivoDiariaIncompleta('${nomeFunc}', ${valAtualDiaria}, ${valorPadraoBase}, ${horasDesc}, '${motImp}')" title="Ver motivo do desconto">i</button>`;
+                        /* BOTÃO MINIMALISTA COM SÍMBOLO DE INTERROGAÇÃO (?) */
+                        btnInfo = `<button class="btn-info-incompleto" onclick="mostrarMotivoDiariaIncompleta('${nomeFunc}', ${valAtualDiaria}, ${valorPadraoBase}, ${horasDesc}, '${motImp}')" title="Ver motivo do desconto">?</button>`;
                     }
 
                     infoDiariasHTML += `<div style="margin-top:4px; font-size:11px; background:var(--op-header-bg); padding:4px 8px; border-radius:4px; display:flex; align-items:center; justify-content:space-between;">
