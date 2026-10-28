@@ -715,20 +715,28 @@
             align-items: center;
         }
 
+        /* ESTILO MINIMALISTA PARA O BOTÃO DE DETALHES DE DIÁRIA */
         .btn-info-incompleto {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--danger-color);
-            border: 1px solid var(--danger-color);
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            font-weight: 800;
+            font-size: 10px;
+            font-weight: 600;
             cursor: pointer;
             margin-left: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-info-incompleto:hover {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
         }
     </style>
 
@@ -1282,6 +1290,17 @@
             if (hrs === 0) return `${mins} min`;
             if (mins === 0) return `${hrs}h`;
             return `${hrs}h ${mins} min`;
+        }
+
+        /* FUNÇÃO AUXILIAR PARA TRANSFORMAR HORAS DECIMAIS EM HORA E MINUTOS EXATOS (EX: 0.85 -> 51min) */
+        function formatarHorasDecimaisEmHorasMinutos(horasDecimais) {
+            if (!horasDecimais || horasDecimais <= 0) return '0 min';
+            const totalMinutos = Math.round(horasDecimais * 60);
+            const horas = Math.floor(totalMinutos / 60);
+            const minutos = totalMinutos % 60;
+            if (horas > 0 && minutos > 0) return `${horas}h ${minutos}min`;
+            if (horas > 0) return `${horas}h`;
+            return `${minutos}min`;
         }
 
         function calcularResumoPontoCard(c, a, r, s, sImp, rImp) {
@@ -2318,9 +2337,11 @@
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
 
+        /* FUNÇÃO QUE EXIBE OS DETALHES DE DESCONTO FORMATADOS CORRETAMENTE COM HORA E MINUTOS EXATOS */
         function mostrarMotivoDiariaIncompleta(nomeFunc, valorDiaria, valorBase, horasDesconto, motivoImp) {
+            const tempoFormatado = formatarHorasDecimaisEmHorasMinutos(horasDesconto);
             let descMsg = `👤 Funcionário: ${nomeFunc}\n💵 Diária paga: R$ ${valorDiaria.toFixed(2)} (Valor padrão: R$ ${valorBase.toFixed(2)})\n\n`;
-            descMsg += `🔻 Motivo do desconto: Teve ${horasDesconto.toFixed(2)}h de desconto no ponto.`;
+            descMsg += `🔻 Motivo do desconto: Teve ${tempoFormatado} de desconto no ponto.`;
             if (motivoImp) {
                 descMsg += `\n⚠️ Observação/Motivo: ${motivoImp}`;
             }
@@ -2368,7 +2389,6 @@
             buscarHistorico();
         }
 
-        /* EXIBIÇÃO CORRIGIDA DE TODAS AS DIÁRIAS NO CARD DO HISTÓRICO COM ÍCONE ❓ PARA DIÁRIAS INCOMPLETAS */
         function renderizarHistorico(lista, filtroExecutor = '') {
             const container = document.getElementById('lista-historico');
             const resumoBox = document.getElementById('resumo-total-periodo');
@@ -2438,7 +2458,8 @@
                         const horasDesc = pontoFunc ? (pontoFunc.horasDesconto || 0) : 0;
                         const motImp = pontoFunc ? (pontoFunc.motivoImprevisto || '') : '';
 
-                        btnInfo = `<button class="btn-info-incompleto" onclick="mostrarMotivoDiariaIncompleta('${nomeFunc}', ${valAtualDiaria}, ${valorPadraoBase}, ${horasDesc}, '${motImp}')" title="Ver motivo da diária incompleta">❓</button>`;
+                        /* BOTÃO MINIMALISTA COM SÍMBOLO MAIS DISCRETO */
+                        btnInfo = `<button class="btn-info-incompleto" onclick="mostrarMotivoDiariaIncompleta('${nomeFunc}', ${valAtualDiaria}, ${valorPadraoBase}, ${horasDesc}, '${motImp}')" title="Ver motivo do desconto">i</button>`;
                     }
 
                     infoDiariasHTML += `<div style="margin-top:4px; font-size:11px; background:var(--op-header-bg); padding:4px 8px; border-radius:4px; display:flex; align-items:center; justify-content:space-between;">
