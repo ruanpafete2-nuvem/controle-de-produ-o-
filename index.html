@@ -715,7 +715,6 @@
             align-items: center;
         }
 
-        /* ESTILO MINIMALISTA COM PONTO DE INTERROGAÇÃO (?) */
         .btn-info-incompleto {
             background: transparent;
             color: var(--text-muted);
@@ -1234,6 +1233,24 @@
             document.getElementById('ano').value = hoje.getFullYear();
         }
 
+        function avancarParaDiaSeguinte() {
+            const diaEl = document.getElementById('dia');
+            const mesEl = document.getElementById('mes');
+            const anoEl = document.getElementById('ano');
+
+            let d = parseInt(diaEl.value) || 1;
+            let mStr = mesEl.value.trim().toLowerCase();
+            let a = parseInt(anoEl.value) || new Date().getFullYear();
+
+            let mIdx = mesesNomes.findIndex(m => m.startsWith(mStr));
+            if (mIdx === -1) mIdx = new Date().getMonth();
+
+            const dObj = new Date(a, mIdx, d + 1);
+            diaEl.value = dObj.getDate();
+            mesEl.value = mesesNomes[dObj.getMonth()];
+            anoEl.value = dObj.getFullYear();
+        }
+
         function novoDia() {
             if (confirm("Deseja limpar as operações da tela para iniciar um novo dia?")) {
                 document.getElementById('operacoes-container').innerHTML = '';
@@ -1589,12 +1606,23 @@
             });
 
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
-            document.getElementById('ponto-data-original').value = novaData;
             modoEdicaoPontoManual = false;
-            
             limparRascunhoPonto();
 
-            alert('Pontos salvos com sucesso!');
+            // Avança a data do ponto automaticamente para o dia seguinte
+            const dObj = new Date(novaData + 'T00:00:00');
+            dObj.setDate(dObj.getDate() + 1);
+            const proximaDataIso = dObj.toISOString().slice(0, 10);
+            
+            document.getElementById('ponto-data').value = proximaDataIso;
+            document.getElementById('ponto-data-original').value = proximaDataIso;
+            
+            const container = document.getElementById('lista-cartoes-ponto');
+            container.innerHTML = '';
+            contadorCartoesPonto = 0;
+            adicionarCartaoPonto();
+
+            alert('Pontos salvos com sucesso! Avançado para o dia seguinte.');
             renderizarHistoricoPontosSalvos();
             gerarRelatorioBancoHoras();
             calcularTotalDia();
@@ -2259,11 +2287,12 @@
                 }
             } else {
                 limparRascunho();
-                alert('Dia finalizado e salvo com sucesso!');
-                resetarDataHoje();
+                // Avança para o dia seguinte automaticamente e limpa as operações
+                avancarParaDiaSeguinte();
                 document.getElementById('operacoes-container').innerHTML = '';
                 contadorOperacoes = 0;
                 adicionarOperacao();
+                alert('Dia finalizado e salvo com sucesso! Avançado para o dia seguinte.');
             }
 
             if (document.getElementById('historico-painel').style.display === 'block') buscarHistorico();
@@ -2456,7 +2485,6 @@
                         const horasDesc = pontoFunc ? (pontoFunc.horasDesconto || 0) : 0;
                         const motImp = pontoFunc ? (pontoFunc.motivoImprevisto || '') : '';
 
-                        /* BOTÃO MINIMALISTA COM SÍMBOLO DE INTERROGAÇÃO (?) */
                         btnInfo = `<button class="btn-info-incompleto" onclick="mostrarMotivoDiariaIncompleta('${nomeFunc}', ${valAtualDiaria}, ${valorPadraoBase}, ${horasDesc}, '${motImp}')" title="Ver motivo do desconto">?</button>`;
                     }
 
@@ -2520,20 +2548,106 @@
             box.style.display = 'block';
         }
 
+        /* EXPORTAÇÃO DETALHADA PARA O WHATSAPP COM DIÁRIAS, DESCONTOS E TOTAIS PARA O FUNCIONÁRIO */
         function exportarRelatorioWhatsApp() {
-            let txt = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
-            let total = 0;
-            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            hist.forEach(i => {
-                total += i.totalNumerico;
-                txt += `\n📅 *${i.dataTexto}* (${i.total})\n`;
-                i.operacoes.forEach(op => {
-                    const nomeNorm = normalizarNomeServico(op.servico);
-                    txt += ` • ${nomeNorm} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
+            const execFiltro = document.getElementById('filtro-executor').value;
+            const ini = document.getElementById('data-inicio').value;
+            const fim = document.getElementById('data-fim').value;
+
+            if (!execFiltro || execFiltro === 'mim') {
+                // Se estiver no modo Geral ou Minha Produção, exporta o relatório geral padrão
+                let txtGeral = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
+                let totalGeral = 0;
+                const histGeral = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+                histGeral.forEach(i => {
+                    totalGeral += i.totalNumerico;
+                    txtGeral += `\n📅 *${i.dataTexto}* (${i.total})\n`;
+                    i.operacoes.forEach(op => {
+                        const nomeNorm = normalizarNomeServico(op.servico);
+                        txtGeral += ` • ${nomeNorm} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
+                    });
                 });
+                txtGeral += `\n💰 *TOTAL GERAL: R$ ${totalGeral.toFixed(2)}*`;
+                navigator.clipboard.writeText(txtGeral).then(() => alert('Relatório geral copiado para colar no WhatsApp!'));
+                return;
+            }
+
+            // Relatório específico para o Funcionário selecionado
+            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            const funcsMap = {};
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
+
+            let filtrados = hist.filter(item => {
+                let itemIso = item.dataIso;
+                if (!itemIso && item.dia && item.mes && item.ano) {
+                    const mIdx = mesesNomes.findIndex(m => m.startsWith(item.mes.toLowerCase()));
+                    if (mIdx !== -1) {
+                        const dObj = new Date(parseInt(item.ano), mIdx, parseInt(item.dia));
+                        itemIso = dObj.toISOString().slice(0, 10);
+                    }
+                }
+                if (!itemIso) return false;
+                if (ini && itemIso < ini) return false;
+                if (fim && itemIso > fim) return false;
+                const tem = item.operacoes.some(op => (op.executor || 'mim') === execFiltro);
+                return tem;
             });
-            txt += `\n💰 *TOTAL GERAL: R$ ${total.toFixed(2)}*`;
-            navigator.clipboard.writeText(txt).then(() => alert('Relatório copiado para colar no WhatsApp!'));
+
+            filtrados.sort((a, b) => a.dataIso.localeCompare(b.dataIso));
+
+            if (filtrados.length === 0) {
+                alert('Nenhum registro encontrado para este funcionário no período.');
+                return;
+            }
+
+            let periodoTxt = (ini && fim) ? `Período: ${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}` : `Resumo Geral`;
+            let txtFunc = `📋 *RESUMO DE PAGAMENTO / PRODUÇÃO*\n👤 Funcionário: *${execFiltro}*\n📅 ${periodoTxt}\n\n`;
+
+            let totalLiquidoPagar = 0;
+            let totalDiasTrabalhados = 0;
+
+            filtrados.forEach(item => {
+                let valorDiaFunc = 0;
+                let pecasDiaTxt = '';
+                
+                item.operacoes.forEach(op => {
+                    if ((op.executor || 'mim') === execFiltro) {
+                        const sub = (op.qtd || 0) * (op.valor || 0);
+                        pecasDiaTxt += `   • ${normalizarNomeServico(op.servico)}: ${op.qtd}x (R$ ${sub.toFixed(2)})\n`;
+                    }
+                });
+
+                // Calcula a diária corrigida com descontos se houver
+                let custoDia = 0;
+                const opFunc = item.operacoes.find(op => (op.executor || 'mim') === execFiltro);
+                if (opFunc) {
+                    custoDia = opFunc.diariaFixada !== undefined ? opFunc.diariaFixada : (funcsMap[execFiltro] ? funcsMap[execFiltro].valor : 0);
+                }
+                totalLiquidoPagar += custoDia;
+                totalDiasTrabalhados++;
+
+                // Busca se houve desconto no ponto neste dia
+                const pontoDoDia = listaPontos.find(p => p.funcionario === execFiltro && p.data === item.dataIso);
+                let infoDescontoStr = '';
+                if (pontoDoDia && pontoDoDia.horasDesconto > 0) {
+                    const tempoDescFmt = formatarHorasDecimaisEmHorasMinutos(pontoDoDia.horasDesconto);
+                    infoDescontoStr = `\n   🔻 Desconto no ponto: ${tempoDescFmt}`;
+                    if (pontoDoDia.motivoImprevisto) {
+                        infoDescontoStr += ` (${pontoDoDia.motivoImprevisto})`;
+                    }
+                }
+
+                txtFunc += `🔹 *${item.dataTexto}*\n${pecasDiaTxt}   💵 Valor do dia: *R$ ${custoDia.toFixed(2)}*${infoDescontoStr}\n\n`;
+            });
+
+            txtFunc += `──────────────────\n`;
+            txtFunc += `📊 Dias trabalhados: *${totalDiasTrabalhados}*\n`;
+            txtFunc += `💰 *TOTAL LÍQUIDO A RECEBER: R$ ${totalLiquidoPagar.toFixed(2)}*`;
+
+            navigator.clipboard.writeText(txtFunc).then(() => {
+                alert(`Resumo de ${execFiltro} copiado com sucesso para colar no WhatsApp!`);
+            });
         }
 
         function excluirRegistro(id) {
