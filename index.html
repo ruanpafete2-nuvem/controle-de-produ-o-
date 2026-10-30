@@ -738,7 +738,6 @@
             border-color: var(--primary-color);
         }
 
-        /* Estilo das abas dentro de Equipe */
         .equipe-tabs {
             display: flex;
             gap: 6px;
@@ -1674,12 +1673,21 @@
 
             let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
 
+            // Coleta os funcionários que estão sendo salvos agora nesta data
+            const funcionariosNesteSalvar = [];
+            document.querySelectorAll('.card-ponto-item').forEach(card => {
+                funcionariosNesteSalvar.push(card.querySelector('.sel-ponto-func').value);
+            });
+
+            // Se mudou a data geral do cartão, removemos os antigos apenas dos funcionários editados na data antiga
             if (dataOriginal && dataOriginal !== novaData) {
-                listaPontos = listaPontos.filter(p => p.data !== dataOriginal);
+                listaPontos = listaPontos.filter(p => !(p.data === dataOriginal && funcionariosNesteSalvar.includes(p.funcionario)));
             }
 
-            listaPontos = listaPontos.filter(p => p.data !== novaData);
+            // Remove da data NOVA apenas os registros dos funcionários que estão sendo salvos agora (evita duplicar o mesmo funcionário no mesmo dia, mas preserva os outros)
+            listaPontos = listaPontos.filter(p => !(p.data === novaData && funcionariosNesteSalvar.includes(p.funcionario)));
 
+            // Adiciona os cartões preenchidos atualmente
             document.querySelectorAll('.card-ponto-item').forEach(card => {
                 const idCard = card.id.replace('ponto-card-', '');
                 const func = card.querySelector('.sel-ponto-func').value;
@@ -2085,7 +2093,6 @@
             container.innerHTML = html;
         }
 
-        /* FUNÇÃO DE CÁLCULO DO ACORDO DE PAGAMENTO PARA O FUNCIONÁRIO COM ADIANTAMENTOS */
         function calcularAcertoFuncionario() {
             const funcSel = document.getElementById('acerto-func').value;
             const ini = document.getElementById('acerto-inicio').value;
@@ -2146,24 +2153,24 @@
                 let infoDescontoCard = '';
                 if (pontoDoDia && pontoDoDia.horasDesconto > 0) {
                     const tempoDescFmt = formatarHorasDecimaisEmHorasMinutos(pontoDoDia.horasDesconto);
-                    infoDescontoCard = `<br><span style="color:var(--danger-color);">🔻 Desconto ponto: ${tempoDescFmt} (${pontoDoDia.motivoImprevisto || 'Falta/Atraso'})</span>`;
+                    infoDescontoCard = `<br><span style="color:var(--danger-color);">Desconto ponto: ${tempoDescFmt} (${pontoDoDia.motivoImprevisto || 'Falta/Atraso'})</span>`;
                 }
 
                 detalhesDiasHtml += `
                     <div style="border-bottom:1px dashed var(--border-color); padding:6px 0; font-size:12px;">
-                        📅 <b>${item.dataTexto}</b> — Diária: <b>R$ ${custoDia.toFixed(2)}</b>${infoDescontoCard}
+                        <b>${item.dataTexto}</b> — R$ ${custoDia.toFixed(2)}${infoDescontoCard}
                     </div>`;
             });
 
             const totalLiquidoFinal = Math.max(0, totalBrutoDiarias - descontoExtra);
 
             containerResultado.innerHTML = `
-                <div style="font-weight:700; margin-bottom:6px; color:var(--primary-color);">👤 Acerto para: ${funcSel}</div>
-                <div>📅 Dias trabalhados: <b>${totalDias} dias</b></div>
-                <div>💵 Total Bruto Diárias: <b>R$ ${totalBrutoDiarias.toFixed(2)}</b></div>
-                <div>🔻 Descontos / Adiantamentos: <b style="color:var(--danger-color);">- R$ ${descontoExtra.toFixed(2)}</b></div>
+                <div style="font-weight:700; margin-bottom:6px; color:var(--primary-color);">Acerto para: ${funcSel}</div>
+                <div>Dias trabalhados: <b>${totalDias} dias</b></div>
+                <div>Total Bruto: <b>R$ ${totalBrutoDiarias.toFixed(2)}</b></div>
+                <div>Descontos/Adiantamentos: <b style="color:var(--danger-color);">- R$ ${descontoExtra.toFixed(2)}</b></div>
                 <div style="margin-top:8px; padding-top:6px; border-top:1px solid var(--border-color); font-size:14px;">
-                    💰 <b>LÍQUIDO A PAGAR: <span style="color:var(--primary-color);">R$ ${totalLiquidoFinal.toFixed(2)}</span></b>
+                    <b>LÍQUIDO A PAGAR: <span style="color:var(--primary-color);">R$ ${totalLiquidoFinal.toFixed(2)}</span></b>
                 </div>
                 <div style="margin-top:10px; max-height: 150px; overflow-y: auto;">
                     ${detalhesDiasHtml}
@@ -2173,7 +2180,6 @@
             btnZap.style.display = 'block';
         }
 
-        /* EXPORTAÇÃO ESPECÍFICA PARA O WHATSAPP DO ACERTO DO FUNCIONÁRIO */
         function exportarAcertoWhatsApp() {
             const funcSel = document.getElementById('acerto-func').value;
             const ini = document.getElementById('acerto-inicio').value;
@@ -2207,8 +2213,12 @@
 
             if (filtrados.length === 0) { alert('Nenhum registro para exportar.'); return; }
 
-            let periodoTxt = (ini && fim) ? `${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}` : `Período Geral`;
-            let txtZap = `📋 *ACERTO DE PAGAMENTO*\n👤 Funcionário: *${funcSel}*\n📅 ${periodoTxt}\n\n`;
+            let periodoTxt = (ini && fim) ? `${ini.split('-').reverse().join('/')} a ${fim.split('-').reverse().join('/')}` : `Período Geral`;
+
+            let txtZap = `*ACERTO DE PAGAMENTO*\n`;
+            txtZap += `Funcionário: ${funcSel}\n`;
+            txtZap += `Período: ${periodoTxt}\n`;
+            txtZap += `────────────────────\n\n`;
 
             let totalBruto = 0;
             let totalDias = 0;
@@ -2226,24 +2236,24 @@
                 let infoDescZap = '';
                 if (pontoDoDia && pontoDoDia.horasDesconto > 0) {
                     const tempoDescFmt = formatarHorasDecimaisEmHorasMinutos(pontoDoDia.horasDesconto);
-                    infoDescZap = `\n   🔻 Desc. Ponto: ${tempoDescFmt} (${pontoDoDia.motivoImprevisto || 'Falta/Atraso'})`;
+                    infoDescZap = `\n  ↳ Desc. Ponto: ${tempoDescFmt} (${pontoDoDia.motivoImprevisto || 'Falta/Atraso'})`;
                 }
 
-                txtZap += `🔹 *${item.dataTexto}* ➔ Valor: *R$ ${custoDia.toFixed(2)}*${infoDescZap}\n`;
+                txtZap += `• *${item.dataTexto}* ➔ R$ ${custoDia.toFixed(2)}${infoDescZap}\n\n`;
             });
 
             const totalFinal = Math.max(0, totalBruto - descontoExtra);
 
-            txtZap += `\n──────────────────\n`;
-            txtZap += `📊 Dias trabalhados: *${totalDias} dias*\n`;
-            txtZap += `💵 Total Bruto: R$ ${totalBruto.toFixed(2)}\n`;
+            txtZap += `────────────────────\n`;
+            txtZap += `Dias trabalhados: ${totalDias}\n`;
+            txtZap += `Total Bruto: R$ ${totalBruto.toFixed(2)}\n`;
             if (descontoExtra > 0) {
-                txtZap += `🔻 Adiantamentos/Descontos: - R$ ${descontoExtra.toFixed(2)}\n`;
+                txtZap += `Adiantamentos/Vales: - R$ ${descontoExtra.toFixed(2)}\n`;
             }
-            txtZap += `💰 *VALOR LÍQUIDO A PAGAR: R$ ${totalFinal.toFixed(2)}*`;
+            txtZap += `\n*TOTAL A PAGAR: R$ ${totalFinal.toFixed(2)}*`;
 
             navigator.clipboard.writeText(txtZap).then(() => {
-                alert(`Acerto de ${funcSel} copiado com sucesso para enviar no WhatsApp!`);
+                alert(`Acerto limpo e minimalista de ${funcSel} copiado com sucesso para colar no WhatsApp!`);
             });
         }
 
@@ -2569,7 +2579,6 @@
                 }
             } else {
                 limparRascunho();
-                // Avança para o dia seguinte automaticamente e limpa as operações
                 avancarParaDiaSeguinte();
                 document.getElementById('operacoes-container').innerHTML = '';
                 contadorOperacoes = 0;
@@ -2832,18 +2841,18 @@
         }
 
         function exportarRelatorioWhatsApp() {
-            let txtGeral = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
+            let txtGeral = `*RELATÓRIO DE PRODUÇÃO*\n`;
             let totalGeral = 0;
             const histGeral = JSON.parse(localStorage.getItem('historicoProducao')) || [];
             histGeral.forEach(i => {
                 totalGeral += i.totalNumerico;
-                txtGeral += `\n📅 *${i.dataTexto}* (${i.total})\n`;
+                txtGeral += `\n*${i.dataTexto}* (${i.total})\n`;
                 i.operacoes.forEach(op => {
                     const nomeNorm = normalizarNomeServico(op.servico);
-                    txtGeral += ` • ${nomeNorm} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
+                    txtGeral += `• ${nomeNorm} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
                 });
             });
-            txtGeral += `\n💰 *TOTAL GERAL: R$ ${totalGeral.toFixed(2)}*`;
+            txtGeral += `\n*TOTAL GERAL: R$ ${totalGeral.toFixed(2)}*`;
             navigator.clipboard.writeText(txtGeral).then(() => alert('Relatório geral copiado para colar no WhatsApp!'));
         }
 
