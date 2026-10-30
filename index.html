@@ -737,6 +737,32 @@
             color: var(--primary-color);
             border-color: var(--primary-color);
         }
+
+        /* Estilo das abas dentro de Equipe */
+        .equipe-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .btn-equipe-tab {
+            flex: 1;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid var(--border-color);
+            background: var(--op-header-bg);
+            color: var(--text-muted);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-equipe-tab.active {
+            background: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
     </style>
 
     <!-- Firebase SDKs -->
@@ -868,33 +894,79 @@
                 <div id="historico-pontos-salvos-container"></div>
             </div>
 
-            <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS + COMPARATIVO -->
+            <!-- PAINEL DE GESTÃO DE FUNCIONÁRIOS + ACERTOS & PAGAMENTOS -->
             <div id="funcionarios-painel" class="box-section">
-                <h2>🏆 Comparativo de Desempenho</h2>
-                <div class="quick-filters" style="margin-top: 5px;">
-                    <button class="btn-chip active" id="chip-rank-hoje" onclick="gerarRankingEquipe('hoje')">Hoje</button>
-                    <button class="btn-chip" id="chip-rank-semana" onclick="gerarRankingEquipe('semana')">Esta Semana</button>
-                    <button class="btn-chip" id="chip-rank-mes" onclick="gerarRankingEquipe('mes')">Este Mês</button>
-                </div>
-                <div id="ranking-container" class="ranking-card"></div>
-
-                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 18px 0;">
-
-                <h2>👥 Cadastro de Funcionários</h2>
-                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Cadastre o funcionário e o valor pago por dia:</p>
                 
-                <div class="filter-field">
-                    <label for="func-nome">Nome do Funcionário:</label>
-                    <input type="text" id="func-nome" placeholder="Ex: Micos">
+                <!-- ABAS DENTRO DE EQUIPE -->
+                <div class="equipe-tabs">
+                    <button class="btn-equipe-tab active" id="tab-btn-acertos" onclick="alternarAbaEquipe('acertos')">💰 Acertos & WhatsApp</button>
+                    <button class="btn-equipe-tab" id="tab-btn-ranking" onclick="alternarAbaEquipe('ranking')">🏆 Ranking & Cadastro</button>
                 </div>
-                <div class="filter-field">
-                    <label for="func-valor">Valor do Salário / Diária (R$):</label>
-                    <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 100.00" onclick="this.select()">
+
+                <!-- SUB-ABA 1: ACERTOS E EXPORTAÇÃO PARA O WHATSAPP -->
+                <div id="sub-aba-acertos">
+                    <h2>📲 Fechamento e Acerto com Funcionário</h2>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Selecione o funcionário e o período para calcular o pagamento exato com descontos e adiantamentos:</p>
+                    
+                    <div class="filter-field">
+                        <label for="acerto-func">Funcionário:</label>
+                        <select id="acerto-func" onchange="calcularAcertoFuncionario()">
+                            <!-- Preenchido dinamicamente -->
+                        </select>
+                    </div>
+
+                    <div style="display:flex; gap:8px;">
+                        <div class="filter-field" style="flex:1;">
+                            <label for="acerto-inicio">De:</label>
+                            <input type="date" id="acerto-inicio" onchange="calcularAcertoFuncionario()">
+                        </div>
+                        <div class="filter-field" style="flex:1;">
+                            <label for="acerto-fim">Até:</label>
+                            <input type="date" id="acerto-fim" onchange="calcularAcertoFuncionario()">
+                        </div>
+                    </div>
+
+                    <div class="filter-field">
+                        <label for="acerto-desconto-extra">Descontos / Adiantamentos Extras (R$):</label>
+                        <input type="number" step="0.01" inputmode="decimal" id="acerto-desconto-extra" value="0.00" onclick="this.select()" oninput="calcularAcertoFuncionario()" placeholder="Ex: 50.00 (vales, adiantamentos)">
+                    </div>
+
+                    <div id="resultado-acerto-container" style="background:var(--op-header-bg); border:1px solid var(--border-color); border-radius:8px; padding:12px; margin-bottom:14px; font-size:12px;">
+                        <!-- Resultado dinâmico -->
+                    </div>
+
+                    <button class="btn btn-green btn-full" id="btn-exportar-acerto-zap" onclick="exportarAcertoWhatsApp()" style="display:none; margin-bottom: 15px;">📲 Exportar Acerto (WhatsApp)</button>
                 </div>
-                <button class="btn btn-green btn-full" id="btn-salvar-func" style="margin-top: 5px;" onclick="salvarNovoFuncionarioCadastrado()">➕ Cadastrar Funcionário</button>
-                
-                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
-                <div id="lista-funcionarios-cadastrados"></div>
+
+                <!-- SUB-ABA 2: RANKING E CADASTRO DE FUNCIONÁRIOS -->
+                <div id="sub-aba-ranking" class="hidden">
+                    <h2>🏆 Comparativo de Desempenho</h2>
+                    <div class="quick-filters" style="margin-top: 5px;">
+                        <button class="btn-chip active" id="chip-rank-hoje" onclick="gerarRankingEquipe('hoje')">Hoje</button>
+                        <button class="btn-chip" id="chip-rank-semana" onclick="gerarRankingEquipe('semana')">Esta Semana</button>
+                        <button class="btn-chip" id="chip-rank-mes" onclick="gerarRankingEquipe('mes')">Este Mês</button>
+                    </div>
+                    <div id="ranking-container" class="ranking-card"></div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 18px 0;">
+
+                    <h2>👥 Cadastro de Funcionários</h2>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Cadastre o funcionário e o valor pago por dia:</p>
+                    
+                    <div class="filter-field">
+                        <label for="func-nome">Nome do Funcionário:</label>
+                        <input type="text" id="func-nome" placeholder="Ex: Nicolas">
+                    </div>
+                    <div class="filter-field">
+                        <label for="func-valor">Valor do Salário / Diária (R$):</label>
+                        <input type="number" step="0.01" inputmode="decimal" id="func-valor" placeholder="Ex: 100.00" onclick="this.select()">
+                    </div>
+                    <button class="btn btn-green btn-full" id="btn-salvar-func" style="margin-top: 5px;" onclick="salvarNovoFuncionarioCadastrado()">➕ Cadastrar Funcionário</button>
+                    
+                    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
+                    <div id="lista-funcionarios-cadastrados"></div>
+                </div>
+
             </div>
 
             <!-- PAINEL DE CADASTRO DE SERVIÇOS -->
@@ -1119,6 +1191,7 @@
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
+            calcularAcertoFuncionario();
 
             const hojeIso = new Date().toISOString().slice(0, 10);
             const inputPontoData = document.getElementById('ponto-data');
@@ -1131,6 +1204,8 @@
             const dInicioMes = new Date(dHoje.getFullYear(), dHoje.getMonth(), 1).toISOString().slice(0, 10);
             document.getElementById('bh-inicio').value = dInicioMes;
             document.getElementById('bh-fim').value = hojeIso;
+            document.getElementById('acerto-inicio').value = dInicioMes;
+            document.getElementById('acerto-fim').value = hojeIso;
 
             if (!carregarRascunhoPonto()) {
                 recarregarTodosPontos();
@@ -1141,6 +1216,27 @@
             if (!carregarRascunho()) {
                 resetarDataHoje();
                 if (contadorOperacoes === 0) adicionarOperacao();
+            }
+        }
+
+        function alternarAbaEquipe(aba) {
+            const btnAcertos = document.getElementById('tab-btn-acertos');
+            const btnRanking = document.getElementById('tab-btn-ranking');
+            const subAcertos = document.getElementById('sub-aba-acertos');
+            const subRanking = document.getElementById('sub-aba-ranking');
+
+            if (aba === 'acertos') {
+                btnAcertos.classList.add('active');
+                btnRanking.classList.remove('active');
+                subAcertos.classList.remove('hidden');
+                subRanking.classList.add('hidden');
+                calcularAcertoFuncionario();
+            } else {
+                btnRanking.classList.add('active');
+                btnAcertos.classList.remove('active');
+                subRanking.classList.remove('hidden');
+                subAcertos.classList.add('hidden');
+                gerarRankingEquipe('hoje');
             }
         }
 
@@ -1284,7 +1380,10 @@
             document.getElementById(idNavBtn).classList.add('active');
 
             if(idPainel === 'historico-painel') buscarHistorico();
-            if(idPainel === 'funcionarios-painel') gerarRankingEquipe('hoje');
+            if(idPainel === 'funcionarios-painel') {
+                gerarRankingEquipe('hoje');
+                calcularAcertoFuncionario();
+            }
             if(idPainel === 'ponto-painel') {
                 renderizarHistoricoPontosSalvos();
                 gerarRelatorioBancoHoras();
@@ -1346,6 +1445,16 @@
             let options = `<option value="mim" ${selecionado === 'mim' ? 'selected' : ''}>Minha Pessoa (Você)</option>`;
             (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => {
                 options += `<option value="${f.nome}" ${selecionado === f.nome ? 'selected' : ''}>${f.nome}</option>`;
+            });
+            return options;
+        }
+
+        function gerarOptionsAcertoFuncionarios(selecionado = '') {
+            const funcs = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
+            if (funcs.length === 0) return `<option value="">Nenhum funcionário cadastrado</option>`;
+            let options = ``;
+            funcs.forEach((f, idx) => {
+                options += `<option value="${f.nome}" ${idx === 0 && !selecionado ? 'selected' : (f.nome === selecionado ? 'selected' : '')}>${f.nome}</option>`;
             });
             return options;
         }
@@ -1834,6 +1943,7 @@
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
+            calcularAcertoFuncionario();
             alert(`Funcionário ${nome} cadastrado com sucesso!`);
         }
 
@@ -1876,6 +1986,7 @@
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
+            calcularAcertoFuncionario();
             calcularTotalDia();
             alert('Funcionário atualizado com sucesso!');
         }
@@ -1888,6 +1999,7 @@
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
+            calcularAcertoFuncionario();
         }
 
         function renderizarListaFuncionariosCadastrados() {
@@ -1973,6 +2085,168 @@
             container.innerHTML = html;
         }
 
+        /* FUNÇÃO DE CÁLCULO DO ACORDO DE PAGAMENTO PARA O FUNCIONÁRIO COM ADIANTAMENTOS */
+        function calcularAcertoFuncionario() {
+            const funcSel = document.getElementById('acerto-func').value;
+            const ini = document.getElementById('acerto-inicio').value;
+            const fim = document.getElementById('acerto-fim').value;
+            const descontoExtra = parseFloat(document.getElementById('acerto-desconto-extra').value) || 0;
+            const containerResultado = document.getElementById('resultado-acerto-container');
+            const btnZap = document.getElementById('btn-exportar-acerto-zap');
+
+            if (!funcSel) {
+                containerResultado.innerHTML = 'Nenhum funcionário selecionado ou cadastrado.';
+                btnZap.style.display = 'none';
+                return;
+            }
+
+            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            const funcsMap = {};
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
+
+            let filtrados = hist.filter(item => {
+                let itemIso = item.dataIso;
+                if (!itemIso && item.dia && item.mes && item.ano) {
+                    const mIdx = mesesNomes.findIndex(m => m.startsWith(item.mes.toLowerCase()));
+                    if (mIdx !== -1) {
+                        const dObj = new Date(parseInt(item.ano), mIdx, parseInt(item.dia));
+                        itemIso = dObj.toISOString().slice(0, 10);
+                    }
+                }
+                if (!itemIso) return false;
+                if (ini && itemIso < ini) return false;
+                if (fim && itemIso > fim) return false;
+                const tem = item.operacoes.some(op => (op.executor || 'mim') === funcSel);
+                return tem;
+            });
+
+            filtrados.sort((a, b) => a.dataIso.localeCompare(b.dataIso));
+
+            if (filtrados.length === 0) {
+                containerResultado.innerHTML = `Nenhum dia de trabalho registrado para <b>${funcSel}</b> no período selecionado.`;
+                btnZap.style.display = 'none';
+                return;
+            }
+
+            let totalBrutoDiarias = 0;
+            let totalDias = 0;
+            let detalhesDiasHtml = '';
+
+            filtrados.forEach(item => {
+                let custoDia = 0;
+                const opFunc = item.operacoes.find(op => (op.executor || 'mim') === funcSel);
+                if (opFunc) {
+                    custoDia = opFunc.diariaFixada !== undefined ? opFunc.diariaFixada : (funcsMap[funcSel] ? funcsMap[funcSel].valor : 0);
+                }
+                totalBrutoDiarias += custoDia;
+                totalDias++;
+
+                const pontoDoDia = listaPontos.find(p => p.funcionario === funcSel && p.data === item.dataIso);
+                let infoDescontoCard = '';
+                if (pontoDoDia && pontoDoDia.horasDesconto > 0) {
+                    const tempoDescFmt = formatarHorasDecimaisEmHorasMinutos(pontoDoDia.horasDesconto);
+                    infoDescontoCard = `<br><span style="color:var(--danger-color);">🔻 Desconto ponto: ${tempoDescFmt} (${pontoDoDia.motivoImprevisto || 'Falta/Atraso'})</span>`;
+                }
+
+                detalhesDiasHtml += `
+                    <div style="border-bottom:1px dashed var(--border-color); padding:6px 0; font-size:12px;">
+                        📅 <b>${item.dataTexto}</b> — Diária: <b>R$ ${custoDia.toFixed(2)}</b>${infoDescontoCard}
+                    </div>`;
+            });
+
+            const totalLiquidoFinal = Math.max(0, totalBrutoDiarias - descontoExtra);
+
+            containerResultado.innerHTML = `
+                <div style="font-weight:700; margin-bottom:6px; color:var(--primary-color);">👤 Acerto para: ${funcSel}</div>
+                <div>📅 Dias trabalhados: <b>${totalDias} dias</b></div>
+                <div>💵 Total Bruto Diárias: <b>R$ ${totalBrutoDiarias.toFixed(2)}</b></div>
+                <div>🔻 Descontos / Adiantamentos: <b style="color:var(--danger-color);">- R$ ${descontoExtra.toFixed(2)}</b></div>
+                <div style="margin-top:8px; padding-top:6px; border-top:1px solid var(--border-color); font-size:14px;">
+                    💰 <b>LÍQUIDO A PAGAR: <span style="color:var(--primary-color);">R$ ${totalLiquidoFinal.toFixed(2)}</span></b>
+                </div>
+                <div style="margin-top:10px; max-height: 150px; overflow-y: auto;">
+                    ${detalhesDiasHtml}
+                </div>
+            `;
+
+            btnZap.style.display = 'block';
+        }
+
+        /* EXPORTAÇÃO ESPECÍFICA PARA O WHATSAPP DO ACERTO DO FUNCIONÁRIO */
+        function exportarAcertoWhatsApp() {
+            const funcSel = document.getElementById('acerto-func').value;
+            const ini = document.getElementById('acerto-inicio').value;
+            const fim = document.getElementById('acerto-fim').value;
+            const descontoExtra = parseFloat(document.getElementById('acerto-desconto-extra').value) || 0;
+
+            if (!funcSel) { alert('Selecione o funcionário!'); return; }
+
+            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+            const funcsMap = {};
+            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
+
+            let filtrados = hist.filter(item => {
+                let itemIso = item.dataIso;
+                if (!itemIso && item.dia && item.mes && item.ano) {
+                    const mIdx = mesesNomes.findIndex(m => m.startsWith(item.mes.toLowerCase()));
+                    if (mIdx !== -1) {
+                        const dObj = new Date(parseInt(item.ano), mIdx, parseInt(item.dia));
+                        itemIso = dObj.toISOString().slice(0, 10);
+                    }
+                }
+                if (!itemIso) return false;
+                if (ini && itemIso < ini) return false;
+                if (fim && itemIso > fim) return false;
+                const tem = item.operacoes.some(op => (op.executor || 'mim') === funcSel);
+                return tem;
+            });
+
+            filtrados.sort((a, b) => a.dataIso.localeCompare(b.dataIso));
+
+            if (filtrados.length === 0) { alert('Nenhum registro para exportar.'); return; }
+
+            let periodoTxt = (ini && fim) ? `${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}` : `Período Geral`;
+            let txtZap = `📋 *ACERTO DE PAGAMENTO*\n👤 Funcionário: *${funcSel}*\n📅 ${periodoTxt}\n\n`;
+
+            let totalBruto = 0;
+            let totalDias = 0;
+
+            filtrados.forEach(item => {
+                let custoDia = 0;
+                const opFunc = item.operacoes.find(op => (op.executor || 'mim') === funcSel);
+                if (opFunc) {
+                    custoDia = opFunc.diariaFixada !== undefined ? opFunc.diariaFixada : (funcsMap[funcSel] ? funcsMap[funcSel].valor : 0);
+                }
+                totalBruto += custoDia;
+                totalDias++;
+
+                const pontoDoDia = listaPontos.find(p => p.funcionario === funcSel && p.data === item.dataIso);
+                let infoDescZap = '';
+                if (pontoDoDia && pontoDoDia.horasDesconto > 0) {
+                    const tempoDescFmt = formatarHorasDecimaisEmHorasMinutos(pontoDoDia.horasDesconto);
+                    infoDescZap = `\n   🔻 Desc. Ponto: ${tempoDescFmt} (${pontoDoDia.motivoImprevisto || 'Falta/Atraso'})`;
+                }
+
+                txtZap += `🔹 *${item.dataTexto}* ➔ Valor: *R$ ${custoDia.toFixed(2)}*${infoDescZap}\n`;
+            });
+
+            const totalFinal = Math.max(0, totalBruto - descontoExtra);
+
+            txtZap += `\n──────────────────\n`;
+            txtZap += `📊 Dias trabalhados: *${totalDias} dias*\n`;
+            txtZap += `💵 Total Bruto: R$ ${totalBruto.toFixed(2)}\n`;
+            if (descontoExtra > 0) {
+                txtZap += `🔻 Adiantamentos/Descontos: - R$ ${descontoExtra.toFixed(2)}\n`;
+            }
+            txtZap += `💰 *VALOR LÍQUIDO A PAGAR: R$ ${totalFinal.toFixed(2)}*`;
+
+            navigator.clipboard.writeText(txtZap).then(() => {
+                alert(`Acerto de ${funcSel} copiado com sucesso para enviar no WhatsApp!`);
+            });
+        }
+
         function gerarOptionsServicos(servicoAtual = '') {
             const servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
             let options = `<option value="">-- Selecionar serviço --</option>`;
@@ -1995,6 +2269,14 @@
             document.querySelectorAll('.select-servico').forEach(s => s.innerHTML = gerarOptionsServicos(s.value));
             document.querySelectorAll('.select-executor').forEach(s => s.innerHTML = gerarOptionsExecutores(s.value));
             document.querySelectorAll('.sel-ponto-func').forEach(s => s.innerHTML = gerarOptionsPontoFuncionarios(s.value));
+            
+            const selAcerto = document.getElementById('acerto-func');
+            if (selAcerto) {
+                const atualAcerto = selAcerto.value;
+                selAcerto.innerHTML = gerarOptionsAcertoFuncionarios(atualAcerto);
+                calcularAcertoFuncionario();
+            }
+
             atualizarSelectFiltroExecutor();
             atualizarSelectBancoHoras();
         }
@@ -2297,6 +2579,7 @@
 
             if (document.getElementById('historico-painel').style.display === 'block') buscarHistorico();
             gerarRankingEquipe('hoje');
+            calcularAcertoFuncionario();
         }
 
         function filtrarRapido(tipo) {
@@ -2548,106 +2831,20 @@
             box.style.display = 'block';
         }
 
-        /* EXPORTAÇÃO DETALHADA PARA O WHATSAPP COM DIÁRIAS, DESCONTOS E TOTAIS PARA O FUNCIONÁRIO */
         function exportarRelatorioWhatsApp() {
-            const execFiltro = document.getElementById('filtro-executor').value;
-            const ini = document.getElementById('data-inicio').value;
-            const fim = document.getElementById('data-fim').value;
-
-            if (!execFiltro || execFiltro === 'mim') {
-                // Se estiver no modo Geral ou Minha Produção, exporta o relatório geral padrão
-                let txtGeral = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
-                let totalGeral = 0;
-                const histGeral = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-                histGeral.forEach(i => {
-                    totalGeral += i.totalNumerico;
-                    txtGeral += `\n📅 *${i.dataTexto}* (${i.total})\n`;
-                    i.operacoes.forEach(op => {
-                        const nomeNorm = normalizarNomeServico(op.servico);
-                        txtGeral += ` • ${nomeNorm} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
-                    });
+            let txtGeral = `📋 *RELATÓRIO DE PRODUÇÃO*\n`;
+            let totalGeral = 0;
+            const histGeral = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            histGeral.forEach(i => {
+                totalGeral += i.totalNumerico;
+                txtGeral += `\n📅 *${i.dataTexto}* (${i.total})\n`;
+                i.operacoes.forEach(op => {
+                    const nomeNorm = normalizarNomeServico(op.servico);
+                    txtGeral += ` • ${nomeNorm} [${op.executor || 'Você'}]: ${op.qtd}x = ${op.total}\n`;
                 });
-                txtGeral += `\n💰 *TOTAL GERAL: R$ ${totalGeral.toFixed(2)}*`;
-                navigator.clipboard.writeText(txtGeral).then(() => alert('Relatório geral copiado para colar no WhatsApp!'));
-                return;
-            }
-
-            // Relatório específico para o Funcionário selecionado
-            const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
-            const funcsMap = {};
-            (JSON.parse(localStorage.getItem('funcionariosCadastrados')) || []).forEach(f => funcsMap[f.nome] = f);
-
-            let filtrados = hist.filter(item => {
-                let itemIso = item.dataIso;
-                if (!itemIso && item.dia && item.mes && item.ano) {
-                    const mIdx = mesesNomes.findIndex(m => m.startsWith(item.mes.toLowerCase()));
-                    if (mIdx !== -1) {
-                        const dObj = new Date(parseInt(item.ano), mIdx, parseInt(item.dia));
-                        itemIso = dObj.toISOString().slice(0, 10);
-                    }
-                }
-                if (!itemIso) return false;
-                if (ini && itemIso < ini) return false;
-                if (fim && itemIso > fim) return false;
-                const tem = item.operacoes.some(op => (op.executor || 'mim') === execFiltro);
-                return tem;
             });
-
-            filtrados.sort((a, b) => a.dataIso.localeCompare(b.dataIso));
-
-            if (filtrados.length === 0) {
-                alert('Nenhum registro encontrado para este funcionário no período.');
-                return;
-            }
-
-            let periodoTxt = (ini && fim) ? `Período: ${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}` : `Resumo Geral`;
-            let txtFunc = `📋 *RESUMO DE PAGAMENTO / PRODUÇÃO*\n👤 Funcionário: *${execFiltro}*\n📅 ${periodoTxt}\n\n`;
-
-            let totalLiquidoPagar = 0;
-            let totalDiasTrabalhados = 0;
-
-            filtrados.forEach(item => {
-                let valorDiaFunc = 0;
-                let pecasDiaTxt = '';
-                
-                item.operacoes.forEach(op => {
-                    if ((op.executor || 'mim') === execFiltro) {
-                        const sub = (op.qtd || 0) * (op.valor || 0);
-                        pecasDiaTxt += `   • ${normalizarNomeServico(op.servico)}: ${op.qtd}x (R$ ${sub.toFixed(2)})\n`;
-                    }
-                });
-
-                // Calcula a diária corrigida com descontos se houver
-                let custoDia = 0;
-                const opFunc = item.operacoes.find(op => (op.executor || 'mim') === execFiltro);
-                if (opFunc) {
-                    custoDia = opFunc.diariaFixada !== undefined ? opFunc.diariaFixada : (funcsMap[execFiltro] ? funcsMap[execFiltro].valor : 0);
-                }
-                totalLiquidoPagar += custoDia;
-                totalDiasTrabalhados++;
-
-                // Busca se houve desconto no ponto neste dia
-                const pontoDoDia = listaPontos.find(p => p.funcionario === execFiltro && p.data === item.dataIso);
-                let infoDescontoStr = '';
-                if (pontoDoDia && pontoDoDia.horasDesconto > 0) {
-                    const tempoDescFmt = formatarHorasDecimaisEmHorasMinutos(pontoDoDia.horasDesconto);
-                    infoDescontoStr = `\n   🔻 Desconto no ponto: ${tempoDescFmt}`;
-                    if (pontoDoDia.motivoImprevisto) {
-                        infoDescontoStr += ` (${pontoDoDia.motivoImprevisto})`;
-                    }
-                }
-
-                txtFunc += `🔹 *${item.dataTexto}*\n${pecasDiaTxt}   💵 Valor do dia: *R$ ${custoDia.toFixed(2)}*${infoDescontoStr}\n\n`;
-            });
-
-            txtFunc += `──────────────────\n`;
-            txtFunc += `📊 Dias trabalhados: *${totalDiasTrabalhados}*\n`;
-            txtFunc += `💰 *TOTAL LÍQUIDO A RECEBER: R$ ${totalLiquidoPagar.toFixed(2)}*`;
-
-            navigator.clipboard.writeText(txtFunc).then(() => {
-                alert(`Resumo de ${execFiltro} copiado com sucesso para colar no WhatsApp!`);
-            });
+            txtGeral += `\n💰 *TOTAL GERAL: R$ ${totalGeral.toFixed(2)}*`;
+            navigator.clipboard.writeText(txtGeral).then(() => alert('Relatório geral copiado para colar no WhatsApp!'));
         }
 
         function excluirRegistro(id) {
@@ -2656,6 +2853,7 @@
             localStorage.setItem('historicoProducao', JSON.stringify(hist.filter(i => i.id !== id)));
             buscarHistorico();
             gerarRankingEquipe('hoje');
+            calcularAcertoFuncionario();
         }
 
         function editarRegistro(id) {
