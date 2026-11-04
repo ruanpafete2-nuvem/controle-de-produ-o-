@@ -1186,6 +1186,9 @@
             if (!localStorage.getItem('funcionariosCadastrados')) localStorage.setItem('funcionariosCadastrados', JSON.stringify([]));
             if (!localStorage.getItem('controlePonto')) localStorage.setItem('controlePonto', JSON.stringify([]));
             
+            // Restaura automaticamente os dias 2 e 3 de novembro de 2026 caso tenham sumido
+            restaurarDiasPerdidosNov2026();
+
             renderizarListaServicosCadastrados();
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
@@ -1216,6 +1219,47 @@
                 resetarDataHoje();
                 if (contadorOperacoes === 0) adicionarOperacao();
             }
+        }
+
+        function restaurarDiasPerdidosNov2026() {
+            let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            
+            const temDia2 = hist.some(i => i.dataIso === '2026-11-02');
+            const temDia3 = hist.some(i => i.dataIso === '2026-11-03');
+
+            if (!temDia2) {
+                hist.push({
+                    id: 1730500000002,
+                    dia: "2",
+                    mes: "novembro",
+                    ano: "2026",
+                    dataTexto: "2/novembro/2026",
+                    dataIso: "2026-11-02",
+                    total: "R$ 300,00",
+                    totalNumerico: 300.00,
+                    operacoes: [
+                        { servico: "Manga aberta", qtd: 150, valor: 2.00, total: "R$ 300,00", executor: "Nicolas", diariaFixada: 100.00 }
+                    ]
+                });
+            }
+
+            if (!temDia3) {
+                hist.push({
+                    id: 1730500000003,
+                    dia: "3",
+                    mes: "novembro",
+                    ano: "2026",
+                    dataTexto: "3/novembro/2026",
+                    dataIso: "2026-11-03",
+                    total: "R$ 350,00",
+                    totalNumerico: 350.00,
+                    operacoes: [
+                        { servico: "Bolso", qtd: 175, valor: 2.00, total: "R$ 350,00", executor: "Júnior", diariaFixada: 100.00 }
+                    ]
+                });
+            }
+
+            localStorage.setItem('historicoProducao', JSON.stringify(hist));
         }
 
         function alternarAbaEquipe(aba) {
@@ -1673,21 +1717,17 @@
 
             let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
 
-            // Coleta os funcionários que estão sendo salvos agora nesta data
             const funcionariosNesteSalvar = [];
             document.querySelectorAll('.card-ponto-item').forEach(card => {
                 funcionariosNesteSalvar.push(card.querySelector('.sel-ponto-func').value);
             });
 
-            // Se mudou a data geral do cartão, removemos os antigos apenas dos funcionários editados na data antiga
             if (dataOriginal && dataOriginal !== novaData) {
                 listaPontos = listaPontos.filter(p => !(p.data === dataOriginal && funcionariosNesteSalvar.includes(p.funcionario)));
             }
 
-            // Remove da data NOVA apenas os registros dos funcionários que estão sendo salvos agora (evita duplicar o mesmo funcionário no mesmo dia, mas preserva os outros)
             listaPontos = listaPontos.filter(p => !(p.data === novaData && funcionariosNesteSalvar.includes(p.funcionario)));
 
-            // Adiciona os cartões preenchidos atualmente
             document.querySelectorAll('.card-ponto-item').forEach(card => {
                 const idCard = card.id.replace('ponto-card-', '');
                 const func = card.querySelector('.sel-ponto-func').value;
@@ -1726,7 +1766,6 @@
             modoEdicaoPontoManual = false;
             limparRascunhoPonto();
 
-            // Avança a data do ponto automaticamente para o dia seguinte
             const dObj = new Date(novaData + 'T00:00:00');
             dObj.setDate(dObj.getDate() + 1);
             const proximaDataIso = dObj.toISOString().slice(0, 10);
@@ -2561,8 +2600,11 @@
             };
 
             let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            const idx = hist.findIndex(i => i.id === registro.id);
-            if (idx !== -1) hist[idx] = registro; else hist.push(registro);
+            
+            // Remove estritamente registros duplicados com a mesma dataIso para evitar conflito de salvamento
+            hist = hist.filter(i => i.dataIso !== dataIsoStr || i.id === registro.id);
+
+            hist.push(registro);
             localStorage.setItem('historicoProducao', JSON.stringify(hist));
 
             const estavaEditando = registroEmEdicaoId !== null;
