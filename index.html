@@ -980,7 +980,7 @@
                     <label for="novo-servico-valor">Valor da Peça (R$):</label>
                     <input type="number" step="0.01" inputmode="decimal" id="novo-servico-valor" placeholder="Ex: 5.00" onclick="this.select()">
                 </div>
-                <button class="btn btn-green btn-full" style="margin-top: 5px;" onclick="salvarNovoServicoCadastrado()">➕ Cadastrar Serviço</button>
+                <button class="btn btn-green btn-full" id="btn-salvar-servico" style="margin-top: 5px;" onclick="salvarNovoServicoCadastrado()">➕ Cadastrar Serviço</button>
                 
                 <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0;">
                 <div id="lista-servicos-cadastrados"></div>
@@ -1085,6 +1085,7 @@
         let contadorCartoesPonto = 0;
         let registroEmEdicaoId = null;
         let funcionarioEmEdicaoIndex = null;
+        let servicoEmEdicaoIndex = null;
         let modoEdicaoPontoManual = false;
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
@@ -1186,9 +1187,6 @@
             if (!localStorage.getItem('funcionariosCadastrados')) localStorage.setItem('funcionariosCadastrados', JSON.stringify([]));
             if (!localStorage.getItem('controlePonto')) localStorage.setItem('controlePonto', JSON.stringify([]));
             
-            // Restaura automaticamente os dias 2 e 3 de novembro de 2026 caso tenham sumido
-            restaurarDiasPerdidosNov2026();
-
             renderizarListaServicosCadastrados();
             renderizarListaFuncionariosCadastrados();
             atualizarTodosOsSelects();
@@ -1219,47 +1217,6 @@
                 resetarDataHoje();
                 if (contadorOperacoes === 0) adicionarOperacao();
             }
-        }
-
-        function restaurarDiasPerdidosNov2026() {
-            let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
-            
-            const temDia2 = hist.some(i => i.dataIso === '2026-11-02');
-            const temDia3 = hist.some(i => i.dataIso === '2026-11-03');
-
-            if (!temDia2) {
-                hist.push({
-                    id: 1730500000002,
-                    dia: "2",
-                    mes: "novembro",
-                    ano: "2026",
-                    dataTexto: "2/novembro/2026",
-                    dataIso: "2026-11-02",
-                    total: "R$ 300,00",
-                    totalNumerico: 300.00,
-                    operacoes: [
-                        { servico: "Manga aberta", qtd: 150, valor: 2.00, total: "R$ 300,00", executor: "Nicolas", diariaFixada: 100.00 }
-                    ]
-                });
-            }
-
-            if (!temDia3) {
-                hist.push({
-                    id: 1730500000003,
-                    dia: "3",
-                    mes: "novembro",
-                    ano: "2026",
-                    dataTexto: "3/novembro/2026",
-                    dataIso: "2026-11-03",
-                    total: "R$ 350,00",
-                    totalNumerico: 350.00,
-                    operacoes: [
-                        { servico: "Bolso", qtd: 175, valor: 2.00, total: "R$ 350,00", executor: "Júnior", diariaFixada: 100.00 }
-                    ]
-                });
-            }
-
-            localStorage.setItem('historicoProducao', JSON.stringify(hist));
         }
 
         function alternarAbaEquipe(aba) {
@@ -1927,21 +1884,51 @@
         }
 
         function salvarNovoServicoCadastrado() {
-            const nome = document.getElementById('novo-servico-nome').value.trim();
-            const valor = parseFloat(document.getElementById('novo-servico-valor').value) || 0;
+            const nomeInput = document.getElementById('novo-servico-nome');
+            const valorInput = document.getElementById('novo-servico-valor');
+            const nome = nomeInput.value.trim();
+            const valor = parseFloat(valorInput.value) || 0;
 
             if (!nome) { alert('Digite o nome do serviço!'); return; }
 
             let servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
-            servicos.push({ nome, valor });
-            localStorage.setItem('servicosCadastrados', JSON.stringify(servicos));
 
-            document.getElementById('novo-servico-nome').value = '';
-            document.getElementById('novo-servico-valor').value = '';
+            if (servicoEmEdicaoIndex !== null && servicos[servicoEmEdicaoIndex]) {
+                servicos[servicoEmEdicaoIndex] = { nome, valor };
+                localStorage.setItem('servicosCadastrados', JSON.stringify(servicos));
+                servicoEmEdicaoIndex = null;
+                
+                const btnCadastrar = document.getElementById('btn-salvar-servico');
+                btnCadastrar.innerText = '➕ Cadastrar Serviço';
+                btnCadastrar.onclick = function() { salvarNovoServicoCadastrado(); };
+                alert('Serviço atualizado com sucesso!');
+            } else {
+                servicos.push({ nome, valor });
+                localStorage.setItem('servicosCadastrados', JSON.stringify(servicos));
+                alert('Serviço cadastrado!');
+            }
+
+            nomeInput.value = '';
+            valorInput.value = '';
 
             renderizarListaServicosCadastrados();
             atualizarTodosOsSelects();
-            alert('Serviço cadastrado!');
+        }
+
+        function prepararEdicaoServico(index) {
+            const servicos = JSON.parse(localStorage.getItem('servicosCadastrados')) || [];
+            const s = servicos[index];
+            if (!s) return;
+
+            document.getElementById('novo-servico-nome').value = s.nome;
+            document.getElementById('novo-servico-valor').value = s.valor;
+            servicoEmEdicaoIndex = index;
+
+            const btnCadastrar = document.getElementById('btn-salvar-servico');
+            btnCadastrar.innerText = '💾 Salvar Alterações';
+            btnCadastrar.onclick = function() { salvarNovoServicoCadastrado(); };
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function removerServicoCadastrado(index) {
@@ -1960,7 +1947,14 @@
 
             let html = '<ul style="padding-left: 18px; font-size: 13px; margin: 0; color: var(--text-color);">';
             servicos.forEach((s, idx) => {
-                html += `<li style="margin-bottom: 6px;"><b>${s.nome}</b> - R$ ${s.valor.toFixed(2)} <button style="background:none; border:none; cursor:pointer;" onclick="removerServicoCadastrado(${idx})">🗑️</button></li>`;
+                html += `
+                    <li style="margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><b>${s.nome}</b> - R$ ${s.valor.toFixed(2)}</span>
+                        <div>
+                            <button style="background:none; border:none; cursor:pointer;" onclick="prepararEdicaoServico(${idx})" title="Editar">✏️</button>
+                            <button style="background:none; border:none; cursor:pointer;" onclick="removerServicoCadastrado(${idx})" title="Excluir">🗑️</button>
+                        </div>
+                    </li>`;
             });
             container.innerHTML = html + '</ul>';
         }
@@ -1976,12 +1970,23 @@
             let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
             
             const existe = funcionarios.some(f => f.nome.toLowerCase() === nome.toLowerCase());
-            if (existe) {
+            if (existe && funcionarioEmEdicaoIndex === null) {
                 alert('Já existe um funcionário cadastrado com esse nome!');
                 return;
             }
 
-            funcionarios.push({ nome, valor });
+            if (funcionarioEmEdicaoIndex !== null && funcionarios[funcionarioEmEdicaoIndex]) {
+                funcionarios[funcionarioEmEdicaoIndex] = { nome, valor };
+                funcionarioEmEdicaoIndex = null;
+                const btnCadastrar = document.getElementById('btn-salvar-func');
+                btnCadastrar.innerText = '➕ Cadastrar Funcionário';
+                btnCadastrar.onclick = function() { salvarNovoFuncionarioCadastrado(); };
+                alert('Funcionário atualizado com sucesso!');
+            } else {
+                funcionarios.push({ nome, valor });
+                alert(`Funcionário ${nome} cadastrado com sucesso!`);
+            }
+
             localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
 
             nomeInput.value = '';
@@ -1991,7 +1996,6 @@
             atualizarTodosOsSelects();
             gerarRankingEquipe('hoje');
             calcularAcertoFuncionario();
-            alert(`Funcionário ${nome} cadastrado com sucesso!`);
         }
 
         function prepararEdicaoFuncionario(index) {
@@ -2009,33 +2013,7 @@
         }
 
         function salvarEdicaoFuncionario() {
-            const nomeInput = document.getElementById('func-nome');
-            const valorInput = document.getElementById('func-valor');
-            const nome = nomeInput.value.trim();
-            const valor = parseFloat(valorInput.value) || 0;
-
-            if (!nome) { alert('Digite o nome do funcionário!'); return; }
-
-            let funcionarios = JSON.parse(localStorage.getItem('funcionariosCadastrados')) || [];
-            if (funcionarioEmEdicaoIndex !== null && funcionarios[funcionarioEmEdicaoIndex]) {
-                funcionarios[funcionarioEmEdicaoIndex] = { nome, valor };
-                localStorage.setItem('funcionariosCadastrados', JSON.stringify(funcionarios));
-            }
-
-            nomeInput.value = '';
-            valorInput.value = '';
-            funcionarioEmEdicaoIndex = null;
-
-            const btnCadastrar = document.getElementById('btn-salvar-func');
-            btnCadastrar.innerText = '➕ Cadastrar Funcionário';
-            btnCadastrar.onclick = function() { salvarNovoFuncionarioCadastrado(); };
-
-            renderizarListaFuncionariosCadastrados();
-            atualizarTodosOsSelects();
-            gerarRankingEquipe('hoje');
-            calcularAcertoFuncionario();
-            calcularTotalDia();
-            alert('Funcionário atualizado com sucesso!');
+            salvarNovoFuncionarioCadastrado();
         }
 
         function removerFuncionarioCadastrado(index) {
@@ -2601,7 +2579,6 @@
 
             let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
             
-            // Remove estritamente registros duplicados com a mesma dataIso para evitar conflito de salvamento
             hist = hist.filter(i => i.dataIso !== dataIsoStr || i.id === registro.id);
 
             hist.push(registro);
