@@ -1025,6 +1025,11 @@
                 
                 <button class="btn btn-green btn-full" id="btn-exportar" style="margin-bottom: 15px; display: none;" onclick="exportarRelatorioWhatsApp()">📲 Exportar Resumo (WhatsApp)</button>
 
+                <!-- BOTÃO PARA VER A LIXEIRA DE ITENS APAGADOS -->
+                <div style="margin-bottom: 15px;">
+                    <button class="btn btn-full" style="background: var(--op-header-bg); font-size: 12px;" onclick="abrirLixeiraModal()">🗑️ Ver Lixeira (Itens Apagados Recentemente)</button>
+                </div>
+
                 <div id="grafico-container" class="chart-box" style="display:none;">
                     <h3 style="font-size: 13px; margin-top: 0; margin-bottom: 10px; color: var(--text-muted);">📊 Total de Peças por Serviço</h3>
                     <div id="barras-grafico"></div>
@@ -1090,6 +1095,8 @@
         const mesesNomes = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
         window.addEventListener('DOMContentLoaded', () => {
+            limparItensLixeiraExpirados();
+
             const savedTheme = localStorage.getItem('app_theme') || 'light';
             if (savedTheme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
@@ -1110,6 +1117,19 @@
                 fazerLogin(true);
             }
         });
+
+        // LIMPAR AUTOMATICAMENTE ITENS DA LIXEIRA COM MAIS DE 2 DIAS
+        function limparItensLixeiraExpirados() {
+            let lixeira = JSON.parse(localStorage.getItem('lixeiraExcluidos')) || [];
+            const agora = Date.now();
+            const doisDiasMs = 2 * 24 * 60 * 60 * 1000;
+
+            const lixeiraFiltrada = lixeira.filter(item => {
+                return (agora - item.timestampExclusao) < doisDiasMs;
+            });
+
+            localStorage.setItem('lixeiraExcluidos', JSON.stringify(lixeiraFiltrada));
+        }
 
         function alternarModoEscuro() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
@@ -1186,6 +1206,7 @@
             if (!localStorage.getItem('servicosCadastrados')) localStorage.setItem('servicosCadastrados', JSON.stringify([]));
             if (!localStorage.getItem('funcionariosCadastrados')) localStorage.setItem('funcionariosCadastrados', JSON.stringify([]));
             if (!localStorage.getItem('controlePonto')) localStorage.setItem('controlePonto', JSON.stringify([]));
+            if (!localStorage.getItem('lixeiraExcluidos')) localStorage.setItem('lixeiraExcluidos', JSON.stringify([]));
             
             renderizarListaServicosCadastrados();
             renderizarListaFuncionariosCadastrados();
@@ -1872,15 +1893,22 @@
         }
 
         function excluirPontoSalvo(idOuIdx) {
-            if (!confirm('Deseja excluir este registro de ponto?')) return;
+            if (!confirm('Deseja excluir este registro de ponto? Ele ficará guardado na Lixeira por 2 dias.')) return;
             let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
             
+            const itemParaExcluir = listaPontos.find((p, index) => p.id === idOuIdx || index === idOuIdx);
+            if (itemParaExcluir) {
+                let lixeira = JSON.parse(localStorage.getItem('lixeiraExcluidos')) || [];
+                lixeira.push({ tipo: 'ponto', dados: itemParaExcluir, timestampExclusao: Date.now() });
+                localStorage.setItem('lixeiraExcluidos', JSON.stringify(lixeira));
+            }
+
             listaPontos = listaPontos.filter((p, index) => p.id !== idOuIdx && index !== idOuIdx);
             localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
             
             recarregarTodosPontos(true);
             calcularTotalDia();
-            alert('Registro de ponto removido!');
+            alert('Registro de ponto enviado para a lixeira!');
         }
 
         function salvarNovoServicoCadastrado() {
@@ -2579,7 +2607,9 @@
 
             let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
             
-            hist = hist.filter(i => i.dataIso !== dataIsoStr || i.id === registro.id);
+            // CORREÇÃO CRUCIAL PARA EVITAR DUPLICAÇÃO DE DIAS:
+            // Removemos qualquer registro anterior que tenha o mesmo ID OU a mesma data ISO
+            hist = hist.filter(i => i.id !== registro.id && i.dataIso !== dataIsoStr);
 
             hist.push(registro);
             localStorage.setItem('historicoProducao', JSON.stringify(hist));
@@ -2589,7 +2619,7 @@
             document.getElementById('banner-edicao').classList.add('hidden');
 
             if (estavaEditando) {
-                alert('Alteração salva no histórico! Restaurando seu rascunho de hoje...');
+                alert('Alteração salva no histórico perfeitamente sem duplicar!');
                 if (!carregarRascunho()) {
                     resetarDataHoje();
                     document.getElementById('operacoes-container').innerHTML = '';
@@ -2876,16 +2906,80 @@
         }
 
         function excluirRegistro(id) {
-            if (!confirm('Deseja excluir este registro?')) return;
+            if (!confirm('Deseja excluir este registro? Ele ficará guardado na Lixeira por 2 dias caso precise recuperar.')) return;
             let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+            
+            const itemParaExcluir = hist.find(i => i.id === id);
+            if (itemParaExcluir) {
+                let lixeira = JSON.parse(localStorage.getItem('lixeiraExcluidos')) || [];
+                lixeira.push({ tipo: 'producao', dados: itemParaExcluir, timestampExclusao: Date.now() });
+                localStorage.setItem('lixeiraExcluidos', JSON.stringify(lixeira));
+            }
+
             localStorage.setItem('historicoProducao', JSON.stringify(hist.filter(i => i.id !== id)));
             buscarHistorico();
             gerarRankingEquipe('hoje');
             calcularAcertoFuncionario();
+            alert('Registro enviado para a lixeira com sucesso!');
+        }
+
+        function abrirLixeiraModal() {
+            limparItensLixeiraExpirados();
+            let lixeira = JSON.parse(localStorage.getItem('lixeiraExcluidos')) || [];
+
+            if (lixeira.length === 0) {
+                alert('A lixeira está vazia!');
+                return;
+            }
+
+            let msg = "🗑️ ITENS NA LIXEIRA (Serão apagados após 2 dias):\n\n";
+            lixeira.forEach((item, index) => {
+                const tempoRestanteHoras = Math.round(( (item.timestampExclusao + (2 * 24 * 60 * 60 * 1000)) - Date.now() ) / (1000 * 60 * 60));
+                if (item.tipo === 'producao') {
+                    msg += `[${index + 1}] Produção dia ${item.dados.dataTexto} (R$ ${item.dados.totalNumerico?.toFixed(2)}) — Expira em ~${tempoRestanteHoras}h\n`;
+                } else {
+                    msg += `[${index + 1}] Ponto de ${item.dados.funcionario} em ${item.dados.data} — Expira em ~${tempoRestanteHoras}h\n`;
+                }
+            });
+
+            msg += "\nDigite o número do item que deseja RESTAURAR ou clique em Cancelar:";
+            const resp = prompt(msg);
+            if (resp !== null && resp.trim() !== "") {
+                const idxNum = parseInt(resp) - 1;
+                if (!isNaN(idxNum) && lixeira[idxNum]) {
+                    restaurarItemDaLixeira(idxNum);
+                } else {
+                    alert('Número inválido.');
+                }
+            }
+        }
+
+        function restaurarItemDaLixeira(index) {
+            let lixeira = JSON.parse(localStorage.getItem('lixeiraExcluidos')) || [];
+            const itemRestaurar = lixeira[index];
+            if (!itemRestaurar) return;
+
+            if (itemRestaurar.tipo === 'producao') {
+                let hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
+                hist.push(itemRestaurar.dados);
+                localStorage.setItem('historicoProducao', JSON.stringify(hist));
+                buscarHistorico();
+                gerarRankingEquipe('hoje');
+                calcularAcertoFuncionario();
+            } else {
+                let listaPontos = JSON.parse(localStorage.getItem('controlePonto')) || [];
+                listaPontos.push(itemRestaurar.dados);
+                localStorage.setItem('controlePonto', JSON.stringify(listaPontos));
+                recarregarTodosPontos(true);
+            }
+
+            lixeira.splice(index, 1);
+            localStorage.setItem('lixeiraExcluidos', JSON.stringify(lixeira));
+            alert('Item restaurado com sucesso!');
         }
 
         function editarRegistro(id) {
-            if (!confirm("Deseja carregar este dia do histórico para alteração? O rascunho de hoje ficará guardado com segurança.")) return;
+            if (!confirm("Deseja carregar este dia do histórico para alteração? O rascunho atual de hoje ficará guardado com segurança.")) return;
 
             const hist = JSON.parse(localStorage.getItem('historicoProducao')) || [];
             const reg = hist.find(i => i.id === id);
@@ -2909,8 +3003,9 @@
             const dados = {
                 historico: JSON.parse(localStorage.getItem('historicoProducao')),
                 servicos: JSON.parse(localStorage.getItem('servicosCadastrados')),
-                funcionarios: JSON.parse(localStorage.getItem('funcionariosCadastراطos')),
-                ponto: JSON.parse(localStorage.getItem('controlePonto'))
+                funcionarios: JSON.parse(localStorage.getItem('funcionariosCadastrados')),
+                ponto: JSON.parse(localStorage.getItem('controlePonto')),
+                lixeira: JSON.parse(localStorage.getItem('lixeiraExcluidos'))
             };
             const link = document.createElement('a');
             link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(dados, null, 2));
@@ -2927,6 +3022,7 @@
                     if(d.servicos) localStorage.setItem('servicosCadastrados', JSON.stringify(d.servicos));
                     if(d.funcionarios) localStorage.setItem('funcionariosCadastrados', JSON.stringify(d.funcionarios));
                     if(d.ponto) localStorage.setItem('controlePonto', JSON.stringify(d.ponto));
+                    if(d.lixeira) localStorage.setItem('lixeiraExcluidos', JSON.stringify(d.lixeira));
                     inicializarApp();
                     alert('Backup restaurado com sucesso!');
                 } catch(err) { alert('Arquivo de backup inválido.'); }
